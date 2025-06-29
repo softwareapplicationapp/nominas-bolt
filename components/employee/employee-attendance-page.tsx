@@ -106,7 +106,7 @@ export default function EmployeeAttendancePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
@@ -115,22 +115,22 @@ export default function EmployeeAttendancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
       <div className="space-y-8 p-6">
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="text-3xl font-bold text-gray-900 text-gradient">My Attendance</h1>
-          <p className="text-gray-600 mt-2">Track your working hours and attendance records</p>
+          <h1 className="text-3xl font-bold text-slate-900 text-gradient">My Attendance</h1>
+          <p className="text-slate-700 mt-2 font-medium">Track your working hours and attendance records</p>
         </div>
 
         {/* Check In/Out Card */}
-        <Card className="animate-scale-in hover-glow">
+        <Card className="animate-scale-in hover-glow border-slate-200">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-blue-600" />
+            <CardTitle className="flex items-center space-x-2 text-slate-900">
+              <Clock className="h-5 w-5 text-slate-600" />
               <span>Today's Attendance</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-slate-700">
               {format(new Date(), 'EEEE, MMMM do, yyyy')}
             </CardDescription>
           </CardHeader>
@@ -140,19 +140,19 @@ export default function EmployeeAttendancePage() {
                 {todayRecord?.check_in && (
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">Checked in at {todayRecord.check_in}</span>
+                    <span className="text-sm text-slate-800 font-medium">Checked in at {todayRecord.check_in}</span>
                   </div>
                 )}
                 {todayRecord?.check_out && (
                   <div className="flex items-center space-x-2">
                     <LogOutIcon className="h-4 w-4 text-red-600" />
-                    <span className="text-sm">Checked out at {todayRecord.check_out}</span>
+                    <span className="text-sm text-slate-800 font-medium">Checked out at {todayRecord.check_out}</span>
                   </div>
                 )}
                 {todayRecord?.total_hours && (
                   <div className="flex items-center space-x-2">
-                    <Timer className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm">Total hours: {todayRecord.total_hours.toFixed(1)}h</span>
+                    <Timer className="h-4 w-4 text-slate-600" />
+                    <span className="text-sm text-slate-800 font-medium">Total hours: {todayRecord.total_hours.toFixed(1)}h</span>
                   </div>
                 )}
               </div>
@@ -181,7 +181,7 @@ export default function EmployeeAttendancePage() {
                     onClick={handleCheckOut}
                     disabled={actionLoading}
                     variant="outline"
-                    className="hover-glow"
+                    className="hover-glow border-slate-300 text-slate-700 hover:text-slate-900"
                   >
                     {actionLoading ? (
                       <>
@@ -196,7 +196,7 @@ export default function EmployeeAttendancePage() {
                     )}
                   </Button>
                 ) : (
-                  <Badge variant="default" className="text-lg px-4 py-2">
+                  <Badge variant="default" className="text-lg px-4 py-2 bg-green-600 text-white">
                     Day Complete
                   </Badge>
                 )}
@@ -207,14 +207,14 @@ export default function EmployeeAttendancePage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="card-interactive animate-scale-in stagger-1 hover-glow">
+          <Card className="card-interactive animate-scale-in stagger-1 hover-glow border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-slate-900">
                     {totalHours.toFixed(1)}h
                   </div>
-                  <p className="text-sm text-gray-600">Total Hours</p>
+                  <p className="text-sm text-slate-700 font-medium">Total Hours</p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-full animate-float">
                   <Clock className="h-6 w-6 text-blue-600" />
@@ -223,14 +223,14 @@ export default function EmployeeAttendancePage() {
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-2 hover-glow">
+          <Card className="card-interactive animate-scale-in stagger-2 hover-glow border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-slate-900">
                     {averageHours.toFixed(1)}h
                   </div>
-                  <p className="text-sm text-gray-600">Average Daily</p>
+                  <p className="text-sm text-slate-700 font-medium">Average Daily</p>
                 </div>
                 <div className="p-3 bg-green-100 rounded-full animate-float">
                   <TrendingUp className="h-6 w-6 text-green-600" />
@@ -239,14 +239,14 @@ export default function EmployeeAttendancePage() {
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-3 hover-glow">
+          <Card className="card-interactive animate-scale-in stagger-3 hover-glow border-slate-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-purple-600">
+                  <div className="text-2xl font-bold text-slate-900">
                     {presentDays}
                   </div>
-                  <p className="text-sm text-gray-600">Days Present</p>
+                  <p className="text-sm text-slate-700 font-medium">Days Present</p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-full animate-float">
                   <Award className="h-6 w-6 text-purple-600" />
@@ -263,34 +263,34 @@ export default function EmployeeAttendancePage() {
           </TabsList>
 
           <TabsContent value="records" className="space-y-6">
-            <Card className="animate-slide-in-up card-glow">
+            <Card className="animate-slide-in-up card-glow border-slate-200">
               <CardHeader>
-                <CardTitle>My Attendance History</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-slate-900">My Attendance History</CardTitle>
+                <CardDescription className="text-slate-700">
                   Your complete attendance records
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
+                <div className="rounded-md border border-slate-200">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Check In</TableHead>
-                        <TableHead>Check Out</TableHead>
-                        <TableHead>Total Hours</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead className="text-slate-800 font-semibold">Date</TableHead>
+                        <TableHead className="text-slate-800 font-semibold">Check In</TableHead>
+                        <TableHead className="text-slate-800 font-semibold">Check Out</TableHead>
+                        <TableHead className="text-slate-800 font-semibold">Total Hours</TableHead>
+                        <TableHead className="text-slate-800 font-semibold">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {attendanceRecords.map((record) => (
                         <TableRow key={record.id}>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-slate-900">
                             {format(new Date(record.date), 'MMM dd, yyyy')}
                           </TableCell>
-                          <TableCell>{record.check_in || '-'}</TableCell>
-                          <TableCell>{record.check_out || '-'}</TableCell>
-                          <TableCell>
+                          <TableCell className="text-slate-800">{record.check_in || '-'}</TableCell>
+                          <TableCell className="text-slate-800">{record.check_out || '-'}</TableCell>
+                          <TableCell className="text-slate-800">
                             {record.total_hours ? `${record.total_hours.toFixed(1)}h` : '-'}
                           </TableCell>
                           <TableCell>
@@ -314,10 +314,10 @@ export default function EmployeeAttendancePage() {
 
           <TabsContent value="calendar" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="animate-slide-in-left card-glow">
+              <Card className="animate-slide-in-left card-glow border-slate-200">
                 <CardHeader>
-                  <CardTitle>Select Date</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-slate-900">Select Date</CardTitle>
+                  <CardDescription className="text-slate-700">
                     Choose a date to view attendance details
                   </CardDescription>
                 </CardHeader>
@@ -326,14 +326,14 @@ export default function EmployeeAttendancePage() {
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
-                    className="rounded-md border"
+                    className="rounded-md border border-slate-200"
                   />
                 </CardContent>
               </Card>
 
-              <Card className="animate-slide-in-right card-glow">
+              <Card className="animate-slide-in-right card-glow border-slate-200">
                 <CardHeader>
-                  <CardTitle>
+                  <CardTitle className="text-slate-900">
                     Attendance for {selectedDate ? format(selectedDate, 'MMMM dd, yyyy') : 'Select a date'}
                   </CardTitle>
                 </CardHeader>
@@ -347,22 +347,22 @@ export default function EmployeeAttendancePage() {
                         if (dayRecord) {
                           return (
                             <div className="space-y-3">
-                              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                                <span className="font-medium">Check In</span>
-                                <Badge variant="outline">{dayRecord.check_in || 'Not recorded'}</Badge>
+                              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                                <span className="font-medium text-green-800">Check In</span>
+                                <Badge variant="outline" className="border-green-300 text-green-800">{dayRecord.check_in || 'Not recorded'}</Badge>
                               </div>
-                              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                                <span className="font-medium">Check Out</span>
-                                <Badge variant="outline">{dayRecord.check_out || 'Not recorded'}</Badge>
+                              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+                                <span className="font-medium text-red-800">Check Out</span>
+                                <Badge variant="outline" className="border-red-300 text-red-800">{dayRecord.check_out || 'Not recorded'}</Badge>
                               </div>
-                              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                                <span className="font-medium">Total Hours</span>
-                                <Badge variant="default">
+                              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <span className="font-medium text-blue-800">Total Hours</span>
+                                <Badge variant="default" className="bg-blue-600 text-white">
                                   {dayRecord.total_hours ? `${dayRecord.total_hours.toFixed(1)}h` : '0h'}
                                 </Badge>
                               </div>
-                              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                                <span className="font-medium">Status</span>
+                              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                <span className="font-medium text-purple-800">Status</span>
                                 <Badge 
                                   variant={
                                     dayRecord.status === 'present' ? 'default' :
@@ -376,18 +376,18 @@ export default function EmployeeAttendancePage() {
                           );
                         } else {
                           return (
-                            <div className="text-center py-8 text-gray-500">
-                              <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                              <p>No attendance record for this date</p>
+                            <div className="text-center py-8 text-slate-600">
+                              <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-slate-400" />
+                              <p className="font-medium">No attendance record for this date</p>
                             </div>
                           );
                         }
                       })()}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p>Please select a date to view details</p>
+                    <div className="text-center py-8 text-slate-600">
+                      <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-slate-400" />
+                      <p className="font-medium">Please select a date to view details</p>
                     </div>
                   )}
                 </CardContent>

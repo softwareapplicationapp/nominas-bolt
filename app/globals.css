@@ -24,20 +24,20 @@
     --card-foreground: 15 23 42;
     --popover: 255 255 255;
     --popover-foreground: 15 23 42;
-    --primary: 71 85 105;
+    --primary: 30 41 59;
     --primary-foreground: 255 255 255;
     --secondary: 241 245 249;
     --secondary-foreground: 15 23 42;
     --muted: 248 250 252;
-    --muted-foreground: 100 116 139;
+    --muted-foreground: 71 85 105;
     --accent: 241 245 249;
     --accent-foreground: 15 23 42;
     --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
     --border: 226 232 240;
     --input: 226 232 240;
-    --ring: 71 85 105;
-    --chart-1: 71 85 105;
+    --ring: 30 41 59;
+    --chart-1: 30 41 59;
     --chart-2: 34 197 94;
     --chart-3: 245 158 11;
     --chart-4: 168 85 247;
@@ -51,7 +51,7 @@
     --card-foreground: 248 250 252;
     --popover: 30 41 59;
     --popover-foreground: 248 250 252;
-    --primary: 71 85 105;
+    --primary: 30 41 59;
     --primary-foreground: 255 255 255;
     --secondary: 51 65 85;
     --secondary-foreground: 248 250 252;
@@ -63,8 +63,8 @@
     --destructive-foreground: 255 255 255;
     --border: 51 65 85;
     --input: 51 65 85;
-    --ring: 71 85 105;
-    --chart-1: 71 85 105;
+    --ring: 30 41 59;
+    --chart-1: 30 41 59;
     --chart-2: 34 197 94;
     --chart-3: 245 158 11;
     --chart-4: 168 85 247;
@@ -232,21 +232,21 @@
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 15px rgba(71, 85, 105, 0.2);
-  border-color: rgba(71, 85, 105, 0.3);
+  box-shadow: 0 0 15px rgba(30, 41, 59, 0.2);
+  border-color: rgba(30, 41, 59, 0.3);
 }
 
 /* Gradient backgrounds - Updated colors */
 .gradient-bg {
-  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
 }
 
 .gradient-card {
-  background: linear-gradient(135deg, rgba(71, 85, 105, 0.1) 0%, rgba(51, 65, 85, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.1) 0%, rgba(15, 23, 42, 0.1) 100%);
 }
 
 .gradient-primary {
-  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
 }
 
 .gradient-success {
@@ -290,19 +290,19 @@
 
 /* Button enhancements - Updated colors */
 .btn-primary {
-  @apply bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl;
+  @apply bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white;
 }
 
 .btn-success {
-  @apply bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl;
+  @apply bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white;
 }
 
 .btn-warning {
-  @apply bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl;
+  @apply bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white;
 }
 
 .btn-danger {
-  @apply bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl;
+  @apply bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white;
 }
 
 /* Card enhancements */
@@ -316,7 +316,7 @@
 
 /* Text animations */
 .text-gradient {
-  background: linear-gradient(135deg, #475569, #64748b, #94a3b8);
+  background: linear-gradient(135deg, #1e293b, #334155, #475569);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -397,4 +397,63 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* High contrast text improvements */
+.text-high-contrast {
+  @apply text-slate-900;
+}
+
+.text-medium-contrast {
+  @apply text-slate-700;
+}
+
+.text-low-contrast {
+  @apply text-slate-600;
+}
+
+/* Improved card text contrast */
+.card-title {
+  @apply text-slate-900 font-semibold;
+}
+
+.card-description {
+  @apply text-slate-700;
+}
+
+.card-content-text {
+  @apply text-slate-800;
+}
+
+/* Better button text contrast */
+.btn-text-contrast {
+  @apply text-white font-medium;
+}
+
+/* Improved form label contrast */
+.form-label {
+  @apply text-slate-800 font-medium;
+}
+
+/* Better placeholder text */
+.placeholder-improved::placeholder {
+  @apply text-slate-500;
+}
+
+/* Improved sidebar text */
+.sidebar-text {
+  @apply text-slate-200;
+}
+
+.sidebar-text-active {
+  @apply text-white font-medium;
+}
+
+/* Better stats text */
+.stats-number {
+  @apply text-slate-900 font-bold;
+}
+
+.stats-label {
+  @apply text-slate-700 font-medium;
 }
