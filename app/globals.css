@@ -511,3 +511,53 @@
 .dialog-description {
   @apply text-muted-foreground font-medium;
 }
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Ensure touch targets are at least 44px */
+  .btn-mobile {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Improve text readability on mobile */
+  .text-mobile {
+    @apply text-base leading-relaxed;
+  }
+  
+  /* Better spacing for mobile */
+  .spacing-mobile {
+    @apply px-4 py-3;
+  }
+  
+  /* Mobile-friendly cards */
+  .card-mobile {
+    @apply rounded-lg shadow-md;
+  }
+  
+  /* Mobile navigation improvements */
+  .nav-mobile {
+    @apply text-base py-3 px-4;
+  }
+}
+
+/* Tablet-specific improvements */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-grid {
+    @apply grid-cols-2;
+  }
+  
+  .tablet-spacing {
+    @apply px-6 py-4;
+  }
+}
+
+/* Desktop improvements */
+@media (min-width: 1025px) {
+  .desktop-grid {
+    @apply grid-cols-4;
+  }
+  
+  .desktop-spacing {
+    @apply px-8 py-6;
+  }
+}

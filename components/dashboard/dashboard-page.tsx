@@ -82,26 +82,26 @@ export default function DashboardPage() {
   const attendanceRate = stats.totalEmployees > 0 ? Math.round((stats.presentToday / stats.totalEmployees) * 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Welcome Section */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
           {t('welcomeBack')}, Admin!
         </h1>
-        <p className="text-gray-800 font-medium">
+        <p className="text-gray-800 font-medium text-sm sm:text-base">
           Here's what's happening at your company today.
         </p>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="border-blue-200 hover-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold text-gray-900">{t('totalEmployees')}</CardTitle>
             <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{stats.totalEmployees}</div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalEmployees}</div>
             <p className="text-xs text-gray-800 font-medium">
               <span className="text-emerald-600 flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
@@ -117,7 +117,7 @@ export default function DashboardPage() {
             <Clock className="h-4 w-4 text-emerald-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{stats.presentToday}</div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.presentToday}</div>
             <p className="text-xs text-gray-800 font-medium">
               <span className="text-emerald-600">{attendanceRate}%</span> {t('attendanceRate')}
             </p>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
             <Calendar className="h-4 w-4 text-amber-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{stats.pendingLeaves}</div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.pendingLeaves}</div>
             <p className="text-xs text-gray-800 font-medium">
               {stats.pendingLeaves > 5 ? (
                 <span className="text-amber-600">Needs attention</span>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">${stats.monthlyPayroll.toLocaleString()}</div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900">${stats.monthlyPayroll.toLocaleString()}</div>
             <p className="text-xs text-gray-800 font-medium">
               <span className="text-gray-700">Current month</span>
             </p>
@@ -155,22 +155,22 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Attendance Chart */}
         <Card className="border-gray-200 hover-glow">
           <CardHeader>
-            <CardTitle className="text-gray-900">Weekly {t('attendance')}</CardTitle>
-            <CardDescription className="text-gray-800 font-medium">
+            <CardTitle className="text-gray-900 text-lg sm:text-xl">Weekly {t('attendance')}</CardTitle>
+            <CardDescription className="text-gray-800 font-medium text-sm">
               Employee attendance overview for this week
             </CardDescription>
           </CardHeader>
           <CardContent>
             {stats.attendanceTrends.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <BarChart data={stats.attendanceTrends}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
+                  <XAxis dataKey="date" fontSize={12} />
+                  <YAxis fontSize={12} />
                   <Tooltip />
                   <Bar dataKey="present" fill="#1e40af" name={t('present')} />
                   <Bar dataKey="absent" fill="#dc2626" name={t('absent')} />
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-[300px] text-gray-700 font-medium">
+              <div className="flex items-center justify-center h-[250px] text-gray-700 font-medium">
                 No attendance data available
               </div>
             )}
@@ -188,22 +188,22 @@ export default function DashboardPage() {
         {/* Department Distribution */}
         <Card className="border-gray-200 hover-glow">
           <CardHeader>
-            <CardTitle className="text-gray-900">{t('department')} Distribution</CardTitle>
-            <CardDescription className="text-gray-800 font-medium">
+            <CardTitle className="text-gray-900 text-lg sm:text-xl">{t('department')} Distribution</CardTitle>
+            <CardDescription className="text-gray-800 font-medium text-sm">
               Employee distribution across departments
             </CardDescription>
           </CardHeader>
           <CardContent>
             {stats.departmentStats.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                   <PieChart>
                     <Pie
                       data={stats.departmentStats}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
+                      innerRadius={40}
+                      outerRadius={80}
                       paddingAngle={5}
                       dataKey="count"
                     >
@@ -214,21 +214,21 @@ export default function DashboardPage() {
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="grid grid-cols-2 gap-2 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
                   {stats.departmentStats.map((dept, index) => (
                     <div key={dept.department} className="flex items-center space-x-2">
                       <div 
                         className="w-3 h-3 rounded-full" 
                         style={{ backgroundColor: departmentColors[index % departmentColors.length] }} 
                       />
-                      <span className="text-sm text-gray-800 font-medium">{dept.department}</span>
+                      <span className="text-sm text-gray-800 font-medium truncate">{dept.department}</span>
                       <span className="text-sm font-bold text-gray-900">{dept.count}</span>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center h-[300px] text-gray-700 font-medium">
+              <div className="flex items-center justify-center h-[250px] text-gray-700 font-medium">
                 No department data available
               </div>
             )}
@@ -236,12 +236,12 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Recent Activities */}
         <Card className="lg:col-span-2 border-gray-200 hover-glow">
           <CardHeader>
-            <CardTitle className="text-gray-900">{t('recentActivities')}</CardTitle>
-            <CardDescription className="text-gray-800 font-medium">
+            <CardTitle className="text-gray-900 text-lg sm:text-xl">{t('recentActivities')}</CardTitle>
+            <CardDescription className="text-gray-800 font-medium text-sm">
               Latest updates and activities in your company
             </CardDescription>
           </CardHeader>
@@ -251,7 +251,7 @@ export default function DashboardPage() {
                 <div className="bg-emerald-100 p-2 rounded-full">
                   <CheckCircle className="h-4 w-4 text-emerald-600" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">System updated</p>
                   <p className="text-sm text-gray-800 font-medium">Dashboard data refreshed successfully</p>
                   <p className="text-xs text-gray-700 font-medium">Just now</p>
@@ -262,7 +262,7 @@ export default function DashboardPage() {
                 <div className="bg-blue-100 p-2 rounded-full">
                   <Activity className="h-4 w-4 text-blue-600" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">{t('attendance')} tracked</p>
                   <p className="text-sm text-gray-800 font-medium">{stats.presentToday} employees checked in today</p>
                   <p className="text-xs text-gray-700 font-medium">{t('today')}</p>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                 <div className="bg-amber-100 p-2 rounded-full">
                   <Clock className="h-4 w-4 text-amber-600" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">Leave requests {t('pending')}</p>
                   <p className="text-sm text-gray-800 font-medium">{stats.pendingLeaves} requests awaiting approval</p>
                   <p className="text-xs text-gray-700 font-medium">Ongoing</p>
@@ -286,8 +286,8 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <Card className="border-gray-200 hover-glow">
           <CardHeader>
-            <CardTitle className="text-gray-900">{t('quickActions')}</CardTitle>
-            <CardDescription className="text-gray-800 font-medium">
+            <CardTitle className="text-gray-900 text-lg sm:text-xl">{t('quickActions')}</CardTitle>
+            <CardDescription className="text-gray-800 font-medium text-sm">
               Common tasks and shortcuts
             </CardDescription>
           </CardHeader>

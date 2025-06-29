@@ -30,32 +30,37 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden"
+            className="lg:hidden p-2"
             onClick={onMenuClick}
           >
             <Menu className="h-5 w-5" />
           </Button>
           
-          <div className="relative hidden md:block">
+          <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search employees, projects..."
-              className="pl-10 w-80"
+              className="pl-10 w-60 lg:w-80"
             />
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Mobile Search */}
+          <Button variant="ghost" size="sm" className="sm:hidden p-2">
+            <Search className="h-5 w-5" />
+          </Button>
+
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative">
+              <Button variant="ghost" size="sm" className="relative p-2">
                 <Bell className="h-5 w-5" />
                 <Badge
                   variant="destructive"
@@ -65,22 +70,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 </Badge>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuContent align="end" className="w-72 sm:w-80">
               <DropdownMenuLabel>Notifications</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex flex-col items-start p-4">
-                <p className="font-medium">New leave request</p>
-                <p className="text-sm text-gray-500">John Doe requested 3 days off</p>
+                <p className="font-medium text-sm">New leave request</p>
+                <p className="text-xs text-gray-500">John Doe requested 3 days off</p>
                 <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex flex-col items-start p-4">
-                <p className="font-medium">Payroll reminder</p>
-                <p className="text-sm text-gray-500">Monthly payroll due in 2 days</p>
+                <p className="font-medium text-sm">Payroll reminder</p>
+                <p className="text-xs text-gray-500">Monthly payroll due in 2 days</p>
                 <p className="text-xs text-gray-400 mt-1">1 day ago</p>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex flex-col items-start p-4">
-                <p className="font-medium">New employee onboarded</p>
-                <p className="text-sm text-gray-500">Sarah Wilson joined the team</p>
+                <p className="font-medium text-sm">New employee onboarded</p>
+                <p className="text-xs text-gray-500">Sarah Wilson joined the team</p>
                 <p className="text-xs text-gray-400 mt-1">3 days ago</p>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -89,10 +94,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar>
+              <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0">
+                <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                   <AvatarImage src="/avatar.jpg" alt="Admin" />
-                  <AvatarFallback>
+                  <AvatarFallback className="text-xs sm:text-sm">
                     {user?.email?.[0]?.toUpperCase() || 'AD'}
                   </AvatarFallback>
                 </Avatar>

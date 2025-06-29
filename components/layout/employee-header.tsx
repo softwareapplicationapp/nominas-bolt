@@ -32,13 +32,13 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 px-6 py-4 shadow-sm">
+    <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden hover-scale text-gray-700"
+            className="lg:hidden hover-scale text-gray-700 p-2"
             onClick={onMenuClick}
           >
             <Menu className="h-5 w-5" />
@@ -48,25 +48,30 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
               placeholder="Buscar..."
-              className="pl-10 w-80 bg-white/50 border-gray-300 hover-glow focus:bg-white transition-all duration-200 text-gray-900"
+              className="pl-10 w-60 lg:w-80 bg-white/50 border-gray-300 hover-glow focus:bg-white transition-all duration-200 text-gray-900"
             />
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Mobile Search */}
+          <Button variant="ghost" size="sm" className="md:hidden p-2">
+            <Search className="h-5 w-5" />
+          </Button>
+
           {/* Quick Actions */}
-          <Button variant="ghost" size="sm" className="hover-scale text-amber-600">
+          <Button variant="ghost" size="sm" className="hover-scale text-amber-600 p-2 hidden sm:flex">
             <Coffee className="h-5 w-5" />
           </Button>
           
-          <Button variant="ghost" size="sm" className="hover-scale text-blue-600">
+          <Button variant="ghost" size="sm" className="hover-scale text-blue-600 p-2 hidden sm:flex">
             <Clock className="h-5 w-5" />
           </Button>
 
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative hover-scale text-gray-700">
+              <Button variant="ghost" size="sm" className="relative hover-scale text-gray-700 p-2">
                 <Bell className="h-5 w-5" />
                 <Badge
                   variant="destructive"
@@ -76,17 +81,17 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
                 </Badge>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 glass">
+            <DropdownMenuContent align="end" className="w-72 sm:w-80 glass">
               <DropdownMenuLabel className="text-gray-900 font-semibold">Notificaciones</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex flex-col items-start p-4 hover-scale cursor-pointer">
-                <p className="font-semibold text-gray-900">Solicitud de permiso aprobada</p>
-                <p className="text-sm text-gray-800">Tu solicitud de vacaciones para la próxima semana ha sido aprobada</p>
+                <p className="font-semibold text-gray-900 text-sm">Solicitud de permiso aprobada</p>
+                <p className="text-xs text-gray-800">Tu solicitud de vacaciones para la próxima semana ha sido aprobada</p>
                 <p className="text-xs text-gray-600 mt-1">Hace 2 horas</p>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex flex-col items-start p-4 hover-scale cursor-pointer">
-                <p className="font-semibold text-gray-900">Recordatorio: Reunión de equipo</p>
-                <p className="text-sm text-gray-800">No olvides la reunión de equipo a las 3 PM</p>
+                <p className="font-semibold text-gray-900 text-sm">Recordatorio: Reunión de equipo</p>
+                <p className="text-xs text-gray-800">No olvides la reunión de equipo a las 3 PM</p>
                 <p className="text-xs text-gray-600 mt-1">Hace 1 hora</p>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -95,10 +100,10 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full hover-scale">
-                <Avatar className="animate-pulse-glow">
+              <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full hover-scale p-0">
+                <Avatar className="animate-pulse-glow h-8 w-8 sm:h-10 sm:w-10">
                   <AvatarImage src="/employee-avatar.jpg" alt="Empleado" />
-                  <AvatarFallback className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
+                  <AvatarFallback className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-xs sm:text-sm">
                     {user?.email?.[0]?.toUpperCase() || 'E'}
                   </AvatarFallback>
                 </Avatar>

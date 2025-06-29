@@ -131,47 +131,47 @@ export default function EmployeeDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="space-y-8 p-6">
+      <div className="space-y-6 sm:space-y-8 p-4 sm:p-6">
         {/* Welcome Header */}
         <div className="animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl p-8 hover-lift border border-emerald-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6">
-                <div className="relative">
-                  <div className="w-20 h-20 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 hover-lift border border-emerald-200">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 lg:space-x-6">
+                <div className="relative mx-auto sm:mx-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
                     {profile ? `${profile.first_name[0]}${profile.last_name[0]}` : user?.email?.[0]?.toUpperCase() || 'E'}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-white animate-bounce-in"></div>
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-emerald-500 rounded-full border-2 border-white animate-bounce-in"></div>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-1">
+                <div className="text-center sm:text-left">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
                     ¡Bienvenido de nuevo, {profile ? profile.first_name : 'Empleado'}!
                   </h1>
-                  <p className="text-gray-800 mt-1 font-semibold">
+                  <p className="text-gray-800 mt-1 font-semibold text-sm sm:text-base">
                     {format(currentTime, 'EEEE, d MMMM yyyy', { locale: language === 'es' ? es : undefined })}
                   </p>
-                  <p className="text-2xl font-mono text-emerald-700 mt-2 font-bold">
+                  <p className="text-lg sm:text-xl lg:text-2xl font-mono text-emerald-700 mt-2 font-bold">
                     {format(currentTime, 'HH:mm:ss')}
                   </p>
                 </div>
               </div>
               
-              <div className="text-right">
-                <div className="flex items-center space-x-4">
+              <div className="text-center lg:text-right">
+                <div className="flex flex-col sm:flex-row lg:flex-col items-center space-y-2 sm:space-y-0 sm:space-x-4 lg:space-x-0 lg:space-y-4">
                   {!isCheckedIn ? (
                     <Button 
                       onClick={handleCheckIn}
                       disabled={checkingIn}
-                      className="btn-success text-lg px-8 py-4 animate-bounce-in"
+                      className="btn-success text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 animate-bounce-in w-full sm:w-auto"
                     >
                       {checkingIn ? (
                         <>
-                          <Timer className="h-5 w-5 mr-2 animate-spin" />
+                          <Timer className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
                           Registrando...
                         </>
                       ) : (
                         <>
-                          <CheckCircle className="h-5 w-5 mr-2" />
+                          <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                           Marcar Entrada
                         </>
                       )}
@@ -181,16 +181,16 @@ export default function EmployeeDashboardPage() {
                       onClick={handleCheckOut}
                       disabled={checkingIn}
                       variant="outline"
-                      className="text-lg px-8 py-4 hover-glow border-emerald-300 text-emerald-700 hover:text-emerald-900 font-semibold"
+                      className="text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 hover-glow border-emerald-300 text-emerald-700 hover:text-emerald-900 font-semibold w-full sm:w-auto"
                     >
                       {checkingIn ? (
                         <>
-                          <Timer className="h-5 w-5 mr-2 animate-spin" />
+                          <Timer className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
                           Registrando...
                         </>
                       ) : (
                         <>
-                          <LogOutIcon className="h-5 w-5 mr-2" />
+                          <LogOutIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                           Marcar Salida
                         </>
                       )}
@@ -198,7 +198,7 @@ export default function EmployeeDashboardPage() {
                   )}
                 </div>
                 {isCheckedIn && stats?.checkInTime && (
-                  <p className="text-sm text-gray-700 mt-2 font-semibold">
+                  <p className="text-xs sm:text-sm text-gray-700 mt-2 font-semibold">
                     Entrada registrada a las {stats.checkInTime}
                   </p>
                 )}
@@ -208,18 +208,18 @@ export default function EmployeeDashboardPage() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <Card className="card-interactive animate-scale-in stagger-1 hover-glow border-blue-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.totalHoursToday.toFixed(1) || '0.0'}h
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Horas Hoy</p>
+                  <p className="text-xs sm:text-sm text-gray-800 font-semibold">Horas Hoy</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full animate-float">
-                  <Clock className="h-6 w-6 text-blue-600" />
+                <div className="p-2 sm:p-3 bg-blue-100 rounded-full animate-float">
+                  <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                 </div>
               </div>
               <div className="mt-4">
@@ -230,16 +230,16 @@ export default function EmployeeDashboardPage() {
           </Card>
 
           <Card className="card-interactive animate-scale-in stagger-2 hover-glow border-emerald-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.weeklyHours.toFixed(1) || '0.0'}h
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Esta Semana</p>
+                  <p className="text-xs sm:text-sm text-gray-800 font-semibold">Esta Semana</p>
                 </div>
-                <div className="p-3 bg-emerald-100 rounded-full animate-float">
-                  <TrendingUp className="h-6 w-6 text-emerald-600" />
+                <div className="p-2 sm:p-3 bg-emerald-100 rounded-full animate-float">
+                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
                 </div>
               </div>
               <div className="mt-4">
@@ -250,16 +250,16 @@ export default function EmployeeDashboardPage() {
           </Card>
 
           <Card className="card-interactive animate-scale-in stagger-3 hover-glow border-purple-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.monthlyAttendance || 0}%
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Asistencia</p>
+                  <p className="text-xs sm:text-sm text-gray-800 font-semibold">Asistencia</p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-full animate-float">
-                  <Award className="h-6 w-6 text-purple-600" />
+                <div className="p-2 sm:p-3 bg-purple-100 rounded-full animate-float">
+                  <Award className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
                 </div>
               </div>
               <div className="mt-4">
@@ -270,16 +270,16 @@ export default function EmployeeDashboardPage() {
           </Card>
 
           <Card className="card-interactive animate-scale-in stagger-4 hover-glow border-amber-200">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.remainingLeaves || 0}
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Días de Permiso</p>
+                  <p className="text-xs sm:text-sm text-gray-800 font-semibold">Días de Permiso</p>
                 </div>
-                <div className="p-3 bg-amber-100 rounded-full animate-float">
-                  <Calendar className="h-6 w-6 text-amber-600" />
+                <div className="p-2 sm:p-3 bg-amber-100 rounded-full animate-float">
+                  <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                 </div>
               </div>
               <div className="mt-4">
@@ -291,42 +291,42 @@ export default function EmployeeDashboardPage() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Quick Actions */}
           <Card className="lg:col-span-1 animate-slide-in-left card-glow border-emerald-200">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-gray-900">
-                <Target className="h-5 w-5 text-emerald-600" />
+              <CardTitle className="flex items-center space-x-2 text-gray-900 text-lg sm:text-xl">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
                 <span>Acciones Rápidas</span>
               </CardTitle>
-              <CardDescription className="text-gray-800 font-medium">
+              <CardDescription className="text-gray-800 font-medium text-sm">
                 Tareas comunes y accesos directos
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <Button className="w-full btn-primary justify-start" size="lg" asChild>
+            <CardContent className="space-y-3 sm:space-y-4">
+              <Button className="w-full btn-primary justify-start text-sm sm:text-base" size="lg" asChild>
                 <a href="/employee/leaves">
-                  <Calendar className="h-5 w-5 mr-3" />
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                   Solicitar Permiso
                 </a>
               </Button>
               
-              <Button className="w-full btn-success justify-start" size="lg" asChild>
+              <Button className="w-full btn-success justify-start text-sm sm:text-base" size="lg" asChild>
                 <a href="/employee/attendance">
-                  <ClockIcon className="h-5 w-5 mr-3" />
+                  <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                   Ver Horario
                 </a>
               </Button>
               
-              <Button className="w-full btn-warning justify-start" size="lg" asChild>
+              <Button className="w-full btn-warning justify-start text-sm sm:text-base" size="lg" asChild>
                 <a href="/employee/profile">
-                  <User className="h-5 w-5 mr-3" />
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                   Actualizar Perfil
                 </a>
               </Button>
               
-              <Button className="w-full btn-danger justify-start" size="lg">
-                <Coffee className="h-5 w-5 mr-3" />
+              <Button className="w-full btn-danger justify-start text-sm sm:text-base" size="lg">
+                <Coffee className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                 Tiempo de Descanso
               </Button>
             </CardContent>
@@ -335,47 +335,47 @@ export default function EmployeeDashboardPage() {
           {/* Recent Activity */}
           <Card className="lg:col-span-2 animate-slide-in-right card-glow border-blue-200">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-gray-900">
-                <CheckCircle className="h-5 w-5 text-emerald-600" />
+              <CardTitle className="flex items-center space-x-2 text-gray-900 text-lg sm:text-xl">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
                 <span>Actividad Reciente</span>
               </CardTitle>
-              <CardDescription className="text-gray-800 font-medium">
+              <CardDescription className="text-gray-800 font-medium text-sm">
                 Tus últimas acciones y actualizaciones
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {stats?.checkInTime && (
-                  <div className="flex items-start space-x-4 p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
+                  <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
                     <div className="p-2 bg-emerald-100 rounded-full">
                       <CheckCircle className="h-4 w-4 text-emerald-600" />
                     </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-emerald-800">Entrada registrada con éxito</p>
-                      <p className="text-sm text-emerald-700 font-medium">Hoy a las {stats.checkInTime}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-emerald-800 text-sm sm:text-base">Entrada registrada con éxito</p>
+                      <p className="text-xs sm:text-sm text-emerald-700 font-medium">Hoy a las {stats.checkInTime}</p>
                     </div>
                   </div>
                 )}
                 
-                <div className="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg hover-scale border border-blue-200">
+                <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-blue-50 rounded-lg hover-scale border border-blue-200">
                   <div className="p-2 bg-blue-100 rounded-full">
                     <Calendar className="h-4 w-4 text-blue-600" />
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-blue-800">Estado de solicitudes de permiso</p>
-                    <p className="text-sm text-blue-700 font-medium">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-blue-800 text-sm sm:text-base">Estado de solicitudes de permiso</p>
+                    <p className="text-xs sm:text-sm text-blue-700 font-medium">
                       {stats?.pendingLeaves || 0} pendientes, {stats?.approvedLeaves || 0} aprobadas
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-4 p-4 bg-purple-50 rounded-lg hover-scale border border-purple-200">
+                <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-purple-50 rounded-lg hover-scale border border-purple-200">
                   <div className="p-2 bg-purple-100 rounded-full">
                     <Award className="h-4 w-4 text-purple-600" />
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-purple-800">Asistencia mensual</p>
-                    <p className="text-sm text-purple-700 font-medium">{stats?.monthlyAttendance || 0}% este mes</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-purple-800 text-sm sm:text-base">Asistencia mensual</p>
+                    <p className="text-xs sm:text-sm text-purple-700 font-medium">{stats?.monthlyAttendance || 0}% este mes</p>
                   </div>
                 </div>
               </div>
@@ -384,46 +384,46 @@ export default function EmployeeDashboardPage() {
         </div>
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Personal Info */}
           <Card className="animate-slide-in-up card-glow border-gray-200">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-gray-900">
-                <User className="h-5 w-5 text-blue-600" />
+              <CardTitle className="flex items-center space-x-2 text-gray-900 text-lg sm:text-xl">
+                <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 <span>Información Personal</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg hover-scale border border-blue-200">
-                  <Mail className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="text-sm text-gray-700 font-semibold">Correo</p>
-                    <p className="font-bold text-gray-900">{user?.email}</p>
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-700 font-semibold">Correo</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base truncate">{user?.email}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3 p-3 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
-                  <Briefcase className="h-5 w-5 text-emerald-600" />
-                  <div>
-                    <p className="text-sm text-gray-700 font-semibold">Departamento</p>
-                    <p className="font-bold text-gray-900">{profile?.department || 'No asignado'}</p>
+                  <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-700 font-semibold">Departamento</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base truncate">{profile?.department || 'No asignado'}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg hover-scale border border-purple-200">
-                  <MapPin className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <p className="text-sm text-gray-700 font-semibold">Ubicación</p>
-                    <p className="font-bold text-gray-900">{profile?.location || 'No especificada'}</p>
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-700 font-semibold">Ubicación</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base truncate">{profile?.location || 'No especificada'}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3 p-3 bg-amber-50 rounded-lg hover-scale border border-amber-200">
-                  <CalendarDays className="h-5 w-5 text-amber-600" />
-                  <div>
-                    <p className="text-sm text-gray-700 font-semibold">Fecha de Inicio</p>
-                    <p className="font-bold text-gray-900">
+                  <CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-700 font-semibold">Fecha de Inicio</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base">
                       {profile?.start_date ? format(new Date(profile.start_date), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined }) : 'No disponible'}
                     </p>
                   </div>
@@ -435,39 +435,39 @@ export default function EmployeeDashboardPage() {
           {/* Leave Summary */}
           <Card className="animate-slide-in-up card-glow border-gray-200">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-gray-900">
-                <Calendar className="h-5 w-5 text-amber-600" />
+              <CardTitle className="flex items-center space-x-2 text-gray-900 text-lg sm:text-xl">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
                 <span>Resumen de Permisos</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 bg-amber-50 rounded-lg hover-scale border border-amber-200">
+                <div className="flex justify-between items-center p-3 sm:p-4 bg-amber-50 rounded-lg hover-scale border border-amber-200">
                   <div>
-                    <p className="font-semibold text-amber-800">Solicitudes Pendientes</p>
-                    <p className="text-sm text-amber-700 font-medium">Esperando aprobación</p>
+                    <p className="font-semibold text-amber-800 text-sm sm:text-base">Solicitudes Pendientes</p>
+                    <p className="text-xs sm:text-sm text-amber-700 font-medium">Esperando aprobación</p>
                   </div>
-                  <Badge variant="secondary" className="text-lg px-3 py-1 bg-amber-100 text-amber-800 font-bold">
+                  <Badge variant="secondary" className="text-base sm:text-lg px-2 sm:px-3 py-1 bg-amber-100 text-amber-800 font-bold">
                     {stats?.pendingLeaves || 0}
                   </Badge>
                 </div>
                 
-                <div className="flex justify-between items-center p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
+                <div className="flex justify-between items-center p-3 sm:p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
                   <div>
-                    <p className="font-semibold text-emerald-800">Permisos Aprobados</p>
-                    <p className="text-sm text-emerald-700 font-medium">Este año</p>
+                    <p className="font-semibold text-emerald-800 text-sm sm:text-base">Permisos Aprobados</p>
+                    <p className="text-xs sm:text-sm text-emerald-700 font-medium">Este año</p>
                   </div>
-                  <Badge variant="default" className="text-lg px-3 py-1 bg-emerald-600 text-white font-bold">
+                  <Badge variant="default" className="text-base sm:text-lg px-2 sm:px-3 py-1 bg-emerald-600 text-white font-bold">
                     {stats?.approvedLeaves || 0}
                   </Badge>
                 </div>
                 
-                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg hover-scale border border-blue-200">
+                <div className="flex justify-between items-center p-3 sm:p-4 bg-blue-50 rounded-lg hover-scale border border-blue-200">
                   <div>
-                    <p className="font-semibold text-blue-800">Días Restantes</p>
-                    <p className="text-sm text-blue-700 font-medium">Disponibles para usar</p>
+                    <p className="font-semibold text-blue-800 text-sm sm:text-base">Días Restantes</p>
+                    <p className="text-xs sm:text-sm text-blue-700 font-medium">Disponibles para usar</p>
                   </div>
-                  <Badge variant="outline" className="text-lg px-3 py-1 border-blue-300 text-blue-800 font-bold">
+                  <Badge variant="outline" className="text-base sm:text-lg px-2 sm:px-3 py-1 border-blue-300 text-blue-800 font-bold">
                     {stats?.remainingLeaves || 0}
                   </Badge>
                 </div>
