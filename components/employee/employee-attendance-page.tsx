@@ -21,13 +21,14 @@ import {
   LogOut as LogOutIcon,
   Timer,
   TrendingUp,
-  Target,
   Award,
   Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
+import { useLanguage } from '@/contexts/language-context';
 
 interface AttendanceRecord {
   id: number;
@@ -46,6 +47,7 @@ export default function EmployeeAttendancePage() {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [todayRecord, setTodayRecord] = useState<AttendanceRecord | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     loadAttendanceData();
@@ -63,7 +65,7 @@ export default function EmployeeAttendancePage() {
       setTodayRecord(todayAttendance || null);
       setIsCheckedIn(!!todayAttendance?.check_in && !todayAttendance?.check_out);
     } catch (error: any) {
-      toast.error('Failed to load attendance data: ' + error.message);
+      toast.error('Error al cargar datos de asistencia: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export default function EmployeeAttendancePage() {
       const data = await apiClient.checkInOut('check_in');
       setTodayRecord(data);
       setIsCheckedIn(true);
-      toast.success('Checked in successfully!');
+      toast.success('¡Entrada registrada con éxito!');
       loadAttendanceData();
     } catch (error: any) {
       toast.error(error.message);
@@ -90,7 +92,7 @@ export default function EmployeeAttendancePage() {
       const data = await apiClient.checkInOut('check_out');
       setTodayRecord(data);
       setIsCheckedIn(false);
-      toast.success('Checked out successfully!');
+      toast.success('¡Salida registrada con éxito!');
       loadAttendanceData();
     } catch (error: any) {
       toast.error(error.message);
@@ -108,7 +110,7 @@ export default function EmployeeAttendancePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       </div>
     );
@@ -119,8 +121,8 @@ export default function EmployeeAttendancePage() {
       <div className="space-y-8 p-6">
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="text-3xl font-bold text-gray-900 text-gradient">My Attendance</h1>
-          <p className="text-gray-800 mt-2 font-semibold">Track your working hours and attendance records</p>
+          <h1 className="text-3xl font-bold text-gray-900 text-gradient">Mi Asistencia</h1>
+          <p className="text-gray-800 mt-2 font-semibold">Controla tus horas de trabajo y registros de asistencia</p>
         </div>
 
         {/* Check In/Out Card */}
@@ -128,10 +130,10 @@ export default function EmployeeAttendancePage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900">
               <Clock className="h-5 w-5 text-blue-600" />
-              <span>Today's Attendance</span>
+              <span>Asistencia de Hoy</span>
             </CardTitle>
             <CardDescription className="text-gray-800 font-medium">
-              {format(new Date(), 'EEEE, MMMM do, yyyy')}
+              {format(new Date(), 'EEEE, d MMMM yyyy', { locale: language === 'es' ? es : undefined })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -140,19 +142,19 @@ export default function EmployeeAttendancePage() {
                 {todayRecord?.check_in && (
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    <span className="text-sm text-gray-900 font-semibold">Checked in at {todayRecord.check_in}</span>
+                    <span className="text-sm text-gray-900 font-semibold">Entrada a las {todayRecord.check_in}</span>
                   </div>
                 )}
                 {todayRecord?.check_out && (
                   <div className="flex items-center space-x-2">
                     <LogOutIcon className="h-4 w-4 text-red-600" />
-                    <span className="text-sm text-gray-900 font-semibold">Checked out at {todayRecord.check_out}</span>
+                    <span className="text-sm text-gray-900 font-semibold">Salida a las {todayRecord.check_out}</span>
                   </div>
                 )}
                 {todayRecord?.total_hours && (
                   <div className="flex items-center space-x-2">
                     <Timer className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-gray-900 font-semibold">Total hours: {todayRecord.total_hours.toFixed(1)}h</span>
+                    <span className="text-sm text-gray-900 font-semibold">Horas totales: {todayRecord.total_hours.toFixed(1)}h</span>
                   </div>
                 )}
               </div>
@@ -167,12 +169,12 @@ export default function EmployeeAttendancePage() {
                     {actionLoading ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Checking In...
+                        Registrando...
                       </>
                     ) : (
                       <>
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        Check In
+                        Marcar Entrada
                       </>
                     )}
                   </Button>
@@ -186,18 +188,18 @@ export default function EmployeeAttendancePage() {
                     {actionLoading ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Checking Out...
+                        Registrando...
                       </>
                     ) : (
                       <>
                         <LogOutIcon className="h-4 w-4 mr-2" />
-                        Check Out
+                        Marcar Salida
                       </>
                     )}
                   </Button>
                 ) : (
                   <Badge variant="default" className="text-lg px-4 py-2 bg-emerald-600 text-white font-semibold">
-                    Day Complete
+                    Día Completado
                   </Badge>
                 )}
               </div>
@@ -214,7 +216,7 @@ export default function EmployeeAttendancePage() {
                   <div className="text-2xl font-bold text-gray-900">
                     {totalHours.toFixed(1)}h
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Total Hours</p>
+                  <p className="text-sm text-gray-800 font-semibold">Horas Totales</p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-full animate-float">
                   <Clock className="h-6 w-6 text-blue-600" />
@@ -230,7 +232,7 @@ export default function EmployeeAttendancePage() {
                   <div className="text-2xl font-bold text-gray-900">
                     {averageHours.toFixed(1)}h
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Average Daily</p>
+                  <p className="text-sm text-gray-800 font-semibold">Promedio Diario</p>
                 </div>
                 <div className="p-3 bg-emerald-100 rounded-full animate-float">
                   <TrendingUp className="h-6 w-6 text-emerald-600" />
@@ -246,7 +248,7 @@ export default function EmployeeAttendancePage() {
                   <div className="text-2xl font-bold text-gray-900">
                     {presentDays}
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Days Present</p>
+                  <p className="text-sm text-gray-800 font-semibold">Días Presentes</p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-full animate-float">
                   <Award className="h-6 w-6 text-purple-600" />
@@ -258,16 +260,16 @@ export default function EmployeeAttendancePage() {
 
         <Tabs defaultValue="records" className="space-y-6">
           <TabsList className="bg-gray-100">
-            <TabsTrigger value="records" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Attendance Records</TabsTrigger>
-            <TabsTrigger value="calendar" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Calendar View</TabsTrigger>
+            <TabsTrigger value="records" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Registros de Asistencia</TabsTrigger>
+            <TabsTrigger value="calendar" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Vista de Calendario</TabsTrigger>
           </TabsList>
 
           <TabsContent value="records" className="space-y-6">
             <Card className="animate-slide-in-up card-glow border-gray-200">
               <CardHeader>
-                <CardTitle className="text-gray-900">My Attendance History</CardTitle>
+                <CardTitle className="text-gray-900">Mi Historial de Asistencia</CardTitle>
                 <CardDescription className="text-gray-800 font-medium">
-                  Your complete attendance records
+                  Tus registros completos de asistencia
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -275,18 +277,18 @@ export default function EmployeeAttendancePage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-gray-900 font-semibold">Date</TableHead>
-                        <TableHead className="text-gray-900 font-semibold">Check In</TableHead>
-                        <TableHead className="text-gray-900 font-semibold">Check Out</TableHead>
-                        <TableHead className="text-gray-900 font-semibold">Total Hours</TableHead>
-                        <TableHead className="text-gray-900 font-semibold">Status</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Fecha</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Entrada</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Salida</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Horas Totales</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Estado</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {attendanceRecords.map((record) => (
                         <TableRow key={record.id}>
                           <TableCell className="font-medium text-gray-900">
-                            {format(new Date(record.date), 'MMM dd, yyyy')}
+                            {format(new Date(record.date), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined })}
                           </TableCell>
                           <TableCell className="text-gray-800 font-medium">{record.check_in || '-'}</TableCell>
                           <TableCell className="text-gray-800 font-medium">{record.check_out || '-'}</TableCell>
@@ -295,16 +297,14 @@ export default function EmployeeAttendancePage() {
                           </TableCell>
                           <TableCell>
                             <Badge 
-                              variant={
-                                record.status === 'present' ? 'default' :
-                                record.status === 'late' ? 'destructive' : 'secondary'
-                              }
                               className={
-                                record.status === 'present' ? 'bg-emerald-600 text-white' :
-                                record.status === 'late' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-800'
+                                record.status === 'present' ? 'badge-approved' :
+                                record.status === 'late' ? 'badge-rejected' : 'badge-inactive'
                               }
                             >
-                              {record.status}
+                              {record.status === 'present' ? 'Presente' :
+                               record.status === 'absent' ? 'Ausente' :
+                               record.status === 'late' ? 'Tarde' : record.status}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -320,9 +320,9 @@ export default function EmployeeAttendancePage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="animate-slide-in-left card-glow border-gray-200">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Select Date</CardTitle>
+                  <CardTitle className="text-gray-900">Seleccionar Fecha</CardTitle>
                   <CardDescription className="text-gray-800 font-medium">
-                    Choose a date to view attendance details
+                    Elige una fecha para ver detalles de asistencia
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -331,6 +331,7 @@ export default function EmployeeAttendancePage() {
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     className="rounded-md border border-gray-200"
+                    locale={language === 'es' ? es : undefined}
                   />
                 </CardContent>
               </Card>
@@ -338,7 +339,7 @@ export default function EmployeeAttendancePage() {
               <Card className="animate-slide-in-right card-glow border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-gray-900">
-                    Attendance for {selectedDate ? format(selectedDate, 'MMMM dd, yyyy') : 'Select a date'}
+                    Asistencia para {selectedDate ? format(selectedDate, 'd MMMM yyyy', { locale: language === 'es' ? es : undefined }) : 'Selecciona una fecha'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -352,32 +353,30 @@ export default function EmployeeAttendancePage() {
                           return (
                             <div className="space-y-3">
                               <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                                <span className="font-semibold text-emerald-800">Check In</span>
-                                <Badge variant="outline" className="border-emerald-300 text-emerald-800 font-semibold">{dayRecord.check_in || 'Not recorded'}</Badge>
+                                <span className="font-semibold text-emerald-800">Entrada</span>
+                                <Badge variant="outline" className="border-emerald-300 text-emerald-800 font-semibold">{dayRecord.check_in || 'No registrada'}</Badge>
                               </div>
                               <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                                <span className="font-semibold text-red-800">Check Out</span>
-                                <Badge variant="outline" className="border-red-300 text-red-800 font-semibold">{dayRecord.check_out || 'Not recorded'}</Badge>
+                                <span className="font-semibold text-red-800">Salida</span>
+                                <Badge variant="outline" className="border-red-300 text-red-800 font-semibold">{dayRecord.check_out || 'No registrada'}</Badge>
                               </div>
                               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <span className="font-semibold text-blue-800">Total Hours</span>
+                                <span className="font-semibold text-blue-800">Horas Totales</span>
                                 <Badge variant="default" className="bg-blue-600 text-white font-semibold">
                                   {dayRecord.total_hours ? `${dayRecord.total_hours.toFixed(1)}h` : '0h'}
                                 </Badge>
                               </div>
                               <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
-                                <span className="font-semibold text-purple-800">Status</span>
+                                <span className="font-semibold text-purple-800">Estado</span>
                                 <Badge 
-                                  variant={
-                                    dayRecord.status === 'present' ? 'default' :
-                                    dayRecord.status === 'late' ? 'destructive' : 'secondary'
-                                  }
                                   className={
-                                    dayRecord.status === 'present' ? 'bg-emerald-600 text-white' :
-                                    dayRecord.status === 'late' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-800'
+                                    dayRecord.status === 'present' ? 'badge-approved' :
+                                    dayRecord.status === 'late' ? 'badge-rejected' : 'badge-inactive'
                                   }
                                 >
-                                  {dayRecord.status}
+                                  {dayRecord.status === 'present' ? 'Presente' :
+                                   dayRecord.status === 'absent' ? 'Ausente' :
+                                   dayRecord.status === 'late' ? 'Tarde' : dayRecord.status}
                                 </Badge>
                               </div>
                             </div>
@@ -386,7 +385,7 @@ export default function EmployeeAttendancePage() {
                           return (
                             <div className="text-center py-8 text-gray-700">
                               <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                              <p className="font-semibold">No attendance record for this date</p>
+                              <p className="font-semibold">No hay registro de asistencia para esta fecha</p>
                             </div>
                           );
                         }
@@ -395,7 +394,7 @@ export default function EmployeeAttendancePage() {
                   ) : (
                     <div className="text-center py-8 text-gray-700">
                       <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                      <p className="font-semibold">Please select a date to view details</p>
+                      <p className="font-semibold">Por favor selecciona una fecha para ver detalles</p>
                     </div>
                   )}
                 </CardContent>

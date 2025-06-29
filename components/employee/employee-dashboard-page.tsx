@@ -19,15 +19,16 @@ import {
   MapPin,
   Briefcase,
   Mail,
-  Phone,
   CalendarDays,
   ClockIcon,
   Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import { apiClient } from '@/lib/api-client';
+import { useLanguage } from '@/contexts/language-context';
 
 interface EmployeeStats {
   attendanceToday: boolean;
@@ -58,6 +59,7 @@ export default function EmployeeDashboardPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -83,7 +85,7 @@ export default function EmployeeDashboardPage() {
       setProfile(profileData);
       setIsCheckedIn(statsData.attendanceToday && statsData.checkInTime && !statsData.checkOutTime);
     } catch (error: any) {
-      toast.error('Failed to load data: ' + error.message);
+      toast.error('Error al cargar datos: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -94,7 +96,7 @@ export default function EmployeeDashboardPage() {
     try {
       await apiClient.checkInOut('check_in');
       setIsCheckedIn(true);
-      toast.success('Checked in successfully!');
+      toast.success('¡Entrada registrada con éxito!');
       loadEmployeeData();
     } catch (error: any) {
       toast.error(error.message);
@@ -108,7 +110,7 @@ export default function EmployeeDashboardPage() {
     try {
       await apiClient.checkInOut('check_out');
       setIsCheckedIn(false);
-      toast.success('Checked out successfully!');
+      toast.success('¡Salida registrada con éxito!');
       loadEmployeeData();
     } catch (error: any) {
       toast.error(error.message);
@@ -143,10 +145,10 @@ export default function EmployeeDashboardPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                    Welcome back, {profile ? profile.first_name : 'Employee'}!
+                    ¡Bienvenido de nuevo, {profile ? profile.first_name : 'Empleado'}!
                   </h1>
                   <p className="text-gray-800 mt-1 font-semibold">
-                    {format(currentTime, 'EEEE, MMMM do, yyyy')}
+                    {format(currentTime, 'EEEE, d MMMM yyyy', { locale: language === 'es' ? es : undefined })}
                   </p>
                   <p className="text-2xl font-mono text-emerald-700 mt-2 font-bold">
                     {format(currentTime, 'HH:mm:ss')}
@@ -165,12 +167,12 @@ export default function EmployeeDashboardPage() {
                       {checkingIn ? (
                         <>
                           <Timer className="h-5 w-5 mr-2 animate-spin" />
-                          Checking In...
+                          Registrando...
                         </>
                       ) : (
                         <>
                           <CheckCircle className="h-5 w-5 mr-2" />
-                          Check In
+                          Marcar Entrada
                         </>
                       )}
                     </Button>
@@ -184,12 +186,12 @@ export default function EmployeeDashboardPage() {
                       {checkingIn ? (
                         <>
                           <Timer className="h-5 w-5 mr-2 animate-spin" />
-                          Checking Out...
+                          Registrando...
                         </>
                       ) : (
                         <>
                           <LogOutIcon className="h-5 w-5 mr-2" />
-                          Check Out
+                          Marcar Salida
                         </>
                       )}
                     </Button>
@@ -197,7 +199,7 @@ export default function EmployeeDashboardPage() {
                 </div>
                 {isCheckedIn && stats?.checkInTime && (
                   <p className="text-sm text-gray-700 mt-2 font-semibold">
-                    Checked in at {stats.checkInTime}
+                    Entrada registrada a las {stats.checkInTime}
                   </p>
                 )}
               </div>
@@ -214,7 +216,7 @@ export default function EmployeeDashboardPage() {
                   <div className="text-2xl font-bold text-gray-900">
                     {stats?.totalHoursToday.toFixed(1) || '0.0'}h
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Hours Today</p>
+                  <p className="text-sm text-gray-800 font-semibold">Horas Hoy</p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-full animate-float">
                   <Clock className="h-6 w-6 text-blue-600" />
@@ -222,7 +224,7 @@ export default function EmployeeDashboardPage() {
               </div>
               <div className="mt-4">
                 <Progress value={(stats?.totalHoursToday || 0) / 8 * 100} className="progress-animated" />
-                <p className="text-xs text-gray-700 mt-1 font-semibold">Target: 8 hours</p>
+                <p className="text-xs text-gray-700 mt-1 font-semibold">Objetivo: 8 horas</p>
               </div>
             </CardContent>
           </Card>
@@ -234,7 +236,7 @@ export default function EmployeeDashboardPage() {
                   <div className="text-2xl font-bold text-gray-900">
                     {stats?.weeklyHours.toFixed(1) || '0.0'}h
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">This Week</p>
+                  <p className="text-sm text-gray-800 font-semibold">Esta Semana</p>
                 </div>
                 <div className="p-3 bg-emerald-100 rounded-full animate-float">
                   <TrendingUp className="h-6 w-6 text-emerald-600" />
@@ -242,7 +244,7 @@ export default function EmployeeDashboardPage() {
               </div>
               <div className="mt-4">
                 <Progress value={(stats?.weeklyHours || 0) / 40 * 100} className="progress-animated" />
-                <p className="text-xs text-gray-700 mt-1 font-semibold">Target: 40 hours</p>
+                <p className="text-xs text-gray-700 mt-1 font-semibold">Objetivo: 40 horas</p>
               </div>
             </CardContent>
           </Card>
@@ -254,7 +256,7 @@ export default function EmployeeDashboardPage() {
                   <div className="text-2xl font-bold text-gray-900">
                     {stats?.monthlyAttendance || 0}%
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Attendance</p>
+                  <p className="text-sm text-gray-800 font-semibold">Asistencia</p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-full animate-float">
                   <Award className="h-6 w-6 text-purple-600" />
@@ -262,7 +264,7 @@ export default function EmployeeDashboardPage() {
               </div>
               <div className="mt-4">
                 <Progress value={stats?.monthlyAttendance || 0} className="progress-animated" />
-                <p className="text-xs text-gray-700 mt-1 font-semibold">This month</p>
+                <p className="text-xs text-gray-700 mt-1 font-semibold">Este mes</p>
               </div>
             </CardContent>
           </Card>
@@ -274,7 +276,7 @@ export default function EmployeeDashboardPage() {
                   <div className="text-2xl font-bold text-gray-900">
                     {stats?.remainingLeaves || 0}
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Leave Days</p>
+                  <p className="text-sm text-gray-800 font-semibold">Días de Permiso</p>
                 </div>
                 <div className="p-3 bg-amber-100 rounded-full animate-float">
                   <Calendar className="h-6 w-6 text-amber-600" />
@@ -282,7 +284,7 @@ export default function EmployeeDashboardPage() {
               </div>
               <div className="mt-4">
                 <Progress value={(stats?.remainingLeaves || 0) / 20 * 100} className="progress-animated" />
-                <p className="text-xs text-gray-700 mt-1 font-semibold">Remaining this year</p>
+                <p className="text-xs text-gray-700 mt-1 font-semibold">Restantes este año</p>
               </div>
             </CardContent>
           </Card>
@@ -295,37 +297,37 @@ export default function EmployeeDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <Target className="h-5 w-5 text-emerald-600" />
-                <span>Quick Actions</span>
+                <span>Acciones Rápidas</span>
               </CardTitle>
               <CardDescription className="text-gray-800 font-medium">
-                Common tasks and shortcuts
+                Tareas comunes y accesos directos
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button className="w-full btn-primary justify-start" size="lg" asChild>
                 <a href="/employee/leaves">
                   <Calendar className="h-5 w-5 mr-3" />
-                  Request Leave
+                  Solicitar Permiso
                 </a>
               </Button>
               
               <Button className="w-full btn-success justify-start" size="lg" asChild>
                 <a href="/employee/attendance">
                   <ClockIcon className="h-5 w-5 mr-3" />
-                  View Timesheet
+                  Ver Horario
                 </a>
               </Button>
               
               <Button className="w-full btn-warning justify-start" size="lg" asChild>
                 <a href="/employee/profile">
                   <User className="h-5 w-5 mr-3" />
-                  Update Profile
+                  Actualizar Perfil
                 </a>
               </Button>
               
               <Button className="w-full btn-danger justify-start" size="lg">
                 <Coffee className="h-5 w-5 mr-3" />
-                Break Time
+                Tiempo de Descanso
               </Button>
             </CardContent>
           </Card>
@@ -335,10 +337,10 @@ export default function EmployeeDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span>Recent Activity</span>
+                <span>Actividad Reciente</span>
               </CardTitle>
               <CardDescription className="text-gray-800 font-medium">
-                Your latest actions and updates
+                Tus últimas acciones y actualizaciones
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -349,8 +351,8 @@ export default function EmployeeDashboardPage() {
                       <CheckCircle className="h-4 w-4 text-emerald-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-emerald-800">Checked in successfully</p>
-                      <p className="text-sm text-emerald-700 font-medium">Today at {stats.checkInTime}</p>
+                      <p className="font-semibold text-emerald-800">Entrada registrada con éxito</p>
+                      <p className="text-sm text-emerald-700 font-medium">Hoy a las {stats.checkInTime}</p>
                     </div>
                   </div>
                 )}
@@ -360,9 +362,9 @@ export default function EmployeeDashboardPage() {
                     <Calendar className="h-4 w-4 text-blue-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-blue-800">Leave requests status</p>
+                    <p className="font-semibold text-blue-800">Estado de solicitudes de permiso</p>
                     <p className="text-sm text-blue-700 font-medium">
-                      {stats?.pendingLeaves || 0} pending, {stats?.approvedLeaves || 0} approved
+                      {stats?.pendingLeaves || 0} pendientes, {stats?.approvedLeaves || 0} aprobadas
                     </p>
                   </div>
                 </div>
@@ -372,8 +374,8 @@ export default function EmployeeDashboardPage() {
                     <Award className="h-4 w-4 text-purple-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-purple-800">Monthly attendance</p>
-                    <p className="text-sm text-purple-700 font-medium">{stats?.monthlyAttendance || 0}% this month</p>
+                    <p className="font-semibold text-purple-800">Asistencia mensual</p>
+                    <p className="text-sm text-purple-700 font-medium">{stats?.monthlyAttendance || 0}% este mes</p>
                   </div>
                 </div>
               </div>
@@ -388,7 +390,7 @@ export default function EmployeeDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <User className="h-5 w-5 text-blue-600" />
-                <span>Personal Information</span>
+                <span>Información Personal</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -396,7 +398,7 @@ export default function EmployeeDashboardPage() {
                 <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg hover-scale border border-blue-200">
                   <Mail className="h-5 w-5 text-blue-600" />
                   <div>
-                    <p className="text-sm text-gray-700 font-semibold">Email</p>
+                    <p className="text-sm text-gray-700 font-semibold">Correo</p>
                     <p className="font-bold text-gray-900">{user?.email}</p>
                   </div>
                 </div>
@@ -404,25 +406,25 @@ export default function EmployeeDashboardPage() {
                 <div className="flex items-center space-x-3 p-3 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
                   <Briefcase className="h-5 w-5 text-emerald-600" />
                   <div>
-                    <p className="text-sm text-gray-700 font-semibold">Department</p>
-                    <p className="font-bold text-gray-900">{profile?.department || 'Not assigned'}</p>
+                    <p className="text-sm text-gray-700 font-semibold">Departamento</p>
+                    <p className="font-bold text-gray-900">{profile?.department || 'No asignado'}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg hover-scale border border-purple-200">
                   <MapPin className="h-5 w-5 text-purple-600" />
                   <div>
-                    <p className="text-sm text-gray-700 font-semibold">Location</p>
-                    <p className="font-bold text-gray-900">{profile?.location || 'Not specified'}</p>
+                    <p className="text-sm text-gray-700 font-semibold">Ubicación</p>
+                    <p className="font-bold text-gray-900">{profile?.location || 'No especificada'}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3 p-3 bg-amber-50 rounded-lg hover-scale border border-amber-200">
                   <CalendarDays className="h-5 w-5 text-amber-600" />
                   <div>
-                    <p className="text-sm text-gray-700 font-semibold">Start Date</p>
+                    <p className="text-sm text-gray-700 font-semibold">Fecha de Inicio</p>
                     <p className="font-bold text-gray-900">
-                      {profile?.start_date ? format(new Date(profile.start_date), 'MMM dd, yyyy') : 'Not available'}
+                      {profile?.start_date ? format(new Date(profile.start_date), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined }) : 'No disponible'}
                     </p>
                   </div>
                 </div>
@@ -435,15 +437,15 @@ export default function EmployeeDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <Calendar className="h-5 w-5 text-amber-600" />
-                <span>Leave Summary</span>
+                <span>Resumen de Permisos</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-4 bg-amber-50 rounded-lg hover-scale border border-amber-200">
                   <div>
-                    <p className="font-semibold text-amber-800">Pending Requests</p>
-                    <p className="text-sm text-amber-700 font-medium">Awaiting approval</p>
+                    <p className="font-semibold text-amber-800">Solicitudes Pendientes</p>
+                    <p className="text-sm text-amber-700 font-medium">Esperando aprobación</p>
                   </div>
                   <Badge variant="secondary" className="text-lg px-3 py-1 bg-amber-100 text-amber-800 font-bold">
                     {stats?.pendingLeaves || 0}
@@ -452,8 +454,8 @@ export default function EmployeeDashboardPage() {
                 
                 <div className="flex justify-between items-center p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
                   <div>
-                    <p className="font-semibold text-emerald-800">Approved Leaves</p>
-                    <p className="text-sm text-emerald-700 font-medium">This year</p>
+                    <p className="font-semibold text-emerald-800">Permisos Aprobados</p>
+                    <p className="text-sm text-emerald-700 font-medium">Este año</p>
                   </div>
                   <Badge variant="default" className="text-lg px-3 py-1 bg-emerald-600 text-white font-bold">
                     {stats?.approvedLeaves || 0}
@@ -462,8 +464,8 @@ export default function EmployeeDashboardPage() {
                 
                 <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg hover-scale border border-blue-200">
                   <div>
-                    <p className="font-semibold text-blue-800">Remaining Days</p>
-                    <p className="text-sm text-blue-700 font-medium">Available to use</p>
+                    <p className="font-semibold text-blue-800">Días Restantes</p>
+                    <p className="text-sm text-blue-700 font-medium">Disponibles para usar</p>
                   </div>
                   <Badge variant="outline" className="text-lg px-3 py-1 border-blue-300 text-blue-800 font-bold">
                     {stats?.remainingLeaves || 0}

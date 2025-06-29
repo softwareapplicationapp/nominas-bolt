@@ -122,12 +122,12 @@ export default function EmployeeSettingsPage() {
 
   const changePassword = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('New passwords do not match');
+      toast.error('Las contraseñas nuevas no coinciden');
       return;
     }
 
     if (passwordForm.newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters long');
+      toast.error('La contraseña debe tener al menos 8 caracteres');
       return;
     }
 
@@ -135,14 +135,14 @@ export default function EmployeeSettingsPage() {
     try {
       // In a real app, this would call the change password API
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      toast.success('Password changed successfully!');
+      toast.success('¡Contraseña cambiada con éxito!');
       setPasswordForm({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
     } catch (error) {
-      toast.error('Failed to change password');
+      toast.error('Error al cambiar la contraseña');
     } finally {
       setSaving(false);
     }
@@ -150,63 +150,63 @@ export default function EmployeeSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       <div className="space-y-8 p-6">
         <div className="flex justify-between items-center animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 text-gradient">{t('settings')}</h1>
-            <p className="text-gray-600 mt-2">{t('personalSettings')} and preferences</p>
+            <h1 className="text-3xl font-bold text-gray-900 text-gradient">Configuración</h1>
+            <p className="text-gray-800 mt-2 font-semibold">Gestiona tus preferencias personales y configuración de cuenta</p>
           </div>
           
           <Button onClick={saveSettings} disabled={saving} className="btn-primary">
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {t('loading')}...
+                Guardando...
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                {t('save')} {t('settings')}
+                Guardar Cambios
               </>
             )}
           </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="personal">{t('personalSettings')}</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="privacy">Privacy</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-gray-100">
+            <TabsTrigger value="personal" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Personal</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Notificaciones</TabsTrigger>
+            <TabsTrigger value="privacy" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Privacidad</TabsTrigger>
+            <TabsTrigger value="security" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Seguridad</TabsTrigger>
           </TabsList>
 
           <TabsContent value="personal" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="animate-scale-in card-glow">
+              <Card className="animate-scale-in card-glow border-blue-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
+                  <CardTitle className="flex items-center space-x-2 text-gray-900">
                     <Globe className="h-5 w-5 text-blue-600" />
-                    <span>{t('language')} & Localization</span>
+                    <span>Idioma y Localización</span>
                   </CardTitle>
-                  <CardDescription>
-                    Choose your preferred language and regional settings
+                  <CardDescription className="text-gray-800 font-medium">
+                    Elige tu idioma preferido y configuración regional
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="language">{t('language')}</Label>
+                    <Label htmlFor="language" className="text-gray-900 font-semibold">Idioma</Label>
                     <Select value={language} onValueChange={(value: Language) => setLanguage(value)}>
-                      <SelectTrigger>
+                      <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -224,85 +224,85 @@ export default function EmployeeSettingsPage() {
                     </Select>
                   </div>
 
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-2">
-                      {t('language')} Preview
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-900 mb-2">
+                      Vista Previa de Idioma
                     </h4>
                     <div className="space-y-2 text-sm">
-                      <p><strong>{t('dashboard')}:</strong> {t('dashboard')}</p>
-                      <p><strong>{t('myAttendance')}:</strong> {t('myAttendance')}</p>
-                      <p><strong>{t('myProfile')}:</strong> {t('myProfile')}</p>
-                      <p><strong>{t('settings')}:</strong> {t('settings')}</p>
+                      <p><strong>Panel de Control:</strong> {t('dashboard')}</p>
+                      <p><strong>Mi Asistencia:</strong> {t('myAttendance')}</p>
+                      <p><strong>Mi Perfil:</strong> {t('myProfile')}</p>
+                      <p><strong>Configuración:</strong> {t('settings')}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="animate-scale-in card-glow">
+              <Card className="animate-scale-in card-glow border-purple-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
+                  <CardTitle className="flex items-center space-x-2 text-gray-900">
                     <Palette className="h-5 w-5 text-purple-600" />
-                    <span>Appearance & Format</span>
+                    <span>Apariencia y Formato</span>
                   </CardTitle>
-                  <CardDescription>
-                    Customize how ArcusHR looks and feels for you
+                  <CardDescription className="text-gray-800 font-medium">
+                    Personaliza cómo se ve y funciona ArcusHR para ti
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="theme">{t('theme')}</Label>
+                    <Label htmlFor="theme" className="text-gray-900 font-semibold">Tema</Label>
                     <Select value={personalSettings.theme} onValueChange={(value) => setPersonalSettings({...personalSettings, theme: value})}>
-                      <SelectTrigger>
+                      <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="auto">Auto (System)</SelectItem>
+                        <SelectItem value="light">Claro</SelectItem>
+                        <SelectItem value="dark">Oscuro</SelectItem>
+                        <SelectItem value="auto">Auto (Sistema)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="timezone">{t('timezone')}</Label>
+                    <Label htmlFor="timezone" className="text-gray-900 font-semibold">Zona Horaria</Label>
                     <Select value={personalSettings.timezone} onValueChange={(value) => setPersonalSettings({...personalSettings, timezone: value})}>
-                      <SelectTrigger>
+                      <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                        <SelectItem value="America/Chicago">Central Time</SelectItem>
-                        <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                        <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                        <SelectItem value="America/New_York">Hora del Este</SelectItem>
+                        <SelectItem value="America/Chicago">Hora Central</SelectItem>
+                        <SelectItem value="America/Denver">Hora de Montaña</SelectItem>
+                        <SelectItem value="America/Los_Angeles">Hora del Pacífico</SelectItem>
+                        <SelectItem value="Europe/Madrid">España (CET)</SelectItem>
                         <SelectItem value="Europe/London">GMT</SelectItem>
-                        <SelectItem value="Europe/Paris">CET</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="dateFormat">Date Format</Label>
+                    <Label htmlFor="dateFormat" className="text-gray-900 font-semibold">Formato de Fecha</Label>
                     <Select value={personalSettings.dateFormat} onValueChange={(value) => setPersonalSettings({...personalSettings, dateFormat: value})}>
-                      <SelectTrigger>
+                      <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                        <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                        <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                        <SelectItem value="MM/DD/YYYY">MM/DD/AAAA</SelectItem>
+                        <SelectItem value="DD/MM/YYYY">DD/MM/AAAA</SelectItem>
+                        <SelectItem value="YYYY-MM-DD">AAAA-MM-DD</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="timeFormat">Time Format</Label>
+                    <Label htmlFor="timeFormat" className="text-gray-900 font-semibold">Formato de Hora</Label>
                     <Select value={personalSettings.timeFormat} onValueChange={(value) => setPersonalSettings({...personalSettings, timeFormat: value})}>
-                      <SelectTrigger>
+                      <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="12h">12 Hour (AM/PM)</SelectItem>
-                        <SelectItem value="24h">24 Hour</SelectItem>
+                        <SelectItem value="12h">12 Horas (AM/PM)</SelectItem>
+                        <SelectItem value="24h">24 Horas</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -312,21 +312,21 @@ export default function EmployeeSettingsPage() {
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">
-            <Card className="animate-scale-in card-glow">
+            <Card className="animate-scale-in card-glow border-amber-200">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Bell className="h-5 w-5 text-orange-600" />
-                  <span>Notification Preferences</span>
+                <CardTitle className="flex items-center space-x-2 text-gray-900">
+                  <Bell className="h-5 w-5 text-amber-600" />
+                  <span>Preferencias de Notificación</span>
                 </CardTitle>
-                <CardDescription>
-                  Choose how and when you want to be notified
+                <CardDescription className="text-gray-800 font-medium">
+                  Elige cómo y cuándo quieres ser notificado
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Email Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive notifications via email</p>
+                    <Label className="text-base text-gray-900 font-semibold">Notificaciones por Correo</Label>
+                    <p className="text-sm text-gray-700 font-medium">Recibir notificaciones por correo electrónico</p>
                   </div>
                   <Switch
                     checked={notificationSettings.emailNotifications}
@@ -336,8 +336,8 @@ export default function EmployeeSettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Leave Updates</Label>
-                    <p className="text-sm text-gray-500">Notify about leave request status changes</p>
+                    <Label className="text-base text-gray-900 font-semibold">Actualizaciones de Permisos</Label>
+                    <p className="text-sm text-gray-700 font-medium">Notificar sobre cambios de estado en solicitudes de permisos</p>
                   </div>
                   <Switch
                     checked={notificationSettings.leaveUpdates}
@@ -347,8 +347,8 @@ export default function EmployeeSettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Payroll Notifications</Label>
-                    <p className="text-sm text-gray-500">Notify about payslips and salary updates</p>
+                    <Label className="text-base text-gray-900 font-semibold">Notificaciones de Nómina</Label>
+                    <p className="text-sm text-gray-700 font-medium">Notificar sobre recibos de pago y actualizaciones salariales</p>
                   </div>
                   <Switch
                     checked={notificationSettings.payrollNotifications}
@@ -358,8 +358,8 @@ export default function EmployeeSettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Reminder Alerts</Label>
-                    <p className="text-sm text-gray-500">Remind about important deadlines and tasks</p>
+                    <Label className="text-base text-gray-900 font-semibold">Alertas de Recordatorio</Label>
+                    <p className="text-sm text-gray-700 font-medium">Recordar fechas importantes y tareas</p>
                   </div>
                   <Switch
                     checked={notificationSettings.reminderAlerts}
@@ -369,8 +369,8 @@ export default function EmployeeSettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Mobile Notifications</Label>
-                    <p className="text-sm text-gray-500">Push notifications on mobile devices</p>
+                    <Label className="text-base text-gray-900 font-semibold">Notificaciones Móviles</Label>
+                    <p className="text-sm text-gray-700 font-medium">Notificaciones push en dispositivos móviles</p>
                   </div>
                   <Switch
                     checked={notificationSettings.mobileNotifications}
@@ -382,36 +382,36 @@ export default function EmployeeSettingsPage() {
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-6">
-            <Card className="animate-scale-in card-glow">
+            <Card className="animate-scale-in card-glow border-emerald-200">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <User className="h-5 w-5 text-green-600" />
-                  <span>Privacy Settings</span>
+                <CardTitle className="flex items-center space-x-2 text-gray-900">
+                  <User className="h-5 w-5 text-emerald-600" />
+                  <span>Configuración de Privacidad</span>
                 </CardTitle>
-                <CardDescription>
-                  Control who can see your information and contact you
+                <CardDescription className="text-gray-800 font-medium">
+                  Controla quién puede ver tu información y contactarte
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="profileVisibility">Profile Visibility</Label>
+                  <Label htmlFor="profileVisibility" className="text-gray-900 font-semibold">Visibilidad del Perfil</Label>
                   <Select value={privacySettings.profileVisibility} onValueChange={(value) => setPrivacySettings({...privacySettings, profileVisibility: value})}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-300 text-gray-900">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="public">Everyone in Company</SelectItem>
-                      <SelectItem value="team">My Team Only</SelectItem>
-                      <SelectItem value="managers">Managers Only</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
+                      <SelectItem value="public">Todos en la Empresa</SelectItem>
+                      <SelectItem value="team">Solo Mi Equipo</SelectItem>
+                      <SelectItem value="managers">Solo Gerentes</SelectItem>
+                      <SelectItem value="private">Privado</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Show Email Address</Label>
-                    <p className="text-sm text-gray-500">Allow others to see your email address</p>
+                    <Label className="text-base text-gray-900 font-semibold">Mostrar Correo Electrónico</Label>
+                    <p className="text-sm text-gray-700 font-medium">Permitir que otros vean tu correo electrónico</p>
                   </div>
                   <Switch
                     checked={privacySettings.showEmail}
@@ -421,8 +421,8 @@ export default function EmployeeSettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Show Phone Number</Label>
-                    <p className="text-sm text-gray-500">Allow others to see your phone number</p>
+                    <Label className="text-base text-gray-900 font-semibold">Mostrar Número de Teléfono</Label>
+                    <p className="text-sm text-gray-700 font-medium">Permitir que otros vean tu número de teléfono</p>
                   </div>
                   <Switch
                     checked={privacySettings.showPhone}
@@ -432,8 +432,8 @@ export default function EmployeeSettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Allow Direct Messages</Label>
-                    <p className="text-sm text-gray-500">Let colleagues send you direct messages</p>
+                    <Label className="text-base text-gray-900 font-semibold">Permitir Mensajes Directos</Label>
+                    <p className="text-sm text-gray-700 font-medium">Permitir que compañeros te envíen mensajes directos</p>
                   </div>
                   <Switch
                     checked={privacySettings.allowDirectMessages}
@@ -445,27 +445,28 @@ export default function EmployeeSettingsPage() {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <Card className="animate-scale-in card-glow">
+            <Card className="animate-scale-in card-glow border-red-200">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 text-gray-900">
                   <Shield className="h-5 w-5 text-red-600" />
-                  <span>Security Settings</span>
+                  <span>Configuración de Seguridad</span>
                 </CardTitle>
-                <CardDescription>
-                  Manage your account security and password
+                <CardDescription className="text-gray-800 font-medium">
+                  Gestiona la seguridad de tu cuenta y contraseña
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Label htmlFor="currentPassword" className="text-gray-900 font-semibold">Contraseña Actual</Label>
                     <div className="relative">
                       <Input
                         id="currentPassword"
                         type={showCurrentPassword ? "text" : "password"}
                         value={passwordForm.currentPassword}
                         onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
-                        placeholder="Enter current password"
+                        placeholder="Ingresa tu contraseña actual"
+                        className="border-gray-300 text-gray-900 pr-10"
                       />
                       <Button
                         type="button"
@@ -475,23 +476,24 @@ export default function EmployeeSettingsPage() {
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                       >
                         {showCurrentPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-4 w-4 text-gray-600" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 text-gray-600" />
                         )}
                       </Button>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
+                    <Label htmlFor="newPassword" className="text-gray-900 font-semibold">Nueva Contraseña</Label>
                     <div className="relative">
                       <Input
                         id="newPassword"
                         type={showNewPassword ? "text" : "password"}
                         value={passwordForm.newPassword}
                         onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                        placeholder="Enter new password"
+                        placeholder="Ingresa nueva contraseña"
+                        className="border-gray-300 text-gray-900 pr-10"
                       />
                       <Button
                         type="button"
@@ -501,22 +503,23 @@ export default function EmployeeSettingsPage() {
                         onClick={() => setShowNewPassword(!showNewPassword)}
                       >
                         {showNewPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-4 w-4 text-gray-600" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 text-gray-600" />
                         )}
                       </Button>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Label htmlFor="confirmPassword" className="text-gray-900 font-semibold">Confirmar Nueva Contraseña</Label>
                     <Input
                       id="confirmPassword"
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                      placeholder="Confirm new password"
+                      placeholder="Confirma nueva contraseña"
+                      className="border-gray-300 text-gray-900"
                     />
                   </div>
                   
@@ -528,33 +531,33 @@ export default function EmployeeSettingsPage() {
                     {saving ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Changing Password...
+                        Cambiando Contraseña...
                       </>
                     ) : (
-                      'Change Password'
+                      'Cambiar Contraseña'
                     )}
                   </Button>
                 </div>
                 
-                <div className="pt-6 border-t">
+                <div className="pt-6 border-t border-gray-200">
                   <div className="space-y-4">
-                    <h4 className="font-medium">Account Information</h4>
+                    <h4 className="font-semibold text-gray-900">Información de Cuenta</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">{t('email')}</p>
-                        <p className="font-medium">{user?.email}</p>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-700 font-semibold">Correo</p>
+                        <p className="font-medium text-gray-900">{user?.email}</p>
                       </div>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Role</p>
-                        <p className="font-medium capitalize">{user?.role}</p>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-700 font-semibold">Rol</p>
+                        <p className="font-medium text-gray-900 capitalize">{user?.role === 'employee' ? 'Empleado' : user?.role}</p>
                       </div>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Last Login</p>
-                        <p className="font-medium">{t('today')}, 9:30 AM</p>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-700 font-semibold">Último Acceso</p>
+                        <p className="font-medium text-gray-900">Hoy, 9:30 AM</p>
                       </div>
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Account Status</p>
-                        <p className="font-medium text-green-600">{t('active')}</p>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-700 font-semibold">Estado de Cuenta</p>
+                        <p className="font-medium text-emerald-600">Activo</p>
                       </div>
                     </div>
                   </div>

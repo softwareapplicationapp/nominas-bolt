@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/language-context';
 
 interface EmployeeHeaderProps {
   onMenuClick: () => void;
@@ -23,6 +24,7 @@ interface EmployeeHeaderProps {
 export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const handleLogout = () => {
     logout();
@@ -36,35 +38,35 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden hover-scale"
+            className="lg:hidden hover-scale text-gray-700"
             onClick={onMenuClick}
           >
             <Menu className="h-5 w-5" />
           </Button>
           
           <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search anything..."
-              className="pl-10 w-80 bg-white/50 border-gray-200/50 hover-glow focus:bg-white transition-all duration-200"
+              placeholder="Buscar..."
+              className="pl-10 w-80 bg-white/50 border-gray-300 hover-glow focus:bg-white transition-all duration-200 text-gray-900"
             />
           </div>
         </div>
 
         <div className="flex items-center space-x-4">
           {/* Quick Actions */}
-          <Button variant="ghost" size="sm" className="hover-scale">
-            <Coffee className="h-5 w-5 text-orange-500" />
+          <Button variant="ghost" size="sm" className="hover-scale text-amber-600">
+            <Coffee className="h-5 w-5" />
           </Button>
           
-          <Button variant="ghost" size="sm" className="hover-scale">
-            <Clock className="h-5 w-5 text-blue-500" />
+          <Button variant="ghost" size="sm" className="hover-scale text-blue-600">
+            <Clock className="h-5 w-5" />
           </Button>
 
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative hover-scale">
+              <Button variant="ghost" size="sm" className="relative hover-scale text-gray-700">
                 <Bell className="h-5 w-5" />
                 <Badge
                   variant="destructive"
@@ -75,17 +77,17 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 glass">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-gray-900 font-semibold">Notificaciones</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex flex-col items-start p-4 hover-scale">
-                <p className="font-medium">Leave request approved</p>
-                <p className="text-sm text-gray-500">Your vacation request for next week has been approved</p>
-                <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
+              <DropdownMenuItem className="flex flex-col items-start p-4 hover-scale cursor-pointer">
+                <p className="font-semibold text-gray-900">Solicitud de permiso aprobada</p>
+                <p className="text-sm text-gray-800">Tu solicitud de vacaciones para la próxima semana ha sido aprobada</p>
+                <p className="text-xs text-gray-600 mt-1">Hace 2 horas</p>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start p-4 hover-scale">
-                <p className="font-medium">Reminder: Team meeting</p>
-                <p className="text-sm text-gray-500">Don't forget about the team meeting at 3 PM</p>
-                <p className="text-xs text-gray-400 mt-1">1 hour ago</p>
+              <DropdownMenuItem className="flex flex-col items-start p-4 hover-scale cursor-pointer">
+                <p className="font-semibold text-gray-900">Recordatorio: Reunión de equipo</p>
+                <p className="text-sm text-gray-800">No olvides la reunión de equipo a las 3 PM</p>
+                <p className="text-xs text-gray-600 mt-1">Hace 1 hora</p>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -95,8 +97,8 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full hover-scale">
                 <Avatar className="animate-pulse-glow">
-                  <AvatarImage src="/employee-avatar.jpg" alt="Employee" />
-                  <AvatarFallback className="bg-gradient-primary text-white">
+                  <AvatarImage src="/employee-avatar.jpg" alt="Empleado" />
+                  <AvatarFallback className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
                     {user?.email?.[0]?.toUpperCase() || 'E'}
                   </AvatarFallback>
                 </Avatar>
@@ -105,27 +107,27 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
             <DropdownMenuContent className="w-56 glass" align="end">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Employee</p>
-                  <p className="text-xs leading-none text-muted-foreground">
+                  <p className="text-sm font-medium text-gray-900 leading-none">Empleado</p>
+                  <p className="text-xs leading-none text-gray-700">
                     {user?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="hover-scale">
+              <DropdownMenuItem className="hover-scale cursor-pointer text-gray-800">
                 <User className="mr-2 h-4 w-4" />
-                Profile
+                Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover-scale">
+              <DropdownMenuItem className="hover-scale cursor-pointer text-gray-800">
                 <Clock className="mr-2 h-4 w-4" />
-                Time Tracking
+                Control de Tiempo
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-red-600 hover-scale cursor-pointer"
                 onClick={handleLogout}
               >
-                Sign out
+                Cerrar Sesión
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

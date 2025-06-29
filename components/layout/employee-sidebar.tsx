@@ -137,7 +137,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
                 className="w-full justify-start text-emerald-200 hover:bg-emerald-600/50 hover:text-white font-medium"
               >
                 <Coffee className="h-4 w-4 mr-2" />
-                Take Break
+                Tiempo de Descanso
               </Button>
               <Button
                 variant="ghost"
@@ -145,7 +145,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
                 className="w-full justify-start text-emerald-200 hover:bg-emerald-600/50 hover:text-white font-medium"
               >
                 <Clock className="h-4 w-4 mr-2" />
-                Check Status
+                Verificar Estado
               </Button>
             </div>
           </div>
@@ -155,8 +155,8 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
         <div className="p-4 border-t border-emerald-600/50">
           {!collapsed && (
             <div className="mb-4">
-              <p className="text-xs text-emerald-300 mb-1 font-medium">{t('signIn')}</p>
-              <p className="text-sm font-semibold text-white">{t('employees')}</p>
+              <p className="text-xs text-emerald-300 mb-1 font-medium">Conectado como</p>
+              <p className="text-sm font-semibold text-white">Empleado</p>
               <p className="text-xs text-emerald-300 font-medium">{user?.email || 'employee@company.com'}</p>
             </div>
           )}

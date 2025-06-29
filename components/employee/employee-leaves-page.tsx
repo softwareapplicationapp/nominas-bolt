@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/language-context';
 
 interface LeaveRequest {
   id: number;
@@ -54,6 +55,7 @@ export default function EmployeeLeavesPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useLanguage();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -76,12 +78,12 @@ export default function EmployeeLeavesPage() {
         }
       });
       
-      if (!response.ok) throw new Error('Failed to fetch leave requests');
+      if (!response.ok) throw new Error('Error al cargar solicitudes de permisos');
       
       const data = await response.json();
       setLeaveRequests(data);
     } catch (error: any) {
-      toast.error('Failed to load leave requests: ' + error.message);
+      toast.error('Error al cargar solicitudes de permisos: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -103,10 +105,10 @@ export default function EmployeeLeavesPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to submit leave request');
+        throw new Error(error.error || 'Error al enviar solicitud de permiso');
       }
 
-      toast.success('Leave request submitted successfully!');
+      toast.success('¡Solicitud de permiso enviada con éxito!');
       setIsDialogOpen(false);
       setFormData({
         type: '',
@@ -132,7 +134,7 @@ export default function EmployeeLeavesPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       </div>
     );
@@ -144,71 +146,70 @@ export default function EmployeeLeavesPage() {
         {/* Header */}
         <div className="flex justify-between items-center animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 text-gradient">My Leave Requests</h1>
-            <p className="text-gray-800 mt-2 font-semibold">Manage your time off and leave requests</p>
+            <h1 className="text-3xl font-bold text-gray-900 text-gradient">Mis Solicitudes de Permiso</h1>
+            <p className="text-gray-800 mt-2 font-semibold">Gestiona tu tiempo libre y solicitudes de permisos</p>
           </div>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="btn-primary">
                 <Plus className="h-4 w-4 mr-2" />
-                Request Leave
+                Solicitar Permiso
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-gray-900">Submit Leave Request</DialogTitle>
+                <DialogTitle className="text-gray-900">Enviar Solicitud de Permiso</DialogTitle>
                 <DialogDescription className="text-gray-800 font-medium">
-                  Fill out the form to request time off
+                  Completa el formulario para solicitar tiempo libre
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmitRequest} className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="leaveType" className="text-gray-900 font-semibold">Leave Type</Label>
+                  <Label htmlFor="leaveType" className="text-gray-900 font-semibold">Tipo de Permiso</Label>
                   <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value})}>
-                    <SelectTrigger className="border-gray-300">
-                      <SelectValue placeholder="Select leave type" />
+                    <SelectTrigger className="border-gray-300 text-gray-900">
+                      <SelectValue placeholder="Selecciona tipo de permiso" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="vacation">Vacation</SelectItem>
-                      <SelectItem value="sick">Sick Leave</SelectItem>
+                      <SelectItem value="vacation">Vacaciones</SelectItem>
+                      <SelectItem value="sick">Enfermedad</SelectItem>
                       <SelectItem value="personal">Personal</SelectItem>
-                      <SelectItem value="emergency">Emergency</SelectItem>
-                      <SelectItem value="maternity">Maternity</SelectItem>
-                      <SelectItem value="paternity">Paternity</SelectItem>
+                      <SelectItem value="emergency">Emergencia</SelectItem>
+                      <SelectItem value="maternity">Maternidad</SelectItem>
+                      <SelectItem value="paternity">Paternidad</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="startDate" className="text-gray-900 font-semibold">Start Date</Label>
+                    <Label htmlFor="startDate" className="text-gray-900 font-semibold">Fecha de Inicio</Label>
                     <Input 
                       id="startDate" 
                       type="date" 
                       value={formData.startDate}
                       onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                
                       required
-                      className="border-gray-300"
+                      className="border-gray-300 text-gray-900"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="endDate" className="text-gray-900 font-semibold">End Date</Label>
+                    <Label htmlFor="endDate" className="text-gray-900 font-semibold">Fecha de Fin</Label>
                     <Input 
                       id="endDate" 
                       type="date" 
                       value={formData.endDate}
                       onChange={(e) => setFormData({...formData, endDate: e.target.value})}
                       required
-                      className="border-gray-300"
+                      className="border-gray-300 text-gray-900"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="reason" className="text-gray-900 font-semibold">Reason</Label>
+                  <Label htmlFor="reason" className="text-gray-900 font-semibold">Motivo</Label>
                   <Textarea 
                     id="reason" 
-                    placeholder="Please provide a reason for your leave request"
+                    placeholder="Por favor proporciona un motivo para tu solicitud de permiso"
                     rows={3}
                     value={formData.reason}
                     onChange={(e) => setFormData({...formData, reason: e.target.value})}
@@ -218,16 +219,16 @@ export default function EmployeeLeavesPage() {
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="border-gray-300 text-gray-800">
-                    Cancel
+                    Cancelar
                   </Button>
                   <Button type="submit" disabled={isSubmitting} className="btn-primary">
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Submitting...
+                        Enviando...
                       </>
                     ) : (
-                      'Submit Request'
+                      'Enviar Solicitud'
                     )}
                   </Button>
                 </div>
@@ -243,7 +244,7 @@ export default function EmployeeLeavesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{pendingRequests}</div>
-                  <p className="text-sm text-gray-800 font-semibold">Pending</p>
+                  <p className="text-sm text-gray-800 font-semibold">Pendientes</p>
                 </div>
                 <div className="p-3 bg-amber-100 rounded-full animate-float">
                   <Clock className="h-6 w-6 text-amber-600" />
@@ -257,7 +258,7 @@ export default function EmployeeLeavesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{approvedRequests}</div>
-                  <p className="text-sm text-gray-800 font-semibold">Approved</p>
+                  <p className="text-sm text-gray-800 font-semibold">Aprobados</p>
                 </div>
                 <div className="p-3 bg-emerald-100 rounded-full animate-float">
                   <CheckCircle className="h-6 w-6 text-emerald-600" />
@@ -271,7 +272,7 @@ export default function EmployeeLeavesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{rejectedRequests}</div>
-                  <p className="text-sm text-gray-800 font-semibold">Rejected</p>
+                  <p className="text-sm text-gray-800 font-semibold">Rechazados</p>
                 </div>
                 <div className="p-3 bg-red-100 rounded-full animate-float">
                   <XCircle className="h-6 w-6 text-red-600" />
@@ -285,7 +286,7 @@ export default function EmployeeLeavesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{totalDaysRequested}</div>
-                  <p className="text-sm text-gray-800 font-semibold">Total Days</p>
+                  <p className="text-sm text-gray-800 font-semibold">Días Totales</p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-full animate-float">
                   <CalendarIcon className="h-6 w-6 text-blue-600" />
@@ -300,10 +301,10 @@ export default function EmployeeLeavesPage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900">
               <FileText className="h-5 w-5 text-blue-600" />
-              <span>My Leave History</span>
+              <span>Mi Historial de Permisos</span>
             </CardTitle>
             <CardDescription className="text-gray-800 font-medium">
-              All your leave requests and their current status
+              Todas tus solicitudes de permisos y su estado actual
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -311,36 +312,39 @@ export default function EmployeeLeavesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-gray-900 font-semibold">Type</TableHead>
-                    <TableHead className="text-gray-900 font-semibold">Dates</TableHead>
-                    <TableHead className="text-gray-900 font-semibold">Days</TableHead>
-                    <TableHead className="text-gray-900 font-semibold">Status</TableHead>
-                    <TableHead className="text-gray-900 font-semibold">Approved By</TableHead>
-                    <TableHead className="text-gray-900 font-semibold">Submitted</TableHead>
+                    <TableHead className="text-gray-900 font-semibold">Tipo</TableHead>
+                    <TableHead className="text-gray-900 font-semibold">Fechas</TableHead>
+                    <TableHead className="text-gray-900 font-semibold">Días</TableHead>
+                    <TableHead className="text-gray-900 font-semibold">Estado</TableHead>
+                    <TableHead className="text-gray-900 font-semibold">Aprobado Por</TableHead>
+                    <TableHead className="text-gray-900 font-semibold">Enviado</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {leaveRequests.map((request) => (
                     <TableRow key={request.id}>
                       <TableCell className="font-medium text-gray-900 capitalize">
-                        {request.type}
+                        {request.type === 'vacation' ? 'Vacaciones' :
+                         request.type === 'sick' ? 'Enfermedad' :
+                         request.type === 'personal' ? 'Personal' :
+                         request.type === 'emergency' ? 'Emergencia' :
+                         request.type === 'maternity' ? 'Maternidad' :
+                         request.type === 'paternity' ? 'Paternidad' : request.type}
                       </TableCell>
                       <TableCell className="text-gray-800 font-medium">
-                        {format(new Date(request.start_date), 'MMM dd')} - {format(new Date(request.end_date), 'MMM dd, yyyy')}
+                        {format(new Date(request.start_date), 'dd MMM')} - {format(new Date(request.end_date), 'dd MMM, yyyy')}
                       </TableCell>
                       <TableCell className="text-gray-800 font-medium">{request.days}</TableCell>
                       <TableCell>
                         <Badge 
-                          variant={
-                            request.status === 'approved' ? 'default' :
-                            request.status === 'rejected' ? 'destructive' : 'secondary'
-                          }
                           className={
-                            request.status === 'approved' ? 'bg-emerald-600 text-white' :
-                            request.status === 'rejected' ? 'bg-red-600 text-white' : 'bg-amber-100 text-amber-800'
+                            request.status === 'approved' ? 'badge-approved' :
+                            request.status === 'rejected' ? 'badge-rejected' : 'badge-pending'
                           }
                         >
-                          {request.status}
+                          {request.status === 'pending' ? 'Pendiente' :
+                           request.status === 'approved' ? 'Aprobado' :
+                           request.status === 'rejected' ? 'Rechazado' : request.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-gray-800 font-medium">
@@ -350,7 +354,7 @@ export default function EmployeeLeavesPage() {
                         }
                       </TableCell>
                       <TableCell className="text-gray-800 font-medium">
-                        {format(new Date(request.created_at), 'MMM dd, yyyy')}
+                        {format(new Date(request.created_at), 'dd MMM, yyyy')}
                       </TableCell>
                     </TableRow>
                   ))}

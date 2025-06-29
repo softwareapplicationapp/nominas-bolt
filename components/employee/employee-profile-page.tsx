@@ -20,7 +20,9 @@ import {
   Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/language-context';
 
 interface EmployeeProfile {
   id: number;
@@ -43,6 +45,7 @@ export default function EmployeeProfilePage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { t, language } = useLanguage();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -63,7 +66,7 @@ export default function EmployeeProfilePage() {
         }
       });
       
-      if (!response.ok) throw new Error('Failed to fetch profile');
+      if (!response.ok) throw new Error('Error al cargar perfil');
       
       const data = await response.json();
       setProfile(data);
@@ -74,7 +77,7 @@ export default function EmployeeProfilePage() {
         location: data.location || ''
       });
     } catch (error: any) {
-      toast.error('Failed to load profile: ' + error.message);
+      toast.error('Error al cargar perfil: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -94,13 +97,13 @@ export default function EmployeeProfilePage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to update profile');
+        throw new Error(error.error || 'Error al actualizar perfil');
       }
 
       const updatedProfile = await response.json();
       setProfile(updatedProfile);
       setEditing(false);
-      toast.success('Profile updated successfully!');
+      toast.success('¡Perfil actualizado con éxito!');
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -122,9 +125,9 @@ export default function EmployeeProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       </div>
     );
@@ -132,41 +135,41 @@ export default function EmployeeProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">Profile not found</p>
+          <p className="text-gray-700 font-semibold">Perfil no encontrado</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       <div className="space-y-8 p-6">
         {/* Header */}
         <div className="flex justify-between items-center animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 text-gradient">My Profile</h1>
-            <p className="text-gray-600 mt-2">View and update your personal information</p>
+            <h1 className="text-3xl font-bold text-gray-900 text-gradient">Mi Perfil</h1>
+            <p className="text-gray-800 mt-2 font-semibold">Ver y actualizar tu información personal</p>
           </div>
           
           <div className="flex space-x-2">
             {editing ? (
               <>
-                <Button variant="outline" onClick={handleCancel}>
+                <Button variant="outline" onClick={handleCancel} className="border-gray-300 text-gray-800 hover:text-gray-900 font-semibold">
                   <X className="h-4 w-4 mr-2" />
-                  Cancel
+                  Cancelar
                 </Button>
                 <Button onClick={handleSave} disabled={saving} className="btn-success">
                   {saving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
+                      Guardando...
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
-                      Save Changes
+                      Guardar Cambios
                     </>
                   )}
                 </Button>
@@ -174,7 +177,7 @@ export default function EmployeeProfilePage() {
             ) : (
               <Button onClick={() => setEditing(true)} className="btn-primary">
                 <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
+                Editar Perfil
               </Button>
             )}
           </div>
@@ -182,44 +185,44 @@ export default function EmployeeProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Overview */}
-          <Card className="lg:col-span-1 animate-scale-in card-glow">
+          <Card className="lg:col-span-1 animate-scale-in card-glow border-gray-200">
             <CardHeader className="text-center">
-              <div className="mx-auto w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center text-white text-3xl font-bold animate-pulse-glow mb-4">
+              <div className="mx-auto w-24 h-24 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg mb-4">
                 {profile.first_name[0]}{profile.last_name[0]}
               </div>
-              <CardTitle className="text-xl">
+              <CardTitle className="text-xl text-gray-900">
                 {profile.first_name} {profile.last_name}
               </CardTitle>
-              <CardDescription className="text-lg">
+              <CardDescription className="text-lg text-gray-800 font-medium">
                 {profile.position}
               </CardDescription>
-              <Badge variant="default" className="w-fit mx-auto">
+              <Badge variant="default" className="w-fit mx-auto bg-blue-600 text-white font-semibold">
                 {profile.employee_id}
               </Badge>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover-scale">
-                <Building className="h-5 w-5 text-gray-600" />
+              <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg hover-scale border border-blue-200">
+                <Building className="h-5 w-5 text-blue-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Department</p>
-                  <p className="font-medium">{profile.department}</p>
+                  <p className="text-sm text-gray-700 font-semibold">Departamento</p>
+                  <p className="font-bold text-gray-900">{profile.department}</p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover-scale">
-                <Calendar className="h-5 w-5 text-gray-600" />
+              <div className="flex items-center space-x-3 p-3 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
+                <Calendar className="h-5 w-5 text-emerald-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Start Date</p>
-                  <p className="font-medium">{format(new Date(profile.start_date), 'MMM dd, yyyy')}</p>
+                  <p className="text-sm text-gray-700 font-semibold">Fecha de Inicio</p>
+                  <p className="font-bold text-gray-900">{format(new Date(profile.start_date), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined })}</p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover-scale">
-                <User className="h-5 w-5 text-gray-600" />
+              <div className="flex items-center space-x-3 p-3 bg-amber-50 rounded-lg hover-scale border border-amber-200">
+                <User className="h-5 w-5 text-amber-600" />
                 <div>
-                  <p className="text-sm text-gray-500">Status</p>
-                  <Badge variant={profile.status === 'active' ? 'default' : 'secondary'}>
-                    {profile.status}
+                  <p className="text-sm text-gray-700 font-semibold">Estado</p>
+                  <Badge variant={profile.status === 'active' ? 'default' : 'secondary'} className={profile.status === 'active' ? 'badge-active' : 'badge-inactive'}>
+                    {profile.status === 'active' ? 'Activo' : 'Inactivo'}
                   </Badge>
                 </div>
               </div>
@@ -227,102 +230,102 @@ export default function EmployeeProfilePage() {
           </Card>
 
           {/* Personal Information */}
-          <Card className="lg:col-span-2 animate-slide-in-right card-glow">
+          <Card className="lg:col-span-2 animate-slide-in-right card-glow border-gray-200">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <User className="h-5 w-5 text-blue-600" />
-                <span>Personal Information</span>
+                <span>Información Personal</span>
               </CardTitle>
-              <CardDescription>
-                {editing ? 'Update your personal details' : 'Your current personal information'}
+              <CardDescription className="text-gray-800 font-medium">
+                {editing ? 'Actualiza tus datos personales' : 'Tu información personal actual'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName" className="text-gray-900 font-semibold">Nombre</Label>
                   {editing ? (
                     <Input
                       id="firstName"
                       value={formData.firstName}
                       onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                      className="hover-glow"
+                      className="border-gray-300 text-gray-900"
                     />
                   ) : (
-                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                       <User className="h-4 w-4 text-gray-600" />
-                      <span>{profile.first_name}</span>
+                      <span className="text-gray-900 font-medium">{profile.first_name}</span>
                     </div>
                   )}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName" className="text-gray-900 font-semibold">Apellido</Label>
                   {editing ? (
                     <Input
                       id="lastName"
                       value={formData.lastName}
                       onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                      className="hover-glow"
+                      className="border-gray-300 text-gray-900"
                     />
                   ) : (
-                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                       <User className="h-4 w-4 text-gray-600" />
-                      <span>{profile.last_name}</span>
+                      <span className="text-gray-900 font-medium">{profile.last_name}</span>
                     </div>
                   )}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                  <Label htmlFor="email" className="text-gray-900 font-semibold">Correo</Label>
+                  <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg border border-gray-200">
                     <Mail className="h-4 w-4 text-gray-600" />
-                    <span className="text-gray-600">{profile.email}</span>
-                    <Badge variant="outline" className="ml-auto">Read Only</Badge>
+                    <span className="text-gray-800 font-medium">{profile.email}</span>
+                    <Badge variant="outline" className="ml-auto border-gray-300 text-gray-700">Solo Lectura</Badge>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone" className="text-gray-900 font-semibold">Teléfono</Label>
                   {editing ? (
                     <Input
                       id="phone"
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      placeholder="Enter phone number"
-                      className="hover-glow"
+                      placeholder="Ingresa número de teléfono"
+                      className="border-gray-300 text-gray-900"
                     />
                   ) : (
-                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                       <Phone className="h-4 w-4 text-gray-600" />
-                      <span>{profile.phone || 'Not provided'}</span>
+                      <span className="text-gray-900 font-medium">{profile.phone || 'No proporcionado'}</span>
                     </div>
                   )}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="position">Position</Label>
-                  <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                  <Label htmlFor="position" className="text-gray-900 font-semibold">Cargo</Label>
+                  <div className="flex items-center space-x-3 p-3 bg-gray-100 rounded-lg border border-gray-200">
                     <Briefcase className="h-4 w-4 text-gray-600" />
-                    <span className="text-gray-600">{profile.position}</span>
-                    <Badge variant="outline" className="ml-auto">Read Only</Badge>
+                    <span className="text-gray-800 font-medium">{profile.position}</span>
+                    <Badge variant="outline" className="ml-auto border-gray-300 text-gray-700">Solo Lectura</Badge>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="location" className="text-gray-900 font-semibold">Ubicación</Label>
                   {editing ? (
                     <Input
                       id="location"
                       value={formData.location}
                       onChange={(e) => setFormData({...formData, location: e.target.value})}
-                      placeholder="Enter location"
-                      className="hover-glow"
+                      placeholder="Ingresa ubicación"
+                      className="border-gray-300 text-gray-900"
                     />
                   ) : (
-                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                       <MapPin className="h-4 w-4 text-gray-600" />
-                      <span>{profile.location || 'Not provided'}</span>
+                      <span className="text-gray-900 font-medium">{profile.location || 'No proporcionada'}</span>
                     </div>
                   )}
                 </div>
@@ -332,37 +335,37 @@ export default function EmployeeProfilePage() {
         </div>
 
         {/* Additional Information */}
-        <Card className="animate-slide-in-up card-glow">
+        <Card className="animate-slide-in-up card-glow border-gray-200">
           <CardHeader>
-            <CardTitle>Employment Details</CardTitle>
-            <CardDescription>
-              Your employment information and company details
+            <CardTitle className="text-gray-900">Detalles de Empleo</CardTitle>
+            <CardDescription className="text-gray-800 font-medium">
+              Tu información laboral y detalles de la empresa
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg hover-scale">
+              <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg hover-scale border border-blue-200">
                 <User className="h-6 w-6 text-blue-600" />
                 <div>
-                  <p className="text-sm text-blue-600">Employee ID</p>
-                  <p className="font-bold text-blue-800">{profile.employee_id}</p>
+                  <p className="text-sm text-blue-700 font-semibold">ID de Empleado</p>
+                  <p className="font-bold text-blue-900">{profile.employee_id}</p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover-scale">
-                <Building className="h-6 w-6 text-green-600" />
+              <div className="flex items-center space-x-3 p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
+                <Building className="h-6 w-6 text-emerald-600" />
                 <div>
-                  <p className="text-sm text-green-600">Department</p>
-                  <p className="font-bold text-green-800">{profile.department}</p>
+                  <p className="text-sm text-emerald-700 font-semibold">Departamento</p>
+                  <p className="font-bold text-emerald-900">{profile.department}</p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover-scale">
+              <div className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover-scale border border-purple-200">
                 <Calendar className="h-6 w-6 text-purple-600" />
                 <div>
-                  <p className="text-sm text-purple-600">Years of Service</p>
-                  <p className="font-bold text-purple-800">
-                    {Math.floor((new Date().getTime() - new Date(profile.start_date).getTime()) / (1000 * 60 * 60 * 24 * 365))} years
+                  <p className="text-sm text-purple-700 font-semibold">Años de Servicio</p>
+                  <p className="font-bold text-purple-900">
+                    {Math.floor((new Date().getTime() - new Date(profile.start_date).getTime()) / (1000 * 60 * 60 * 24 * 365))} años
                   </p>
                 </div>
               </div>
