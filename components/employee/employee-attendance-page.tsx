@@ -209,7 +209,7 @@ export default function EmployeeAttendancePage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="stat-card">
+          <Card className="card-interactive animate-scale-in stagger-1 hover-glow border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -218,14 +218,14 @@ export default function EmployeeAttendancePage() {
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Horas Totales</p>
                 </div>
-                <div className="employee-stat-icon-blue">
-                  <Clock className="h-6 w-6" />
+                <div className="p-3 bg-blue-100 rounded-full animate-float">
+                  <Clock className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="stat-card">
+          <Card className="card-interactive animate-scale-in stagger-2 hover-glow border-emerald-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -234,14 +234,14 @@ export default function EmployeeAttendancePage() {
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Promedio Diario</p>
                 </div>
-                <div className="employee-stat-icon-emerald">
-                  <TrendingUp className="h-6 w-6" />
+                <div className="p-3 bg-emerald-100 rounded-full animate-float">
+                  <TrendingUp className="h-6 w-6 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="stat-card">
+          <Card className="card-interactive animate-scale-in stagger-3 hover-glow border-purple-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -250,8 +250,8 @@ export default function EmployeeAttendancePage() {
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Días Presentes</p>
                 </div>
-                <div className="employee-stat-icon-purple">
-                  <Award className="h-6 w-6" />
+                <div className="p-3 bg-purple-100 rounded-full animate-float">
+                  <Award className="h-6 w-6 text-purple-600" />
                 </div>
               </div>
             </CardContent>
@@ -259,9 +259,9 @@ export default function EmployeeAttendancePage() {
         </div>
 
         <Tabs defaultValue="records" className="space-y-6">
-          <TabsList className="tabs-improved">
-            <TabsTrigger value="records" className="tab-trigger-improved">Registros de Asistencia</TabsTrigger>
-            <TabsTrigger value="calendar" className="tab-trigger-improved">Vista de Calendario</TabsTrigger>
+          <TabsList className="bg-gray-100">
+            <TabsTrigger value="records" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Registros de Asistencia</TabsTrigger>
+            <TabsTrigger value="calendar" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Vista de Calendario</TabsTrigger>
           </TabsList>
 
           <TabsContent value="records" className="space-y-6">
@@ -352,21 +352,21 @@ export default function EmployeeAttendancePage() {
                         if (dayRecord) {
                           return (
                             <div className="space-y-3">
-                              <div className="activity-card activity-card-emerald">
+                              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
                                 <span className="font-semibold text-emerald-800">Entrada</span>
                                 <Badge variant="outline" className="border-emerald-300 text-emerald-800 font-semibold">{dayRecord.check_in || 'No registrada'}</Badge>
                               </div>
-                              <div className="activity-card activity-card-red">
+                              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
                                 <span className="font-semibold text-red-800">Salida</span>
                                 <Badge variant="outline" className="border-red-300 text-red-800 font-semibold">{dayRecord.check_out || 'No registrada'}</Badge>
                               </div>
-                              <div className="activity-card activity-card-blue">
+                              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
                                 <span className="font-semibold text-blue-800">Horas Totales</span>
                                 <Badge variant="default" className="bg-blue-600 text-white font-semibold">
                                   {dayRecord.total_hours ? `${dayRecord.total_hours.toFixed(1)}h` : '0h'}
                                 </Badge>
                               </div>
-                              <div className="activity-card activity-card-purple">
+                              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
                                 <span className="font-semibold text-purple-800">Estado</span>
                                 <Badge 
                                   className={

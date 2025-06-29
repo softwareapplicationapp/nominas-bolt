@@ -34,7 +34,6 @@ import {
   Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/language-context';
 
@@ -56,7 +55,7 @@ export default function EmployeeLeavesPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -240,57 +239,57 @@ export default function EmployeeLeavesPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="stat-card">
+          <Card className="card-interactive animate-scale-in stagger-1 hover-glow border-amber-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{pendingRequests}</div>
                   <p className="text-sm text-gray-800 font-semibold">Pendientes</p>
                 </div>
-                <div className="employee-stat-icon-amber">
-                  <Clock className="h-6 w-6" />
+                <div className="p-3 bg-amber-100 rounded-full animate-float">
+                  <Clock className="h-6 w-6 text-amber-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="stat-card">
+          <Card className="card-interactive animate-scale-in stagger-2 hover-glow border-emerald-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{approvedRequests}</div>
                   <p className="text-sm text-gray-800 font-semibold">Aprobados</p>
                 </div>
-                <div className="employee-stat-icon-emerald">
-                  <CheckCircle className="h-6 w-6" />
+                <div className="p-3 bg-emerald-100 rounded-full animate-float">
+                  <CheckCircle className="h-6 w-6 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="stat-card">
+          <Card className="card-interactive animate-scale-in stagger-3 hover-glow border-red-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{rejectedRequests}</div>
                   <p className="text-sm text-gray-800 font-semibold">Rechazados</p>
                 </div>
-                <div className="p-3 bg-red-100 rounded-full">
+                <div className="p-3 bg-red-100 rounded-full animate-float">
                   <XCircle className="h-6 w-6 text-red-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="stat-card">
+          <Card className="card-interactive animate-scale-in stagger-4 hover-glow border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{totalDaysRequested}</div>
                   <p className="text-sm text-gray-800 font-semibold">Días Totales</p>
                 </div>
-                <div className="employee-stat-icon-blue">
-                  <CalendarIcon className="h-6 w-6" />
+                <div className="p-3 bg-blue-100 rounded-full animate-float">
+                  <CalendarIcon className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
