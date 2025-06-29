@@ -322,9 +322,10 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
-    // Handle the specific query for employee profile with role - FIXED
+    // FIXED: Handle the specific query for employee profile with role
     if (q.includes('select e.*, u.role from employees e join users u on e.user_id = u.id where e.user_id = ?')) {
-      console.log('Executing employee profile query for user_id:', params[0]);
+      console.log('=== Employee profile query ===');
+      console.log('Looking for user_id:', params[0]);
       console.log('User ID type:', typeof params[0]);
       
       // First, get the employee data

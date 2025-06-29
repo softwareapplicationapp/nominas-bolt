@@ -22,8 +22,9 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('Fetching employee data for user ID:', user.id);
+    console.log('User ID type:', typeof user.id);
     
-    // Get employee data for the current user
+    // Get employee data for the current user - SIMPLIFIED APPROACH
     const employee = await dbGet(`
       SELECT e.*, u.role
       FROM employees e
