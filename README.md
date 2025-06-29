@@ -62,7 +62,12 @@ The application uses JWT secrets for authentication. In production, set these en
 
 ### Database
 
-The application uses a pure JavaScript in-memory database, making it perfect for serverless deployments. Demo data is automatically seeded on startup.
+This version uses **Supabase** as the persistent database. Set the following environment variables in your deployment:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+The previous in-memory store has been removed.
 
 ## Default Login Credentials
 
