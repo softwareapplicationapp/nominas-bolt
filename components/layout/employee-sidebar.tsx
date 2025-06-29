@@ -15,8 +15,7 @@ import {
   ChevronRight,
   LogOut,
   Coffee,
-  Target,
-  Award
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
@@ -40,7 +39,6 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
     { name: t('myLeaves'), href: '/employee/leaves', icon: Calendar },
     { name: t('myProfile'), href: '/employee/profile', icon: User },
     { name: t('myPayslips'), href: '/employee/payslips', icon: FileText },
-    { name: 'Performance', href: '/employee/performance', icon: Award },
     { name: t('settings'), href: '/employee/settings', icon: Settings },
   ];
 
@@ -62,19 +60,19 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex flex-col bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0 shadow-2xl',
+          'fixed inset-y-0 left-0 z-30 flex flex-col bg-gradient-to-b from-slate-800 via-slate-700 to-slate-800 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0 shadow-2xl',
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           collapsed ? 'w-16' : 'w-64'
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+        <div className="flex items-center justify-between p-4 border-b border-slate-600/50">
           <div className={cn('flex items-center', collapsed && 'justify-center')}>
-            <div className="bg-gradient-primary p-2 rounded-lg animate-pulse-glow">
+            <div className="bg-gradient-to-r from-slate-600 to-slate-700 p-2 rounded-lg shadow-lg">
               <Target className="h-6 w-6" />
             </div>
             {!collapsed && (
-              <span className="ml-3 text-xl font-semibold text-gradient">
+              <span className="ml-3 text-xl font-semibold">
                 {t('employeePortal')}
               </span>
             )}
@@ -82,7 +80,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
           <Button
             variant="ghost"
             size="sm"
-            className="hidden lg:flex text-slate-400 hover:text-white hover:bg-slate-700/50 hover-scale"
+            className="hidden lg:flex text-slate-400 hover:text-white hover:bg-slate-600/50"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
@@ -102,12 +100,11 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover-lift',
+                  'group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200',
                   isActive
-                    ? 'bg-gradient-primary text-white shadow-lg animate-pulse-glow'
-                    : 'text-slate-300 hover:bg-slate-700/50 hover:text-white hover-scale',
-                  collapsed && 'justify-center px-2',
-                  `animate-slide-in-left stagger-${index + 1}`
+                    ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg'
+                    : 'text-slate-300 hover:bg-slate-600/50 hover:text-white',
+                  collapsed && 'justify-center px-2'
                 )}
                 onClick={() => setOpen(false)}
               >
@@ -122,7 +119,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
                   <span className="transition-all duration-200">{item.name}</span>
                 )}
                 {!collapsed && isActive && (
-                  <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
                 )}
               </Link>
             );
@@ -131,13 +128,13 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
 
         {/* Quick Actions */}
         {!collapsed && (
-          <div className="px-4 py-4 border-t border-slate-700/50 animate-slide-in-up">
+          <div className="px-4 py-4 border-t border-slate-600/50">
             <p className="text-xs text-slate-400 mb-3 font-medium">{t('quickActions')}</p>
             <div className="space-y-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-slate-300 hover:bg-slate-700/50 hover:text-white hover-scale"
+                className="w-full justify-start text-slate-300 hover:bg-slate-600/50 hover:text-white"
               >
                 <Coffee className="h-4 w-4 mr-2" />
                 Take Break
@@ -145,7 +142,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-slate-300 hover:bg-slate-700/50 hover:text-white hover-scale"
+                className="w-full justify-start text-slate-300 hover:bg-slate-600/50 hover:text-white"
               >
                 <Clock className="h-4 w-4 mr-2" />
                 Check Status
@@ -155,9 +152,9 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
         )}
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-700/50">
+        <div className="p-4 border-t border-slate-600/50">
           {!collapsed && (
-            <div className="mb-4 animate-fade-in">
+            <div className="mb-4">
               <p className="text-xs text-slate-400 mb-1">{t('signIn')}</p>
               <p className="text-sm font-medium">{t('employees')}</p>
               <p className="text-xs text-slate-400">{user?.email || 'employee@company.com'}</p>
@@ -167,7 +164,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              'w-full text-slate-300 hover:bg-red-600/20 hover:text-red-400 transition-all duration-200 hover-scale',
+              'w-full text-slate-300 hover:bg-red-600/20 hover:text-red-400 transition-all duration-200',
               collapsed ? 'px-2' : 'justify-start'
             )}
           >

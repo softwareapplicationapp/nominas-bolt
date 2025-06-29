@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { apiClient } from '@/lib/api-client';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/language-context';
 
 interface DashboardStats {
   totalEmployees: number;
@@ -36,11 +37,12 @@ interface DashboardStats {
   }>;
 }
 
-const departmentColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const departmentColors = ['#475569', '#22c55e', '#f59e0b', '#dc2626', '#8b5cf6'];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     loadDashboardStats();
@@ -70,7 +72,7 @@ export default function DashboardPage() {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">Failed to load dashboard data</p>
-        <button onClick={loadDashboardStats} className="mt-2 text-blue-600 hover:underline">
+        <button onClick={loadDashboardStats} className="mt-2 text-slate-600 hover:underline">
           Try again
         </button>
       </div>
@@ -84,7 +86,7 @@ export default function DashboardPage() {
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, Admin!
+          {t('welcomeBack')}, Admin!
         </h1>
         <p className="text-gray-600">
           Here's what's happening at your company today.
@@ -95,7 +97,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalEmployees')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -103,7 +105,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">
               <span className="text-green-600 flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                Active workforce
+                {t('active')} workforce
               </span>
             </p>
           </CardContent>
@@ -111,20 +113,20 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Present Today</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('presentToday')}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.presentToday}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">{attendanceRate}%</span> attendance rate
+              <span className="text-green-600">{attendanceRate}%</span> {t('attendanceRate')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Leaves</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('pendingLeaves')}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -141,13 +143,13 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Payroll</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('monthlyPayroll')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${stats.monthlyPayroll.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-blue-600">Current month</span>
+              <span className="text-slate-600">Current month</span>
             </p>
           </CardContent>
         </Card>
@@ -157,7 +159,7 @@ export default function DashboardPage() {
         {/* Attendance Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Weekly Attendance</CardTitle>
+            <CardTitle>Weekly {t('attendance')}</CardTitle>
             <CardDescription>
               Employee attendance overview for this week
             </CardDescription>
@@ -170,9 +172,9 @@ export default function DashboardPage() {
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="present" fill="#3b82f6" name="Present" />
-                  <Bar dataKey="absent" fill="#ef4444" name="Absent" />
-                  <Bar dataKey="late" fill="#f59e0b" name="Late" />
+                  <Bar dataKey="present" fill="#475569" name={t('present')} />
+                  <Bar dataKey="absent" fill="#dc2626" name={t('absent')} />
+                  <Bar dataKey="late" fill="#f59e0b" name={t('late')} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -186,7 +188,7 @@ export default function DashboardPage() {
         {/* Department Distribution */}
         <Card>
           <CardHeader>
-            <CardTitle>Department Distribution</CardTitle>
+            <CardTitle>{t('department')} Distribution</CardTitle>
             <CardDescription>
               Employee distribution across departments
             </CardDescription>
@@ -238,7 +240,7 @@ export default function DashboardPage() {
         {/* Recent Activities */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Recent Activities</CardTitle>
+            <CardTitle>{t('recentActivities')}</CardTitle>
             <CardDescription>
               Latest updates and activities in your company
             </CardDescription>
@@ -257,13 +259,13 @@ export default function DashboardPage() {
               </div>
               
               <div className="flex items-start space-x-3">
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Activity className="h-4 w-4 text-blue-600" />
+                <div className="bg-slate-100 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-slate-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Attendance tracked</p>
+                  <p className="text-sm font-medium">{t('attendance')} tracked</p>
                   <p className="text-sm text-gray-500">{stats.presentToday} employees checked in today</p>
-                  <p className="text-xs text-gray-400">Today</p>
+                  <p className="text-xs text-gray-400">{t('today')}</p>
                 </div>
               </div>
               
@@ -272,7 +274,7 @@ export default function DashboardPage() {
                   <Clock className="h-4 w-4 text-orange-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Leave requests pending</p>
+                  <p className="text-sm font-medium">Leave requests {t('pending')}</p>
                   <p className="text-sm text-gray-500">{stats.pendingLeaves} requests awaiting approval</p>
                   <p className="text-xs text-gray-400">Ongoing</p>
                 </div>
@@ -284,7 +286,7 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle>{t('quickActions')}</CardTitle>
             <CardDescription>
               Common tasks and shortcuts
             </CardDescription>
@@ -297,23 +299,23 @@ export default function DashboardPage() {
               </div>
               
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium">Present Today</span>
+                <span className="text-sm font-medium">{t('presentToday')}</span>
                 <Badge variant="default">{stats.presentToday}</Badge>
               </div>
               
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium">Total Employees</span>
+                <span className="text-sm font-medium">{t('totalEmployees')}</span>
                 <Badge variant="outline">{stats.totalEmployees}</Badge>
               </div>
             </div>
             
             <div className="pt-4">
-              <h4 className="text-sm font-medium mb-2">System Health</h4>
+              <h4 className="text-sm font-medium mb-2">{t('systemHealth')}</h4>
               <div className="space-y-2">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Server Status</span>
-                    <span className="text-green-600">Online</span>
+                    <span>Server {t('status')}</span>
+                    <span className="text-green-600">{t('online')}</span>
                   </div>
                   <Progress value={95} className="h-2" />
                 </div>

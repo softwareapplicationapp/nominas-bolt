@@ -63,15 +63,15 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex flex-col bg-slate-900 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0',
+          'fixed inset-y-0 left-0 z-30 flex flex-col bg-slate-800 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0',
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           collapsed ? 'w-16' : 'w-64'
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+        <div className="flex items-center justify-between p-4 border-b border-slate-600">
           <div className={cn('flex items-center', collapsed && 'justify-center')}>
-            <div className="bg-blue-600 p-2 rounded-lg">
+            <div className="bg-slate-600 p-2 rounded-lg">
               <Building2 className="h-6 w-6" />
             </div>
             {!collapsed && (
@@ -81,7 +81,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="hidden lg:flex text-slate-400 hover:text-white hover:bg-slate-700"
+            className="hidden lg:flex text-slate-400 hover:text-white hover:bg-slate-600"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
@@ -103,8 +103,8 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 className={cn(
                   'group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
                   isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white',
+                    ? 'bg-slate-600 text-white'
+                    : 'text-slate-300 hover:bg-slate-600 hover:text-white',
                   collapsed && 'justify-center px-2'
                 )}
                 onClick={() => setOpen(false)}
@@ -123,7 +123,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-700">
+        <div className="p-4 border-t border-slate-600">
           {!collapsed && (
             <div className="mb-4">
               <p className="text-xs text-slate-400 mb-1">{t('signIn')}</p>
@@ -135,7 +135,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              'w-full text-slate-300 hover:bg-slate-700 hover:text-white',
+              'w-full text-slate-300 hover:bg-slate-600 hover:text-white',
               collapsed ? 'px-2' : 'justify-start'
             )}
           >

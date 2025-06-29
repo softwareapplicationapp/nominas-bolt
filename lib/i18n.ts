@@ -38,6 +38,13 @@ export const translations = {
     position: 'Position',
     location: 'Location',
     notes: 'Notes',
+    submit: 'Submit',
+    close: 'Close',
+    view: 'View',
+    download: 'Download',
+    export: 'Export',
+    import: 'Import',
+    refresh: 'Refresh',
     
     // Auth
     signIn: 'Sign In',
@@ -48,6 +55,10 @@ export const translations = {
     password: 'Password',
     confirmPassword: 'Confirm Password',
     forgotPassword: 'Forgot Password?',
+    createAccount: 'Create Account',
+    welcomeToArcusHR: 'Welcome to ArcusHR',
+    signInToAccount: 'Sign in to your account',
+    createCompany: 'Create Company',
     
     // Dashboard
     welcomeBack: 'Welcome back',
@@ -58,6 +69,10 @@ export const translations = {
     recentActivities: 'Recent Activities',
     quickActions: 'Quick Actions',
     systemHealth: 'System Health',
+    attendanceToday: 'Attendance Today',
+    weeklyHours: 'Weekly Hours',
+    monthlyAttendance: 'Monthly Attendance',
+    remainingLeaves: 'Remaining Leaves',
     
     // Employees
     employeeManagement: 'Employee Management',
@@ -71,6 +86,9 @@ export const translations = {
     employeeId: 'Employee ID',
     active: 'Active',
     inactive: 'Inactive',
+    newEmployee: 'New Employee',
+    employeeDirectory: 'Employee Directory',
+    browseEmployees: 'Browse and manage all employees in your organization',
     
     // Attendance
     attendanceTracking: 'Attendance Tracking',
@@ -82,6 +100,11 @@ export const translations = {
     late: 'Late',
     halfDay: 'Half Day',
     attendanceRate: 'Attendance Rate',
+    trackEmployeeAttendance: 'Track employee attendance and working hours',
+    attendanceRecords: 'Attendance Records',
+    calendarView: 'Calendar View',
+    selectDate: 'Select Date',
+    chooseDate: 'Choose a date to view attendance details',
     
     // Leaves
     leaveManagement: 'Leave Management',
@@ -99,6 +122,34 @@ export const translations = {
     emergency: 'Emergency',
     maternity: 'Maternity',
     paternity: 'Paternity',
+    manageLeaveRequests: 'Manage employee leave requests and approvals',
+    leaveRequests: 'Leave Requests',
+    reviewManageLeaveRequests: 'Review and manage employee leave requests',
+    
+    // Payroll
+    payrollManagement: 'Payroll Management',
+    managePayroll: 'Manage employee compensation and payroll processing',
+    generateReports: 'Generate Reports',
+    processPayroll: 'Process Payroll',
+    baseSalary: 'Base Salary',
+    bonus: 'Bonus',
+    deductions: 'Deductions',
+    netPay: 'Net Pay',
+    processed: 'Processed',
+    
+    // Projects
+    projectManagement: 'Project Management',
+    manageProjects: 'Manage projects and track team progress',
+    newProject: 'New Project',
+    activeProjects: 'Active Projects',
+    completedProjects: 'Completed',
+    totalBudget: 'Total Budget',
+    totalSpent: 'Total Spent',
+    
+    // Reports
+    reportsAnalytics: 'Reports & Analytics',
+    comprehensiveInsights: 'Comprehensive insights and data analysis',
+    exportAll: 'Export All',
     
     // Settings
     personalSettings: 'Personal Settings',
@@ -109,6 +160,9 @@ export const translations = {
     theme: 'Theme',
     timezone: 'Timezone',
     currency: 'Currency',
+    manageSystemSettings: 'Manage your system preferences and configurations',
+    resetToDefaults: 'Reset to Defaults',
+    saveChanges: 'Save Changes',
     
     // Messages
     saveSuccess: 'Settings saved successfully!',
@@ -116,6 +170,9 @@ export const translations = {
     deleteConfirm: 'Are you sure you want to delete this item?',
     loginSuccess: 'Welcome back to ArcusHR!',
     loginError: 'Login failed',
+    createSuccess: 'Created successfully!',
+    updateSuccess: 'Updated successfully!',
+    deleteSuccess: 'Deleted successfully!',
     
     // Employee Portal
     myProfile: 'My Profile',
@@ -123,6 +180,10 @@ export const translations = {
     myLeaves: 'My Leave Requests',
     myPayslips: 'My Payslips',
     employeePortal: 'Employee Portal',
+    viewUpdatePersonalInfo: 'View and update your personal information',
+    trackAttendanceRecords: 'Track your working hours and attendance records',
+    manageLeaveRequests: 'Manage your time off and leave requests',
+    viewDownloadPayslips: 'View and download your salary information and payslips',
     
     // Time
     hours: 'hours',
@@ -138,6 +199,54 @@ export const translations = {
     website: 'Website',
     workingHours: 'Working Hours',
     workingDays: 'Working Days',
+    companyInformation: 'Company Information',
+    basicCompanyDetails: 'Basic company details and contact information',
+    workingSchedule: 'Working Hours & Schedule',
+    configureWorkingHours: 'Configure working hours and business days',
+    
+    // Forms
+    required: 'Required',
+    optional: 'Optional',
+    pleaseSelect: 'Please select',
+    selectOption: 'Select an option',
+    enterValue: 'Enter value',
+    
+    // Notifications
+    emailNotifications: 'Email Notifications',
+    receiveNotificationsEmail: 'Receive notifications via email',
+    leaveUpdates: 'Leave Updates',
+    notifyLeaveRequestStatus: 'Notify about leave request status changes',
+    payrollNotifications: 'Payroll Notifications',
+    notifyPayslipsSalary: 'Notify about payslips and salary updates',
+    reminderAlerts: 'Reminder Alerts',
+    remindImportantDeadlines: 'Remind about important deadlines and tasks',
+    
+    // Security
+    passwordPolicy: 'Password Policy',
+    configurePasswordRequirements: 'Configure password requirements for all users',
+    minimumLength: 'Minimum Length',
+    requireUppercase: 'Require Uppercase Letters',
+    requireNumbers: 'Require Numbers',
+    requireSymbols: 'Require Symbols',
+    sessionTimeout: 'Session Timeout (hours)',
+    maxLoginAttempts: 'Max Login Attempts',
+    twoFactorAuth: 'Two-Factor Authentication',
+    require2FA: 'Require 2FA for all admin users',
+    
+    // System
+    systemInformation: 'System Information',
+    currentSystemStatus: 'Current system status and information',
+    systemStatus: 'System Status',
+    online: 'Online',
+    version: 'Version',
+    database: 'Database',
+    lastBackup: 'Last Backup',
+    maintenance: 'Maintenance',
+    systemMaintenance: 'System maintenance and backup options',
+    backupDatabase: 'Backup Database',
+    clearCache: 'Clear Cache',
+    testEmailConfig: 'Test Email Configuration',
+    resetAllData: 'Reset All Data',
   },
   es: {
     // Navigation
@@ -171,6 +280,13 @@ export const translations = {
     position: 'Cargo',
     location: 'Ubicación',
     notes: 'Notas',
+    submit: 'Enviar',
+    close: 'Cerrar',
+    view: 'Ver',
+    download: 'Descargar',
+    export: 'Exportar',
+    import: 'Importar',
+    refresh: 'Actualizar',
     
     // Auth
     signIn: 'Iniciar Sesión',
@@ -181,6 +297,10 @@ export const translations = {
     password: 'Contraseña',
     confirmPassword: 'Confirmar Contraseña',
     forgotPassword: '¿Olvidaste tu contraseña?',
+    createAccount: 'Crear Cuenta',
+    welcomeToArcusHR: 'Bienvenido a ArcusHR',
+    signInToAccount: 'Inicia sesión en tu cuenta',
+    createCompany: 'Crear Empresa',
     
     // Dashboard
     welcomeBack: 'Bienvenido de vuelta',
@@ -191,6 +311,10 @@ export const translations = {
     recentActivities: 'Actividades Recientes',
     quickActions: 'Acciones Rápidas',
     systemHealth: 'Estado del Sistema',
+    attendanceToday: 'Asistencia Hoy',
+    weeklyHours: 'Horas Semanales',
+    monthlyAttendance: 'Asistencia Mensual',
+    remainingLeaves: 'Permisos Restantes',
     
     // Employees
     employeeManagement: 'Gestión de Empleados',
@@ -204,6 +328,9 @@ export const translations = {
     employeeId: 'ID de Empleado',
     active: 'Activo',
     inactive: 'Inactivo',
+    newEmployee: 'Nuevo Empleado',
+    employeeDirectory: 'Directorio de Empleados',
+    browseEmployees: 'Navegar y gestionar todos los empleados de tu organización',
     
     // Attendance
     attendanceTracking: 'Control de Asistencia',
@@ -215,6 +342,11 @@ export const translations = {
     late: 'Tarde',
     halfDay: 'Medio Día',
     attendanceRate: 'Tasa de Asistencia',
+    trackEmployeeAttendance: 'Controlar la asistencia y horas de trabajo de los empleados',
+    attendanceRecords: 'Registros de Asistencia',
+    calendarView: 'Vista de Calendario',
+    selectDate: 'Seleccionar Fecha',
+    chooseDate: 'Elige una fecha para ver los detalles de asistencia',
     
     // Leaves
     leaveManagement: 'Gestión de Permisos',
@@ -232,6 +364,34 @@ export const translations = {
     emergency: 'Emergencia',
     maternity: 'Maternidad',
     paternity: 'Paternidad',
+    manageLeaveRequests: 'Gestionar solicitudes de permisos y aprobaciones de empleados',
+    leaveRequests: 'Solicitudes de Permiso',
+    reviewManageLeaveRequests: 'Revisar y gestionar solicitudes de permisos de empleados',
+    
+    // Payroll
+    payrollManagement: 'Gestión de Nómina',
+    managePayroll: 'Gestionar compensación de empleados y procesamiento de nómina',
+    generateReports: 'Generar Reportes',
+    processPayroll: 'Procesar Nómina',
+    baseSalary: 'Salario Base',
+    bonus: 'Bonificación',
+    deductions: 'Deducciones',
+    netPay: 'Pago Neto',
+    processed: 'Procesado',
+    
+    // Projects
+    projectManagement: 'Gestión de Proyectos',
+    manageProjects: 'Gestionar proyectos y seguir el progreso del equipo',
+    newProject: 'Nuevo Proyecto',
+    activeProjects: 'Proyectos Activos',
+    completedProjects: 'Completados',
+    totalBudget: 'Presupuesto Total',
+    totalSpent: 'Total Gastado',
+    
+    // Reports
+    reportsAnalytics: 'Reportes y Análisis',
+    comprehensiveInsights: 'Información completa y análisis de datos',
+    exportAll: 'Exportar Todo',
     
     // Settings
     personalSettings: 'Configuración Personal',
@@ -242,6 +402,9 @@ export const translations = {
     theme: 'Tema',
     timezone: 'Zona Horaria',
     currency: 'Moneda',
+    manageSystemSettings: 'Gestionar las preferencias y configuraciones del sistema',
+    resetToDefaults: 'Restablecer Valores Predeterminados',
+    saveChanges: 'Guardar Cambios',
     
     // Messages
     saveSuccess: '¡Configuración guardada exitosamente!',
@@ -249,6 +412,9 @@ export const translations = {
     deleteConfirm: '¿Estás seguro de que quieres eliminar este elemento?',
     loginSuccess: '¡Bienvenido de vuelta a ArcusHR!',
     loginError: 'Error al iniciar sesión',
+    createSuccess: '¡Creado exitosamente!',
+    updateSuccess: '¡Actualizado exitosamente!',
+    deleteSuccess: '¡Eliminado exitosamente!',
     
     // Employee Portal
     myProfile: 'Mi Perfil',
@@ -256,6 +422,10 @@ export const translations = {
     myLeaves: 'Mis Solicitudes de Permiso',
     myPayslips: 'Mis Recibos de Pago',
     employeePortal: 'Portal del Empleado',
+    viewUpdatePersonalInfo: 'Ver y actualizar tu información personal',
+    trackAttendanceRecords: 'Controlar tus horas de trabajo y registros de asistencia',
+    manageLeaveRequests: 'Gestionar tu tiempo libre y solicitudes de permisos',
+    viewDownloadPayslips: 'Ver y descargar tu información salarial y recibos de pago',
     
     // Time
     hours: 'horas',
@@ -271,6 +441,54 @@ export const translations = {
     website: 'Sitio Web',
     workingHours: 'Horario de Trabajo',
     workingDays: 'Días Laborales',
+    companyInformation: 'Información de la Empresa',
+    basicCompanyDetails: 'Detalles básicos de la empresa e información de contacto',
+    workingSchedule: 'Horario de Trabajo y Programación',
+    configureWorkingHours: 'Configurar horarios de trabajo y días laborales',
+    
+    // Forms
+    required: 'Requerido',
+    optional: 'Opcional',
+    pleaseSelect: 'Por favor selecciona',
+    selectOption: 'Selecciona una opción',
+    enterValue: 'Ingresa un valor',
+    
+    // Notifications
+    emailNotifications: 'Notificaciones por Correo',
+    receiveNotificationsEmail: 'Recibir notificaciones por correo electrónico',
+    leaveUpdates: 'Actualizaciones de Permisos',
+    notifyLeaveRequestStatus: 'Notificar sobre cambios en el estado de solicitudes de permisos',
+    payrollNotifications: 'Notificaciones de Nómina',
+    notifyPayslipsSalary: 'Notificar sobre recibos de pago y actualizaciones salariales',
+    reminderAlerts: 'Alertas de Recordatorio',
+    remindImportantDeadlines: 'Recordar fechas límite importantes y tareas',
+    
+    // Security
+    passwordPolicy: 'Política de Contraseñas',
+    configurePasswordRequirements: 'Configurar requisitos de contraseña para todos los usuarios',
+    minimumLength: 'Longitud Mínima',
+    requireUppercase: 'Requerir Letras Mayúsculas',
+    requireNumbers: 'Requerir Números',
+    requireSymbols: 'Requerir Símbolos',
+    sessionTimeout: 'Tiempo de Espera de Sesión (horas)',
+    maxLoginAttempts: 'Máximo de Intentos de Inicio de Sesión',
+    twoFactorAuth: 'Autenticación de Dos Factores',
+    require2FA: 'Requerir 2FA para todos los usuarios administradores',
+    
+    // System
+    systemInformation: 'Información del Sistema',
+    currentSystemStatus: 'Estado actual del sistema e información',
+    systemStatus: 'Estado del Sistema',
+    online: 'En Línea',
+    version: 'Versión',
+    database: 'Base de Datos',
+    lastBackup: 'Última Copia de Seguridad',
+    maintenance: 'Mantenimiento',
+    systemMaintenance: 'Mantenimiento del sistema y opciones de respaldo',
+    backupDatabase: 'Respaldar Base de Datos',
+    clearCache: 'Limpiar Caché',
+    testEmailConfig: 'Probar Configuración de Correo',
+    resetAllData: 'Restablecer Todos los Datos',
   }
 } as const;
 

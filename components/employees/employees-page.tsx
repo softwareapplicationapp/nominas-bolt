@@ -32,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Mail, Phone, MapPin, Edit, Trash2, Loader2, Key, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
+import { useLanguage } from '@/contexts/language-context';
 
 interface Employee {
   id: number;
@@ -59,6 +60,7 @@ export default function EmployeesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [newEmployeePassword, setNewEmployeePassword] = useState('');
+  const { t } = useLanguage();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -145,12 +147,12 @@ export default function EmployeesPage() {
       if (editingEmployee) {
         // Update existing employee
         await apiClient.updateEmployee(editingEmployee.id, employeeData);
-        toast.success('Employee updated successfully!');
+        toast.success(t('updateSuccess'));
       } else {
         // Create new employee
         const response = await apiClient.createEmployee(employeeData);
         setNewEmployeePassword(response.temporaryPassword);
-        toast.success('Employee created successfully!');
+        toast.success(t('createSuccess'));
       }
 
       setIsDialogOpen(false);
@@ -181,13 +183,13 @@ export default function EmployeesPage() {
   };
 
   const handleDeleteEmployee = async (employeeId: number) => {
-    if (!confirm('Are you sure you want to delete this employee?')) {
+    if (!confirm(t('deleteConfirm'))) {
       return;
     }
 
     try {
       await apiClient.deleteEmployee(employeeId);
-      toast.success('Employee deleted successfully!');
+      toast.success(t('deleteSuccess'));
       loadEmployees();
     } catch (error: any) {
       toast.error('Failed to delete employee: ' + error.message);
@@ -201,7 +203,7 @@ export default function EmployeesPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Loading employees...</span>
+        <span className="ml-2">{t('loading')} {t('employees')}...</span>
       </div>
     );
   }
@@ -212,7 +214,7 @@ export default function EmployeesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Employees</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('employees')}</h1>
           <p className="text-gray-600 mt-2">Manage your company's workforce</p>
         </div>
         
@@ -223,13 +225,13 @@ export default function EmployeesPage() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Add Employee
+              {t('addEmployee')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
-                {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
+                {editingEmployee ? t('editEmployee') : t('addEmployee')}
               </DialogTitle>
               <DialogDescription>
                 {editingEmployee ? 'Update employee information' : 'Create a new employee profile with login credentials.'}
@@ -249,7 +251,7 @@ export default function EmployeesPage() {
 
             <form onSubmit={handleAddEmployee} className="grid grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName">{t('firstName')}</Label>
                 <Input 
                   id="firstName" 
                   value={formData.firstName}
@@ -259,7 +261,7 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t('lastName')}</Label>
                 <Input 
                   id="lastName" 
                   value={formData.lastName}
@@ -269,7 +271,7 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('email')}</Label>
                 <Input 
                   id="email" 
                   type="email" 
@@ -280,7 +282,7 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t('phone')}</Label>
                 <Input 
                   id="phone" 
                   value={formData.phone}
@@ -289,10 +291,10 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
+                <Label htmlFor="department">{t('department')}</Label>
                 <Select value={formData.department} onValueChange={(value) => setFormData({...formData, department: value})}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t('selectOption')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Engineering">Engineering</SelectItem>
@@ -305,7 +307,7 @@ export default function EmployeesPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="position">Position</Label>
+                <Label htmlFor="position">{t('position')}</Label>
                 <Input 
                   id="position" 
                   value={formData.position}
@@ -315,7 +317,7 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date</Label>
+                <Label htmlFor="startDate">{t('startDate')}</Label>
                 <Input 
                   id="startDate" 
                   type="date" 
@@ -325,7 +327,7 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="salary">Salary</Label>
+                <Label htmlFor="salary">{t('salary')}</Label>
                 <Input 
                   id="salary" 
                   type="number" 
@@ -335,7 +337,7 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="col-span-2 space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">{t('location')}</Label>
                 <Input 
                   id="location" 
                   value={formData.location}
@@ -347,7 +349,7 @@ export default function EmployeesPage() {
                 <div className="col-span-2 space-y-2">
                   <Label htmlFor="password">
                     <Key className="h-4 w-4 inline mr-2" />
-                    Initial Password (Optional)
+                    Initial {t('password')} ({t('optional')})
                   </Label>
                   <Input 
                     id="password" 
@@ -360,7 +362,7 @@ export default function EmployeesPage() {
               )}
               <div className="col-span-2 flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? (
@@ -369,7 +371,7 @@ export default function EmployeesPage() {
                       {editingEmployee ? 'Updating...' : 'Creating...'}
                     </>
                   ) : (
-                    editingEmployee ? 'Update Employee' : 'Create Employee'
+                    editingEmployee ? t('update') + ' ' + t('employees') : t('create') + ' ' + t('employees')
                   )}
                 </Button>
               </div>
@@ -382,26 +384,12 @@ export default function EmployeesPage() {
       {newEmployeePassword && (
         <Alert className="border-green-200 bg-green-50">
           <Key className="h-4 w-4" />
-          <AlertTitle>Employee Created Successfully!</AlertTitle>
+          <AlertTitle>{t('createSuccess')}!</AlertTitle>
           <AlertDescription>
             <strong>Login credentials:</strong><br />
-            Email: {formData.email}<br />
-            Password: <code className="bg-green-100 px-2 py-1 rounded">{newEmployeePassword}</code><br />
+            {t('email')}: {formData.email}<br />
+            {t('password')}: <code className="bg-green-100 px-2 py-1 rounded">{newEmployeePassword}</code><br />
             <em>Please share these credentials with the employee securely.</em>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Debug Information */}
-      {process.env.NODE_ENV === 'development' && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertTitle>Debug Info</AlertTitle>
-          <AlertDescription>
-            Total employees loaded: {employees.length}<br />
-            Filtered employees: {filteredEmployees.length}<br />
-            Active employees: {activeEmployees}<br />
-            Departments: {departments.join(', ')}
           </AlertDescription>
         </Alert>
       )}
@@ -411,7 +399,7 @@ export default function EmployeesPage() {
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold">{employees.length}</div>
-            <p className="text-sm text-gray-600">Total Employees</p>
+            <p className="text-sm text-gray-600">{t('totalEmployees')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -428,7 +416,7 @@ export default function EmployeesPage() {
               return startDate.getMonth() === currentMonth.getMonth() && 
                      startDate.getFullYear() === currentMonth.getFullYear();
             }).length}</div>
-            <p className="text-sm text-gray-600">New This Month</p>
+            <p className="text-sm text-gray-600">New {t('thisMonth')}</p>
           </CardContent>
         </Card>
         <Card>
@@ -436,7 +424,7 @@ export default function EmployeesPage() {
             <div className="text-2xl font-bold">
               {employees.length > 0 ? Math.round((activeEmployees / employees.length) * 100) : 0}%
             </div>
-            <p className="text-sm text-gray-600">Active Rate</p>
+            <p className="text-sm text-gray-600">{t('active')} Rate</p>
           </CardContent>
         </Card>
       </div>
@@ -444,9 +432,9 @@ export default function EmployeesPage() {
       {/* Filters and Search */}
       <Card>
         <CardHeader>
-          <CardTitle>Employee Directory</CardTitle>
+          <CardTitle>{t('employeeDirectory')}</CardTitle>
           <CardDescription>
-            Browse and manage all employees in your organization
+            {t('browseEmployees')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -454,7 +442,7 @@ export default function EmployeesPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search employees..."
+                placeholder={t('search') + ' ' + t('employees') + '...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -462,7 +450,7 @@ export default function EmployeesPage() {
             </div>
             <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by department" />
+                <SelectValue placeholder={t('filter') + ' by ' + t('department')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
@@ -475,7 +463,7 @@ export default function EmployeesPage() {
 
           {employees.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 text-lg">No employees found</p>
+              <p className="text-gray-500 text-lg">No {t('employees')} found</p>
               <p className="text-gray-400 text-sm mt-2">Add your first employee to get started</p>
             </div>
           ) : (
@@ -484,12 +472,12 @@ export default function EmployeesPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Employee</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t('department')}</TableHead>
+                    <TableHead>{t('position')}</TableHead>
+                    <TableHead>{t('status')}</TableHead>
                     <TableHead>Login Access</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('startDate')}</TableHead>
+                    <TableHead>{t('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
