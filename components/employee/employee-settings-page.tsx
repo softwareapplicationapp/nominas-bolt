@@ -18,10 +18,13 @@ import {
   Save,
   Eye,
   EyeOff,
-  Loader2
+  Loader2,
+  Globe
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
+import { languages, Language } from '@/lib/i18n';
 
 interface PersonalSettings {
   theme: string;
@@ -48,6 +51,7 @@ interface PrivacySettings {
 
 export default function EmployeeSettingsPage() {
   const { user } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
@@ -56,7 +60,7 @@ export default function EmployeeSettingsPage() {
 
   const [personalSettings, setPersonalSettings] = useState<PersonalSettings>({
     theme: 'light',
-    language: 'en',
+    language: language,
     timezone: 'America/New_York',
     dateFormat: 'MM/DD/YYYY',
     timeFormat: '12h'
@@ -87,13 +91,17 @@ export default function EmployeeSettingsPage() {
     loadSettings();
   }, []);
 
+  useEffect(() => {
+    setPersonalSettings(prev => ({ ...prev, language }));
+  }, [language]);
+
   const loadSettings = async () => {
     try {
       setLoading(true);
       // In a real app, this would fetch from API
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
     } catch (error) {
-      toast.error('Failed to load settings');
+      toast.error(t('saveError'));
     } finally {
       setLoading(false);
     }
@@ -104,9 +112,9 @@ export default function EmployeeSettingsPage() {
     try {
       // In a real app, this would save to API
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      toast.success('Settings saved successfully!');
+      toast.success(t('saveSuccess'));
     } catch (error) {
-      toast.error('Failed to save settings');
+      toast.error(t('saveError'));
     } finally {
       setSaving(false);
     }
@@ -155,20 +163,20 @@ export default function EmployeeSettingsPage() {
       <div className="space-y-8 p-6">
         <div className="flex justify-between items-center animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 text-gradient">Settings</h1>
-            <p className="text-gray-600 mt-2">Manage your personal preferences and account settings</p>
+            <h1 className="text-3xl font-bold text-gray-900 text-gradient">{t('settings')}</h1>
+            <p className="text-gray-600 mt-2">{t('personalSettings')} and preferences</p>
           </div>
           
           <Button onClick={saveSettings} disabled={saving} className="btn-primary">
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                {t('loading')}...
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save Changes
+                {t('save')} {t('settings')}
               </>
             )}
           </Button>
@@ -176,27 +184,73 @@ export default function EmployeeSettingsPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="personal">Personal</TabsTrigger>
+            <TabsTrigger value="personal">{t('personalSettings')}</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
           </TabsList>
 
           <TabsContent value="personal" className="space-y-6">
-            <Card className="animate-scale-in card-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Palette className="h-5 w-5 text-purple-600" />
-                  <span>Appearance & Language</span>
-                </CardTitle>
-                <CardDescription>
-                  Customize how ArcusHR looks and feels for you
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="animate-scale-in card-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Globe className="h-5 w-5 text-blue-600" />
+                    <span>{t('language')} & Localization</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Choose your preferred language and regional settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="theme">Theme</Label>
+                    <Label htmlFor="language">{t('language')}</Label>
+                    <Select value={language} onValueChange={(value: Language) => setLanguage(value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(languages).map(([code, name]) => (
+                          <SelectItem key={code} value={code}>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-lg">
+                                {code === 'en' ? '🇺🇸' : '🇪🇸'}
+                              </span>
+                              <span>{name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">
+                      {t('language')} Preview
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <p><strong>{t('dashboard')}:</strong> {t('dashboard')}</p>
+                      <p><strong>{t('myAttendance')}:</strong> {t('myAttendance')}</p>
+                      <p><strong>{t('myProfile')}:</strong> {t('myProfile')}</p>
+                      <p><strong>{t('settings')}:</strong> {t('settings')}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="animate-scale-in card-glow">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Palette className="h-5 w-5 text-purple-600" />
+                    <span>Appearance & Format</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Customize how ArcusHR looks and feels for you
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="theme">{t('theme')}</Label>
                     <Select value={personalSettings.theme} onValueChange={(value) => setPersonalSettings({...personalSettings, theme: value})}>
                       <SelectTrigger>
                         <SelectValue />
@@ -210,22 +264,7 @@ export default function EmployeeSettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Select value={personalSettings.language} onValueChange={(value) => setPersonalSettings({...personalSettings, language: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Español</SelectItem>
-                        <SelectItem value="fr">Français</SelectItem>
-                        <SelectItem value="de">Deutsch</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="timezone">Timezone</Label>
+                    <Label htmlFor="timezone">{t('timezone')}</Label>
                     <Select value={personalSettings.timezone} onValueChange={(value) => setPersonalSettings({...personalSettings, timezone: value})}>
                       <SelectTrigger>
                         <SelectValue />
@@ -267,9 +306,9 @@ export default function EmployeeSettingsPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">
@@ -502,7 +541,7 @@ export default function EmployeeSettingsPage() {
                     <h4 className="font-medium">Account Information</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Email</p>
+                        <p className="text-sm text-gray-500">{t('email')}</p>
                         <p className="font-medium">{user?.email}</p>
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg">
@@ -511,11 +550,11 @@ export default function EmployeeSettingsPage() {
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg">
                         <p className="text-sm text-gray-500">Last Login</p>
-                        <p className="font-medium">Today, 9:30 AM</p>
+                        <p className="font-medium">{t('today')}, 9:30 AM</p>
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg">
                         <p className="text-sm text-gray-500">Account Status</p>
-                        <p className="font-medium text-green-600">Active</p>
+                        <p className="font-medium text-green-600">{t('active')}</p>
                       </div>
                     </div>
                   </div>

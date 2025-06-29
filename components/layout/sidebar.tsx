@@ -20,28 +20,30 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
 
 interface SidebarProps {
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Employees', href: '/dashboard/employees', icon: Users },
-  { name: 'Attendance', href: '/dashboard/attendance', icon: Clock },
-  { name: 'Leave Management', href: '/dashboard/leaves', icon: Calendar },
-  { name: 'Payroll', href: '/dashboard/payroll', icon: CreditCard },
-  { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
-  { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
-  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-];
-
 export default function Sidebar({ open, setOpen }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
+
+  const navigation = [
+    { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('employees'), href: '/dashboard/employees', icon: Users },
+    { name: t('attendance'), href: '/dashboard/attendance', icon: Clock },
+    { name: t('leaves'), href: '/dashboard/leaves', icon: Calendar },
+    { name: t('payroll'), href: '/dashboard/payroll', icon: CreditCard },
+    { name: t('projects'), href: '/dashboard/projects', icon: FolderKanban },
+    { name: t('reports'), href: '/dashboard/reports', icon: BarChart3 },
+    { name: t('settings'), href: '/dashboard/settings', icon: Settings },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -124,7 +126,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         <div className="p-4 border-t border-slate-700">
           {!collapsed && (
             <div className="mb-4">
-              <p className="text-xs text-slate-400 mb-1">Signed in as</p>
+              <p className="text-xs text-slate-400 mb-1">{t('signIn')}</p>
               <p className="text-sm font-medium">Admin User</p>
               <p className="text-xs text-slate-400">{user?.email || 'admin@company.com'}</p>
             </div>
@@ -138,7 +140,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
             )}
           >
             <LogOut className={cn('h-4 w-4', !collapsed && 'mr-2')} />
-            {!collapsed && 'Sign Out'}
+            {!collapsed && t('signOut')}
           </Button>
         </div>
       </div>

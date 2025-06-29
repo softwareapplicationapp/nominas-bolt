@@ -20,27 +20,29 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
 
 interface EmployeeSidebarProps {
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
-const navigation = [
-  { name: 'Dashboard', href: '/employee/dashboard', icon: LayoutDashboard },
-  { name: 'My Attendance', href: '/employee/attendance', icon: Clock },
-  { name: 'Leave Requests', href: '/employee/leaves', icon: Calendar },
-  { name: 'My Profile', href: '/employee/profile', icon: User },
-  { name: 'Payslips', href: '/employee/payslips', icon: FileText },
-  { name: 'Performance', href: '/employee/performance', icon: Award },
-  { name: 'Settings', href: '/employee/settings', icon: Settings },
-];
-
 export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
+
+  const navigation = [
+    { name: t('dashboard'), href: '/employee/dashboard', icon: LayoutDashboard },
+    { name: t('myAttendance'), href: '/employee/attendance', icon: Clock },
+    { name: t('myLeaves'), href: '/employee/leaves', icon: Calendar },
+    { name: t('myProfile'), href: '/employee/profile', icon: User },
+    { name: t('myPayslips'), href: '/employee/payslips', icon: FileText },
+    { name: 'Performance', href: '/employee/performance', icon: Award },
+    { name: t('settings'), href: '/employee/settings', icon: Settings },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -73,7 +75,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
             </div>
             {!collapsed && (
               <span className="ml-3 text-xl font-semibold text-gradient">
-                Employee Portal
+                {t('employeePortal')}
               </span>
             )}
           </div>
@@ -130,7 +132,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
         {/* Quick Actions */}
         {!collapsed && (
           <div className="px-4 py-4 border-t border-slate-700/50 animate-slide-in-up">
-            <p className="text-xs text-slate-400 mb-3 font-medium">Quick Actions</p>
+            <p className="text-xs text-slate-400 mb-3 font-medium">{t('quickActions')}</p>
             <div className="space-y-2">
               <Button
                 variant="ghost"
@@ -156,8 +158,8 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
         <div className="p-4 border-t border-slate-700/50">
           {!collapsed && (
             <div className="mb-4 animate-fade-in">
-              <p className="text-xs text-slate-400 mb-1">Signed in as</p>
-              <p className="text-sm font-medium">Employee</p>
+              <p className="text-xs text-slate-400 mb-1">{t('signIn')}</p>
+              <p className="text-sm font-medium">{t('employees')}</p>
               <p className="text-xs text-slate-400">{user?.email || 'employee@company.com'}</p>
             </div>
           )}
@@ -170,7 +172,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
             )}
           >
             <LogOut className={cn('h-4 w-4', !collapsed && 'mr-2')} />
-            {!collapsed && 'Sign Out'}
+            {!collapsed && t('signOut')}
           </Button>
         </div>
       </div>

@@ -25,10 +25,13 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle,
-  Loader2
+  Loader2,
+  Globe
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
+import { languages, Language } from '@/lib/i18n';
 
 interface CompanySettings {
   name: string;
@@ -68,6 +71,7 @@ interface SecuritySettings {
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('company');
@@ -119,7 +123,7 @@ export default function SettingsPage() {
       // For now, we'll use the default values
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
     } catch (error) {
-      toast.error('Failed to load settings');
+      toast.error(t('saveError'));
     } finally {
       setLoading(false);
     }
@@ -130,16 +134,16 @@ export default function SettingsPage() {
     try {
       // In a real app, this would save to API
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      toast.success('Settings saved successfully!');
+      toast.success(t('saveSuccess'));
     } catch (error) {
-      toast.error('Failed to save settings');
+      toast.error(t('saveError'));
     } finally {
       setSaving(false);
     }
   };
 
   const resetToDefaults = () => {
-    if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
+    if (confirm(t('deleteConfirm'))) {
       setCompanySettings({
         name: 'Acme Corporation',
         industry: 'Technology',
@@ -192,7 +196,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('settings')}</h1>
           <p className="text-gray-600 mt-2">Manage your system preferences and configurations</p>
         </div>
         
@@ -205,12 +209,12 @@ export default function SettingsPage() {
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                {t('loading')}...
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save Changes
+                {t('save')} {t('settings')}
               </>
             )}
           </Button>
@@ -218,8 +222,9 @@ export default function SettingsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="company">Company</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="company">{t('companySettings')}</TabsTrigger>
+          <TabsTrigger value="language">{t('language')}</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
@@ -231,7 +236,7 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Building2 className="h-5 w-5 text-blue-600" />
-                  <span>Company Information</span>
+                  <span>{t('companySettings')}</span>
                 </CardTitle>
                 <CardDescription>
                   Basic company details and contact information
@@ -239,7 +244,7 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
+                  <Label htmlFor="companyName">{t('companyName')}</Label>
                   <Input
                     id="companyName"
                     value={companySettings.name}
@@ -248,7 +253,7 @@ export default function SettingsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="industry">Industry</Label>
+                  <Label htmlFor="industry">{t('industry')}</Label>
                   <Select value={companySettings.industry} onValueChange={(value) => setCompanySettings({...companySettings, industry: value})}>
                     <SelectTrigger>
                       <SelectValue />
@@ -265,7 +270,7 @@ export default function SettingsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
+                  <Label htmlFor="address">{t('address')}</Label>
                   <Textarea
                     id="address"
                     value={companySettings.address}
@@ -276,7 +281,7 @@ export default function SettingsPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">{t('phone')}</Label>
                     <Input
                       id="phone"
                       value={companySettings.phone}
@@ -284,7 +289,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t('email')}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -295,7 +300,7 @@ export default function SettingsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
+                  <Label htmlFor="website">{t('website')}</Label>
                   <Input
                     id="website"
                     value={companySettings.website}
@@ -309,7 +314,7 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Clock className="h-5 w-5 text-green-600" />
-                  <span>Working Hours & Schedule</span>
+                  <span>{t('workingHours')} & Schedule</span>
                 </CardTitle>
                 <CardDescription>
                   Configure working hours and business days
@@ -318,7 +323,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="timezone">Timezone</Label>
+                    <Label htmlFor="timezone">{t('timezone')}</Label>
                     <Select value={companySettings.timezone} onValueChange={(value) => setCompanySettings({...companySettings, timezone: value})}>
                       <SelectTrigger>
                         <SelectValue />
@@ -335,7 +340,7 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="currency">Currency</Label>
+                    <Label htmlFor="currency">{t('currency')}</Label>
                     <Select value={companySettings.currency} onValueChange={(value) => setCompanySettings({...companySettings, currency: value})}>
                       <SelectTrigger>
                         <SelectValue />
@@ -378,7 +383,7 @@ export default function SettingsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label>Working Days</Label>
+                  <Label>{t('workingDays')}</Label>
                   <div className="flex flex-wrap gap-2">
                     {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
                       <Badge
@@ -400,6 +405,74 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="language" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Globe className="h-5 w-5 text-blue-600" />
+                <span>{t('language')} & Localization</span>
+              </CardTitle>
+              <CardDescription>
+                Choose your preferred language and regional settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="language">{t('language')}</Label>
+                  <Select value={language} onValueChange={(value: Language) => setLanguage(value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(languages).map(([code, name]) => (
+                        <SelectItem key={code} value={code}>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg">
+                              {code === 'en' ? '🇺🇸' : '🇪🇸'}
+                            </span>
+                            <span>{name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-gray-500">
+                    {language === 'en' 
+                      ? 'Select your preferred language for the interface'
+                      : 'Selecciona tu idioma preferido para la interfaz'
+                    }
+                  </p>
+                </div>
+
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">
+                    {t('language')} Preview
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>{t('dashboard')}:</strong> {t('dashboard')}</p>
+                    <p><strong>{t('employees')}:</strong> {t('employees')}</p>
+                    <p><strong>{t('attendance')}:</strong> {t('attendance')}</p>
+                    <p><strong>{t('settings')}:</strong> {t('settings')}</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="flex items-center space-x-2 text-green-800">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-medium">
+                      {language === 'en' 
+                        ? 'Language settings will be saved automatically'
+                        : 'La configuración de idioma se guardará automáticamente'
+                      }
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">
@@ -615,12 +688,12 @@ export default function SettingsPage() {
                 
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <span className="font-medium">Database</span>
-                  <Badge variant="outline">SQLite</Badge>
+                  <Badge variant="outline">Supabase</Badge>
                 </div>
                 
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <span className="font-medium">Last Backup</span>
-                  <Badge variant="outline">Today, 3:00 AM</Badge>
+                  <Badge variant="outline">{t('today')}, 3:00 AM</Badge>
                 </div>
               </CardContent>
             </Card>
