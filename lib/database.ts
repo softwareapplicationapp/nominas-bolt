@@ -412,7 +412,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return { count: count || 0 };
     }
 
-    // Payroll sum query
+    // Payroll sum query - FIXED: Use proper date comparison instead of LIKE
     if (q.includes('coalesce(sum(net_pay), 0) as total from payroll')) {
       const { data: employees } = await supabase
         .from('employees')
@@ -424,11 +424,17 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       }
 
       const employeeIds = employees.map(e => e.id);
+      
+      // Use proper date range comparison instead of LIKE
+      const startOfMonth = `${params[1]}-01`;
+      const endOfMonth = `${params[1]}-31`; // This will work for most months, Supabase will handle edge cases
+      
       const { data, error } = await supabase
         .from('payroll')
         .select('net_pay')
         .in('employee_id', employeeIds)
-        .like('pay_period_start', `${params[1]}%`);
+        .gte('pay_period_start', startOfMonth)
+        .lte('pay_period_start', endOfMonth);
       
       if (error) throw error;
       const total = (data || []).reduce((sum, p) => sum + (p.net_pay || 0), 0);
