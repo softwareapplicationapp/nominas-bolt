@@ -16,7 +16,7 @@ A complete HR management solution built with Next.js, featuring employee managem
 
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: Tailwind CSS, shadcn/ui components
-- **Database**: Pure JavaScript in-memory database (serverless-friendly)
+- **Database**: Supabase Postgres
 - **Authentication**: JWT with refresh tokens
 - **Charts**: Recharts for data visualization
 - **Icons**: Lucide React
@@ -90,7 +90,7 @@ The application comes with pre-seeded demo data:
 │   └── employee/         # Employee portal components
 ├── lib/                   # Utility libraries
 │   ├── auth.ts           # Authentication utilities
-│   ├── database.ts       # In-memory database
+│   ├── database.ts       # Supabase query helpers
 │   └── api-client.ts     # API client for frontend
 ├── contexts/              # React contexts
 └── netlify.toml          # Netlify deployment configuration
