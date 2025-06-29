@@ -322,14 +322,42 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
+    // Handle the specific query for employee profile with role
     if (q.includes('select e.*, u.role from employees e join users u on e.user_id = u.id where e.user_id = ?')) {
+      console.log('Executing employee profile query for user_id:', params[0]);
+      
       const { data, error } = await supabase
         .from('employees')
-        .select('*, users!inner(role)')
+        .select(`
+          *,
+          users!inner(role)
+        `)
         .eq('user_id', params[0])
         .maybeSingle();
-      if (error) throw error;
-      return data ? { ...data, role: (data as any).users.role } : null;
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Raw Supabase response:', data);
+      
+      if (!data) {
+        console.log('No employee found for user_id:', params[0]);
+        return null;
+      }
+      
+      // Transform the nested structure to flat structure
+      const result = {
+        ...data,
+        role: (data as any).users?.role || null
+      };
+      
+      // Remove the nested users object
+      delete (result as any).users;
+      
+      console.log('Transformed result:', result);
+      return result;
     }
 
     if (q.includes('select id from employees where user_id = ?')) {
