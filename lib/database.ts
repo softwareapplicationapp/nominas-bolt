@@ -322,42 +322,51 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
-    // Handle the specific query for employee profile with role
+    // Handle the specific query for employee profile with role - FIXED
     if (q.includes('select e.*, u.role from employees e join users u on e.user_id = u.id where e.user_id = ?')) {
       console.log('Executing employee profile query for user_id:', params[0]);
       console.log('User ID type:', typeof params[0]);
       
-      const { data, error } = await supabase
+      // First, get the employee data
+      const { data: employeeData, error: employeeError } = await supabase
         .from('employees')
-        .select(`
-          *,
-          users!inner(role)
-        `)
+        .select('*')
         .eq('user_id', params[0])
         .maybeSingle();
       
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      if (employeeError) {
+        console.error('Employee query error:', employeeError);
+        throw employeeError;
       }
       
-      console.log('Raw Supabase response:', data);
-      
-      if (!data) {
+      if (!employeeData) {
         console.log('No employee found for user_id:', params[0]);
         return null;
       }
       
-      // Transform the nested structure to flat structure
+      console.log('Employee data found:', employeeData);
+      
+      // Then get the user role
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', params[0])
+        .maybeSingle();
+      
+      if (userError) {
+        console.error('User query error:', userError);
+        throw userError;
+      }
+      
+      console.log('User data found:', userData);
+      
+      // Combine the data
       const result = {
-        ...data,
-        role: (data as any).users?.role || null
+        ...employeeData,
+        role: userData?.role || null
       };
       
-      // Remove the nested users object
-      delete (result as any).users;
-      
-      console.log('Transformed result:', result);
+      console.log('Final result:', result);
       return result;
     }
 
