@@ -18,57 +18,57 @@
 
 @layer base {
   :root {
-    --background: 255 255 255;
-    --foreground: 17 24 39;
-    --card: 255 255 255;
-    --card-foreground: 17 24 39;
-    --popover: 255 255 255;
-    --popover-foreground: 17 24 39;
-    --primary: 37 99 235;
-    --primary-foreground: 255 255 255;
-    --secondary: 241 245 249;
-    --secondary-foreground: 17 24 39;
-    --muted: 248 250 252;
-    --muted-foreground: 75 85 99;
-    --accent: 241 245 249;
-    --accent-foreground: 17 24 39;
-    --destructive: 220 38 38;
-    --destructive-foreground: 255 255 255;
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 37 99 235;
-    --chart-1: 37 99 235;
-    --chart-2: 16 185 129;
-    --chart-3: 217 119 6;
-    --chart-4: 139 92 246;
-    --chart-5: 236 72 153;
+    --background: 0 0% 100%; /* White */
+    --foreground: 222 47% 11%; /* Dark Blue-Gray */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 222 47% 11%; /* Dark Blue-Gray */
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 222 47% 11%; /* Dark Blue-Gray */
+    --primary: 220 89% 44%; /* Strong Blue */
+    --primary-foreground: 0 0% 100%; /* White */
+    --secondary: 210 40% 96%; /* Light Gray */
+    --secondary-foreground: 222 47% 11%; /* Dark Blue-Gray */
+    --muted: 210 40% 96%; /* Light Gray */
+    --muted-foreground: 215 16% 47%; /* Medium Gray */
+    --accent: 210 40% 96%; /* Light Gray */
+    --accent-foreground: 222 47% 11%; /* Dark Blue-Gray */
+    --destructive: 0 84% 60%; /* Red */
+    --destructive-foreground: 0 0% 100%; /* White */
+    --border: 214 32% 91%; /* Light Gray Border */
+    --input: 214 32% 91%; /* Light Gray Input */
+    --ring: 220 89% 44%; /* Strong Blue */
+    --chart-1: 220 89% 44%; /* Strong Blue */
+    --chart-2: 142 76% 36%; /* Emerald Green */
+    --chart-3: 38 93% 50%; /* Orange */
+    --chart-4: 262 83% 50%; /* Purple */
+    --chart-5: 347 77% 50%; /* Pink */
     --radius: 0.5rem;
   }
   .dark {
-    --background: 17 24 39;
-    --foreground: 248 250 252;
-    --card: 31 41 55;
-    --card-foreground: 248 250 252;
-    --popover: 31 41 55;
-    --popover-foreground: 248 250 252;
-    --primary: 37 99 235;
-    --primary-foreground: 255 255 255;
-    --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
-    --accent: 51 65 85;
-    --accent-foreground: 248 250 252;
-    --destructive: 220 38 38;
-    --destructive-foreground: 255 255 255;
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 37 99 235;
-    --chart-1: 37 99 235;
-    --chart-2: 16 185 129;
-    --chart-3: 217 119 6;
-    --chart-4: 139 92 246;
-    --chart-5: 236 72 153;
+    --background: 222 47% 11%; /* Dark Blue-Gray */
+    --foreground: 210 20% 98%; /* Off-white */
+    --card: 217 32% 18%; /* Darker Gray */
+    --card-foreground: 210 20% 98%; /* Off-white */
+    --popover: 217 32% 18%; /* Darker Gray */
+    --popover-foreground: 210 20% 98%; /* Off-white */
+    --primary: 217 91% 60%; /* Lighter Strong Blue */
+    --primary-foreground: 222 47% 11%; /* Dark Blue-Gray */
+    --secondary: 217 32% 18%; /* Darker Gray */
+    --secondary-foreground: 210 20% 98%; /* Off-white */
+    --muted: 217 32% 18%; /* Darker Gray */
+    --muted-foreground: 215 16% 57%; /* Lighter Medium Gray */
+    --accent: 217 32% 18%; /* Darker Gray */
+    --accent-foreground: 210 20% 98%; /* Off-white */
+    --destructive: 0 84% 60%; /* Red */
+    --destructive-foreground: 0 0% 100%; /* White */
+    --border: 217 32% 18%; /* Darker Gray */
+    --input: 217 32% 18%; /* Darker Gray */
+    --ring: 217 91% 60%; /* Lighter Strong Blue */
+    --chart-1: 217 91% 60%; /* Lighter Strong Blue */
+    --chart-2: 142 76% 36%; /* Emerald Green */
+    --chart-3: 38 93% 50%; /* Orange */
+    --chart-4: 262 83% 50%; /* Purple */
+    --chart-5: 347 77% 50%; /* Pink */
   }
 }
 
@@ -238,40 +238,40 @@
 
 /* Gradient backgrounds */
 .gradient-bg {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%);
 }
 
 .gradient-card {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(29, 78, 216, 0.1) 100%);
+  background: linear-gradient(135deg, hsla(var(--primary), 0.1) 0%, hsla(var(--primary), 0.1) 100%);
 }
 
 .gradient-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%);
 }
 
 .gradient-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, hsl(var(--chart-2)) 0%, hsl(var(--chart-2)) 100%);
 }
 
 .gradient-warning {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, hsl(var(--chart-3)) 0%, hsl(var(--chart-3)) 100%);
 }
 
 .gradient-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(var(--destructive)) 100%);
 }
 
 /* Glass morphism effect */
 .glass {
-  background: rgba(255, 255, 255, 0.25);
+  background: hsla(var(--background), 0.25);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid hsla(var(--foreground), 0.18);
 }
 
 .glass-dark {
-  background: rgba(0, 0, 0, 0.25);
+  background: hsla(var(--background), 0.25);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid hsla(var(--foreground), 0.18);
 }
 
 /* Staggered animations */
@@ -290,19 +290,23 @@
 
 /* Button enhancements */
 .btn-primary {
-  @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white font-semibold;
+  @apply bg-gradient-to-r from-primary to-primary-foreground hover:from-primary hover:to-primary-foreground transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white font-semibold;
+  background: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%);
 }
 
 .btn-success {
-  @apply bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white font-semibold;
+  @apply bg-gradient-to-r from-chart-2 to-chart-2 hover:from-chart-2 hover:to-chart-2 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white font-semibold;
+  background: linear-gradient(to right, hsl(var(--chart-2)) 0%, hsl(var(--chart-2)) 100%);
 }
 
 .btn-warning {
-  @apply bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white font-semibold;
+  @apply bg-gradient-to-r from-chart-3 to-chart-3 hover:from-chart-3 hover:to-chart-3 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white font-semibold;
+  background: linear-gradient(to right, hsl(var(--chart-3)) 0%, hsl(var(--chart-3)) 100%);
 }
 
 .btn-danger {
-  @apply bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white font-semibold;
+  @apply bg-gradient-to-r from-destructive to-destructive hover:from-destructive hover:to-destructive transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-white font-semibold;
+  background: linear-gradient(to right, hsl(var(--destructive)) 0%, hsl(var(--destructive)) 100%);
 }
 
 /* Card enhancements */
@@ -316,7 +320,7 @@
 
 /* Text animations */
 .text-gradient {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8, #4f46e5);
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)), hsl(var(--chart-4)));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -347,11 +351,11 @@
   right: 0;
   background-image: linear-gradient(
     -45deg,
-    rgba(255, 255, 255, 0.2) 25%,
+    hsla(var(--primary-foreground), 0.2) 25%,
     transparent 25%,
     transparent 50%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0.2) 75%,
+    hsla(var(--primary-foreground), 0.2) 50%,
+    hsla(var(--primary-foreground), 0.2) 75%,
     transparent 75%,
     transparent
   );
@@ -401,109 +405,109 @@
 
 /* High contrast text improvements */
 .text-high-contrast {
-  @apply text-gray-900;
+  @apply text-foreground;
 }
 
 .text-medium-contrast {
-  @apply text-gray-800;
+  @apply text-foreground;
 }
 
 .text-low-contrast {
-  @apply text-gray-700;
+  @apply text-muted-foreground;
 }
 
 /* Improved card text contrast */
 .card-title {
-  @apply text-gray-900 font-semibold;
+  @apply text-foreground font-semibold;
 }
 
 .card-description {
-  @apply text-gray-800 font-medium;
+  @apply text-muted-foreground font-medium;
 }
 
 .card-content-text {
-  @apply text-gray-900;
+  @apply text-foreground;
 }
 
 /* Better button text contrast */
 .btn-text-contrast {
-  @apply text-white font-semibold;
+  @apply text-primary-foreground font-semibold;
 }
 
 /* Improved form label contrast */
 .form-label {
-  @apply text-gray-900 font-semibold;
+  @apply text-foreground font-semibold;
 }
 
 /* Better placeholder text */
 .placeholder-improved::placeholder {
-  @apply text-gray-600;
+  @apply text-muted-foreground;
 }
 
 /* Improved sidebar text */
 .sidebar-text {
-  @apply text-slate-200;
+  @apply text-secondary-foreground;
 }
 
 .sidebar-text-active {
-  @apply text-white font-semibold;
+  @apply text-primary-foreground font-semibold;
 }
 
 /* Better stats text */
 .stats-number {
-  @apply text-gray-900 font-bold;
+  @apply text-foreground font-bold;
 }
 
 .stats-label {
-  @apply text-gray-800 font-semibold;
+  @apply text-muted-foreground font-semibold;
 }
 
 /* Improved badge contrast */
 .badge-pending {
-  @apply bg-amber-500 text-white font-semibold;
+  @apply bg-chart-3 text-primary-foreground font-semibold;
 }
 
 .badge-approved {
-  @apply bg-emerald-600 text-white font-semibold;
+  @apply bg-chart-2 text-primary-foreground font-semibold;
 }
 
 .badge-rejected {
-  @apply bg-red-600 text-white font-semibold;
+  @apply bg-destructive text-primary-foreground font-semibold;
 }
 
 .badge-active {
-  @apply bg-blue-600 text-white font-semibold;
+  @apply bg-primary text-primary-foreground font-semibold;
 }
 
 .badge-inactive {
-  @apply bg-gray-500 text-white font-semibold;
+  @apply bg-muted-foreground text-primary-foreground font-semibold;
 }
 
 /* Improved table headers */
 .table-header {
-  @apply text-gray-900 font-semibold;
+  @apply text-foreground font-semibold;
 }
 
 /* Improved table cells */
 .table-cell {
-  @apply text-gray-800 font-medium;
+  @apply text-muted-foreground font-medium;
 }
 
 /* Improved form inputs */
 .input-contrast {
-  @apply border-gray-300 text-gray-900 placeholder:text-gray-500;
+  @apply border-border text-foreground placeholder:text-muted-foreground;
 }
 
 /* Improved select contrast */
 .select-contrast {
-  @apply border-gray-300 text-gray-900;
+  @apply border-border text-foreground;
 }
 
 /* Improved dialog text */
 .dialog-title {
-  @apply text-gray-900 font-bold;
+  @apply text-foreground font-bold;
 }
 
 .dialog-description {
-  @apply text-gray-800 font-medium;
+  @apply text-muted-foreground font-medium;
 }
