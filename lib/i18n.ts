@@ -122,7 +122,7 @@ export const translations = {
     emergency: 'Emergency',
     maternity: 'Maternity',
     paternity: 'Paternity',
-    manageLeaveRequests: 'Manage employee leave requests and approvals',
+    manageEmployeeLeaves: 'Manage employee leave requests and approvals',
     leaveRequests: 'Leave Requests',
     reviewManageLeaveRequests: 'Review and manage employee leave requests',
     
@@ -364,7 +364,7 @@ export const translations = {
     emergency: 'Emergencia',
     maternity: 'Maternidad',
     paternity: 'Paternidad',
-    manageLeaveRequests: 'Gestionar solicitudes de permisos y aprobaciones de empleados',
+    manageEmployeeLeaves: 'Gestionar solicitudes de permisos y aprobaciones de empleados',
     leaveRequests: 'Solicitudes de Permiso',
     reviewManageLeaveRequests: 'Revisar y gestionar solicitudes de permisos de empleados',
     
