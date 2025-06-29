@@ -9,7 +9,7 @@ export interface Company {
 }
 
 export interface User {
-  id: number;
+  id: string; // Changed from number to string for UUID
   email: string;
   password_hash: string;
   role: string;
@@ -20,7 +20,7 @@ export interface User {
 
 export interface Employee {
   id: number;
-  user_id?: number;
+  user_id?: string; // Changed from number to string for UUID
   employee_id: string;
   first_name: string;
   last_name: string;
@@ -325,6 +325,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
     // Handle the specific query for employee profile with role
     if (q.includes('select e.*, u.role from employees e join users u on e.user_id = u.id where e.user_id = ?')) {
       console.log('Executing employee profile query for user_id:', params[0]);
+      console.log('User ID type:', typeof params[0]);
       
       const { data, error } = await supabase
         .from('employees')

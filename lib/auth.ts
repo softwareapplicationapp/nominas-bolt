@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-i
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-in-production';
 
 export interface User {
-  id: number;
+  id: string; // Changed from number to string for UUID
   email: string;
   role: string;
   company_id: number;
@@ -61,7 +61,7 @@ export function verifyAccessToken(token: string): User | null {
   }
 }
 
-export function verifyRefreshToken(token: string): { userId: number } | null {
+export function verifyRefreshToken(token: string): { userId: string } | null {
   try {
     const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as any;
     return { userId: decoded.userId };
