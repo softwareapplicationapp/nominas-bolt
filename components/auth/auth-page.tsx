@@ -81,14 +81,14 @@ export default function AuthPage() {
   // Show loading state while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
         <div className="text-center animate-fade-in">
           <div className="bg-gradient-primary p-4 rounded-2xl mx-auto mb-6 w-fit">
             <Building2 className="h-10 w-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 mb-3 text-gradient">ArcusHR</h1>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto"></div>
-          <p className="text-slate-600 mt-4">{t('loading')}...</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3 text-gradient">ArcusHR</h1>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700 mx-auto"></div>
+          <p className="text-gray-800 mt-4 font-medium">{t('loading')}...</p>
         </div>
       </div>
     );
@@ -100,17 +100,17 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12 animate-fade-in">
           <div className="flex items-center justify-center mb-8">
-            <div className="bg-gradient-primary p-4 rounded-2xl mr-4">
+            <div className="bg-gradient-primary p-4 rounded-2xl mr-4 shadow-lg">
               <Building2 className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-5xl font-bold text-slate-800 text-gradient">ArcusHR</h1>
+            <h1 className="text-5xl font-bold text-gray-900 text-gradient">ArcusHR</h1>
           </div>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-800 max-w-2xl mx-auto font-medium">
             Complete Human Resource Management platform for modern businesses
           </p>
         </div>
@@ -119,37 +119,37 @@ export default function AuthPage() {
           {/* Features Section */}
           <div className="space-y-8 animate-slide-in-left">
             <div>
-              <h2 className="text-3xl font-semibold text-slate-800 mb-8">
+              <h2 className="text-3xl font-semibold text-gray-900 mb-8">
                 Why Choose ArcusHR?
               </h2>
               <div className="grid gap-8">
-                <div className="flex items-start space-x-6 hover-lift p-6 bg-white/50 rounded-2xl glass">
-                  <div className="bg-slate-100 p-3 rounded-xl">
-                    <Users className="h-8 w-8 text-slate-600" />
+                <div className="flex items-start space-x-6 hover-lift p-6 bg-white/80 rounded-2xl shadow-lg border border-blue-100">
+                  <div className="bg-blue-100 p-3 rounded-xl">
+                    <Users className="h-8 w-8 text-blue-700" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-800 text-lg">{t('employeeManagement')}</h3>
-                    <p className="text-slate-600 mt-2">Complete employee profiles, organizational structure, and role management</p>
+                    <h3 className="font-semibold text-gray-900 text-lg">{t('employeeManagement')}</h3>
+                    <p className="text-gray-800 mt-2 font-medium">Complete employee profiles, organizational structure, and role management</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-6 hover-lift p-6 bg-white/50 rounded-2xl glass">
-                  <div className="bg-green-100 p-3 rounded-xl">
-                    <BarChart3 className="h-8 w-8 text-green-600" />
+                <div className="flex items-start space-x-6 hover-lift p-6 bg-white/80 rounded-2xl shadow-lg border border-emerald-100">
+                  <div className="bg-emerald-100 p-3 rounded-xl">
+                    <BarChart3 className="h-8 w-8 text-emerald-700" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-800 text-lg">Analytics & {t('reports')}</h3>
-                    <p className="text-slate-600 mt-2">Comprehensive reporting and analytics for data-driven decisions</p>
+                    <h3 className="font-semibold text-gray-900 text-lg">Analytics & {t('reports')}</h3>
+                    <p className="text-gray-800 mt-2 font-medium">Comprehensive reporting and analytics for data-driven decisions</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-6 hover-lift p-6 bg-white/50 rounded-2xl glass">
+                <div className="flex items-start space-x-6 hover-lift p-6 bg-white/80 rounded-2xl shadow-lg border border-gray-200">
                   <div className="bg-gray-100 p-3 rounded-xl">
-                    <Shield className="h-8 w-8 text-gray-600" />
+                    <Shield className="h-8 w-8 text-gray-700" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-800 text-lg">Secure & Compliant</h3>
-                    <p className="text-slate-600 mt-2">Enterprise-grade security with role-based access control</p>
+                    <h3 className="font-semibold text-gray-900 text-lg">Secure & Compliant</h3>
+                    <p className="text-gray-800 mt-2 font-medium">Enterprise-grade security with role-based access control</p>
                   </div>
                 </div>
               </div>
@@ -158,20 +158,20 @@ export default function AuthPage() {
 
           {/* Auth Forms */}
           <div className="lg:max-w-md animate-slide-in-right">
-            <Card className="shadow-2xl border-0 glass hover-glow">
+            <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm hover-glow">
               <CardHeader className="text-center pb-8">
-                <CardTitle className="text-3xl font-bold text-slate-800 mb-2">Get Started</CardTitle>
-                <CardDescription className="text-lg text-slate-700 font-medium">
+                <CardTitle className="text-3xl font-bold text-gray-900 mb-2">Get Started</CardTitle>
+                <CardDescription className="text-lg text-gray-800 font-semibold">
                   {t('signInToAccount')} or create a new company
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="signin" className="space-y-6">
-                  <TabsList className="grid w-full grid-cols-2 bg-gray-100/50">
-                    <TabsTrigger value="signin" className="data-[state=active]:bg-white data-[state=active]:shadow-md font-semibold">
+                  <TabsList className="grid w-full grid-cols-2 bg-blue-50">
+                    <TabsTrigger value="signin" className="data-[state=active]:bg-white data-[state=active]:shadow-md font-semibold text-gray-900">
                       {t('signIn')}
                     </TabsTrigger>
-                    <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:shadow-md font-semibold">
+                    <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:shadow-md font-semibold text-gray-900">
                       {t('signUp')}
                     </TabsTrigger>
                   </TabsList>
@@ -179,13 +179,13 @@ export default function AuthPage() {
                   <TabsContent value="signin" className="space-y-6">
                     {/* User Type Selection */}
                     <div className="space-y-3">
-                      <Label className="text-slate-700 font-medium">I am a:</Label>
+                      <Label className="text-gray-900 font-semibold">I am a:</Label>
                       <div className="grid grid-cols-2 gap-3">
                         <Button
                           type="button"
                           variant={userType === 'manager' ? 'default' : 'outline'}
                           onClick={() => setUserType('manager')}
-                          className="h-12 hover-scale font-medium"
+                          className="h-12 hover-scale font-semibold"
                         >
                           <Building2 className="h-4 w-4 mr-2" />
                           Manager
@@ -194,7 +194,7 @@ export default function AuthPage() {
                           type="button"
                           variant={userType === 'employee' ? 'default' : 'outline'}
                           onClick={() => setUserType('employee')}
-                          className="h-12 hover-scale font-medium"
+                          className="h-12 hover-scale font-semibold"
                         >
                           <UserCheck className="h-4 w-4 mr-2" />
                           Employee
@@ -204,25 +204,25 @@ export default function AuthPage() {
 
                     <form onSubmit={handleSignIn} className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="email" className="text-slate-700 font-medium">{t('email')}</Label>
+                        <Label htmlFor="email" className="text-gray-900 font-semibold">{t('email')}</Label>
                         <Input
                           id="email"
                           name="email"
                           type="email"
                           placeholder={userType === 'manager' ? 'admin@company.com' : 'employee@company.com'}
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200"
+                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="password" className="text-slate-700 font-medium">{t('password')}</Label>
+                        <Label htmlFor="password" className="text-gray-900 font-semibold">{t('password')}</Label>
                         <Input
                           id="password"
                           name="password"
                           type="password"
                           placeholder="••••••••"
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200"
+                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
                         />
                       </div>
                       <Button 
@@ -245,19 +245,19 @@ export default function AuthPage() {
                   <TabsContent value="signup" className="space-y-6">
                     <form onSubmit={handleSignUp} className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="company" className="text-slate-700 font-medium">{t('companyName')}</Label>
+                        <Label htmlFor="company" className="text-gray-900 font-semibold">{t('companyName')}</Label>
                         <Input
                           id="company"
                           name="company"
                           placeholder="Acme Corporation"
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200"
+                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="industry" className="text-slate-700 font-medium">{t('industry')}</Label>
+                        <Label htmlFor="industry" className="text-gray-900 font-semibold">{t('industry')}</Label>
                         <Select value={industry} onValueChange={setIndustry}>
-                          <SelectTrigger className="h-12 hover-glow">
+                          <SelectTrigger className="h-12 hover-glow border-gray-300 text-gray-900">
                             <SelectValue placeholder={t('selectOption')} />
                           </SelectTrigger>
                           <SelectContent>
@@ -271,25 +271,25 @@ export default function AuthPage() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="admin-email" className="text-slate-700 font-medium">Admin {t('email')}</Label>
+                        <Label htmlFor="admin-email" className="text-gray-900 font-semibold">Admin {t('email')}</Label>
                         <Input
                           id="admin-email"
                           name="admin-email"
                           type="email"
                           placeholder="admin@company.com"
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200"
+                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="admin-password" className="text-slate-700 font-medium">{t('password')}</Label>
+                        <Label htmlFor="admin-password" className="text-gray-900 font-semibold">{t('password')}</Label>
                         <Input
                           id="admin-password"
                           name="admin-password"
                           type="password"
                           placeholder="••••••••"
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200"
+                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
                         />
                       </div>
                       <Button 

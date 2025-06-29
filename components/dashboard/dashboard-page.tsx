@@ -37,7 +37,7 @@ interface DashboardStats {
   }>;
 }
 
-const departmentColors = ['#475569', '#22c55e', '#f59e0b', '#dc2626', '#8b5cf6'];
+const departmentColors = ['#1e40af', '#059669', '#d97706', '#dc2626', '#7c3aed'];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -71,8 +71,8 @@ export default function DashboardPage() {
   if (!stats) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">Failed to load dashboard data</p>
-        <button onClick={loadDashboardStats} className="mt-2 text-slate-600 hover:underline">
+        <p className="text-gray-700 font-medium">Failed to load dashboard data</p>
+        <button onClick={loadDashboardStats} className="mt-2 text-blue-700 hover:underline font-semibold">
           Try again
         </button>
       </div>
@@ -88,22 +88,22 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           {t('welcomeBack')}, Admin!
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-800 font-medium">
           Here's what's happening at your company today.
         </p>
       </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="border-blue-200 hover-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('totalEmployees')}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-gray-900">{t('totalEmployees')}</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalEmployees}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600 flex items-center">
+            <div className="text-2xl font-bold text-gray-900">{stats.totalEmployees}</div>
+            <p className="text-xs text-gray-800 font-medium">
+              <span className="text-emerald-600 flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 {t('active')} workforce
               </span>
@@ -111,45 +111,45 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-emerald-200 hover-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('presentToday')}</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-gray-900">{t('presentToday')}</CardTitle>
+            <Clock className="h-4 w-4 text-emerald-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.presentToday}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">{attendanceRate}%</span> {t('attendanceRate')}
+            <div className="text-2xl font-bold text-gray-900">{stats.presentToday}</div>
+            <p className="text-xs text-gray-800 font-medium">
+              <span className="text-emerald-600">{attendanceRate}%</span> {t('attendanceRate')}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-amber-200 hover-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('pendingLeaves')}</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-gray-900">{t('pendingLeaves')}</CardTitle>
+            <Calendar className="h-4 w-4 text-amber-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingLeaves}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-gray-900">{stats.pendingLeaves}</div>
+            <p className="text-xs text-gray-800 font-medium">
               {stats.pendingLeaves > 5 ? (
-                <span className="text-orange-600">Needs attention</span>
+                <span className="text-amber-600">Needs attention</span>
               ) : (
-                <span className="text-green-600">Under control</span>
+                <span className="text-emerald-600">Under control</span>
               )}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-purple-200 hover-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('monthlyPayroll')}</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-gray-900">{t('monthlyPayroll')}</CardTitle>
+            <DollarSign className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.monthlyPayroll.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-slate-600">Current month</span>
+            <div className="text-2xl font-bold text-gray-900">${stats.monthlyPayroll.toLocaleString()}</div>
+            <p className="text-xs text-gray-800 font-medium">
+              <span className="text-gray-700">Current month</span>
             </p>
           </CardContent>
         </Card>
@@ -157,10 +157,10 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Attendance Chart */}
-        <Card>
+        <Card className="border-gray-200 hover-glow">
           <CardHeader>
-            <CardTitle>Weekly {t('attendance')}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-gray-900">Weekly {t('attendance')}</CardTitle>
+            <CardDescription className="text-gray-800 font-medium">
               Employee attendance overview for this week
             </CardDescription>
           </CardHeader>
@@ -172,13 +172,13 @@ export default function DashboardPage() {
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="present" fill="#475569" name={t('present')} />
+                  <Bar dataKey="present" fill="#1e40af" name={t('present')} />
                   <Bar dataKey="absent" fill="#dc2626" name={t('absent')} />
-                  <Bar dataKey="late" fill="#f59e0b" name={t('late')} />
+                  <Bar dataKey="late" fill="#d97706" name={t('late')} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-[300px] text-gray-500">
+              <div className="flex items-center justify-center h-[300px] text-gray-700 font-medium">
                 No attendance data available
               </div>
             )}
@@ -186,10 +186,10 @@ export default function DashboardPage() {
         </Card>
 
         {/* Department Distribution */}
-        <Card>
+        <Card className="border-gray-200 hover-glow">
           <CardHeader>
-            <CardTitle>{t('department')} Distribution</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-gray-900">{t('department')} Distribution</CardTitle>
+            <CardDescription className="text-gray-800 font-medium">
               Employee distribution across departments
             </CardDescription>
           </CardHeader>
@@ -221,14 +221,14 @@ export default function DashboardPage() {
                         className="w-3 h-3 rounded-full" 
                         style={{ backgroundColor: departmentColors[index % departmentColors.length] }} 
                       />
-                      <span className="text-sm text-gray-600">{dept.department}</span>
-                      <span className="text-sm font-medium">{dept.count}</span>
+                      <span className="text-sm text-gray-800 font-medium">{dept.department}</span>
+                      <span className="text-sm font-bold text-gray-900">{dept.count}</span>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center h-[300px] text-gray-500">
+              <div className="flex items-center justify-center h-[300px] text-gray-700 font-medium">
                 No department data available
               </div>
             )}
@@ -238,45 +238,45 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activities */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 border-gray-200 hover-glow">
           <CardHeader>
-            <CardTitle>{t('recentActivities')}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-gray-900">{t('recentActivities')}</CardTitle>
+            <CardDescription className="text-gray-800 font-medium">
               Latest updates and activities in your company
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <div className="bg-green-100 p-2 rounded-full">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="bg-emerald-100 p-2 rounded-full">
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">System updated</p>
-                  <p className="text-sm text-gray-500">Dashboard data refreshed successfully</p>
-                  <p className="text-xs text-gray-400">Just now</p>
+                  <p className="text-sm font-semibold text-gray-900">System updated</p>
+                  <p className="text-sm text-gray-800 font-medium">Dashboard data refreshed successfully</p>
+                  <p className="text-xs text-gray-700 font-medium">Just now</p>
                 </div>
               </div>
               
               <div className="flex items-start space-x-3">
-                <div className="bg-slate-100 p-2 rounded-full">
-                  <Activity className="h-4 w-4 text-slate-600" />
+                <div className="bg-blue-100 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">{t('attendance')} tracked</p>
-                  <p className="text-sm text-gray-500">{stats.presentToday} employees checked in today</p>
-                  <p className="text-xs text-gray-400">{t('today')}</p>
+                  <p className="text-sm font-semibold text-gray-900">{t('attendance')} tracked</p>
+                  <p className="text-sm text-gray-800 font-medium">{stats.presentToday} employees checked in today</p>
+                  <p className="text-xs text-gray-700 font-medium">{t('today')}</p>
                 </div>
               </div>
               
               <div className="flex items-start space-x-3">
-                <div className="bg-orange-100 p-2 rounded-full">
-                  <Clock className="h-4 w-4 text-orange-600" />
+                <div className="bg-amber-100 p-2 rounded-full">
+                  <Clock className="h-4 w-4 text-amber-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Leave requests {t('pending')}</p>
-                  <p className="text-sm text-gray-500">{stats.pendingLeaves} requests awaiting approval</p>
-                  <p className="text-xs text-gray-400">Ongoing</p>
+                  <p className="text-sm font-semibold text-gray-900">Leave requests {t('pending')}</p>
+                  <p className="text-sm text-gray-800 font-medium">{stats.pendingLeaves} requests awaiting approval</p>
+                  <p className="text-xs text-gray-700 font-medium">Ongoing</p>
                 </div>
               </div>
             </div>
@@ -284,45 +284,45 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions */}
-        <Card>
+        <Card className="border-gray-200 hover-glow">
           <CardHeader>
-            <CardTitle>{t('quickActions')}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-gray-900">{t('quickActions')}</CardTitle>
+            <CardDescription className="text-gray-800 font-medium">
               Common tasks and shortcuts
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium">Pending Approvals</span>
-                <Badge variant="secondary">{stats.pendingLeaves}</Badge>
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+                <span className="text-sm font-semibold text-gray-900">Pending Approvals</span>
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800 font-semibold">{stats.pendingLeaves}</Badge>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium">{t('presentToday')}</span>
-                <Badge variant="default">{stats.presentToday}</Badge>
+              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                <span className="text-sm font-semibold text-gray-900">{t('presentToday')}</span>
+                <Badge variant="default" className="bg-emerald-600 text-white font-semibold">{stats.presentToday}</Badge>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium">{t('totalEmployees')}</span>
-                <Badge variant="outline">{stats.totalEmployees}</Badge>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <span className="text-sm font-semibold text-gray-900">{t('totalEmployees')}</span>
+                <Badge variant="outline" className="border-blue-300 text-blue-800 font-semibold">{stats.totalEmployees}</Badge>
               </div>
             </div>
             
             <div className="pt-4">
-              <h4 className="text-sm font-medium mb-2">{t('systemHealth')}</h4>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">{t('systemHealth')}</h4>
               <div className="space-y-2">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Server {t('status')}</span>
-                    <span className="text-green-600">{t('online')}</span>
+                    <span className="text-gray-800 font-medium">Server {t('status')}</span>
+                    <span className="text-emerald-600 font-semibold">{t('online')}</span>
                   </div>
                   <Progress value={95} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Data Sync</span>
-                    <span className="text-green-600">99%</span>
+                    <span className="text-gray-800 font-medium">Data Sync</span>
+                    <span className="text-emerald-600 font-semibold">99%</span>
                   </div>
                   <Progress value={99} className="h-2" />
                 </div>

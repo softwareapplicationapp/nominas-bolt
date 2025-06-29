@@ -106,7 +106,7 @@ export default function EmployeeAttendancePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
@@ -115,22 +115,22 @@ export default function EmployeeAttendancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       <div className="space-y-8 p-6">
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="text-3xl font-bold text-slate-900 text-gradient">My Attendance</h1>
-          <p className="text-slate-700 mt-2 font-medium">Track your working hours and attendance records</p>
+          <h1 className="text-3xl font-bold text-gray-900 text-gradient">My Attendance</h1>
+          <p className="text-gray-800 mt-2 font-semibold">Track your working hours and attendance records</p>
         </div>
 
         {/* Check In/Out Card */}
-        <Card className="animate-scale-in hover-glow border-slate-200">
+        <Card className="animate-scale-in hover-glow border-blue-200">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-slate-900">
-              <Clock className="h-5 w-5 text-slate-600" />
+            <CardTitle className="flex items-center space-x-2 text-gray-900">
+              <Clock className="h-5 w-5 text-blue-600" />
               <span>Today's Attendance</span>
             </CardTitle>
-            <CardDescription className="text-slate-700">
+            <CardDescription className="text-gray-800 font-medium">
               {format(new Date(), 'EEEE, MMMM do, yyyy')}
             </CardDescription>
           </CardHeader>
@@ -139,20 +139,20 @@ export default function EmployeeAttendancePage() {
               <div className="space-y-2">
                 {todayRecord?.check_in && (
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-slate-800 font-medium">Checked in at {todayRecord.check_in}</span>
+                    <CheckCircle className="h-4 w-4 text-emerald-600" />
+                    <span className="text-sm text-gray-900 font-semibold">Checked in at {todayRecord.check_in}</span>
                   </div>
                 )}
                 {todayRecord?.check_out && (
                   <div className="flex items-center space-x-2">
                     <LogOutIcon className="h-4 w-4 text-red-600" />
-                    <span className="text-sm text-slate-800 font-medium">Checked out at {todayRecord.check_out}</span>
+                    <span className="text-sm text-gray-900 font-semibold">Checked out at {todayRecord.check_out}</span>
                   </div>
                 )}
                 {todayRecord?.total_hours && (
                   <div className="flex items-center space-x-2">
-                    <Timer className="h-4 w-4 text-slate-600" />
-                    <span className="text-sm text-slate-800 font-medium">Total hours: {todayRecord.total_hours.toFixed(1)}h</span>
+                    <Timer className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-gray-900 font-semibold">Total hours: {todayRecord.total_hours.toFixed(1)}h</span>
                   </div>
                 )}
               </div>
@@ -181,7 +181,7 @@ export default function EmployeeAttendancePage() {
                     onClick={handleCheckOut}
                     disabled={actionLoading}
                     variant="outline"
-                    className="hover-glow border-slate-300 text-slate-700 hover:text-slate-900"
+                    className="hover-glow border-gray-300 text-gray-800 hover:text-gray-900 font-semibold"
                   >
                     {actionLoading ? (
                       <>
@@ -196,7 +196,7 @@ export default function EmployeeAttendancePage() {
                     )}
                   </Button>
                 ) : (
-                  <Badge variant="default" className="text-lg px-4 py-2 bg-green-600 text-white">
+                  <Badge variant="default" className="text-lg px-4 py-2 bg-emerald-600 text-white font-semibold">
                     Day Complete
                   </Badge>
                 )}
@@ -207,14 +207,14 @@ export default function EmployeeAttendancePage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="card-interactive animate-scale-in stagger-1 hover-glow border-slate-200">
+          <Card className="card-interactive animate-scale-in stagger-1 hover-glow border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-slate-900">
+                  <div className="text-2xl font-bold text-gray-900">
                     {totalHours.toFixed(1)}h
                   </div>
-                  <p className="text-sm text-slate-700 font-medium">Total Hours</p>
+                  <p className="text-sm text-gray-800 font-semibold">Total Hours</p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-full animate-float">
                   <Clock className="h-6 w-6 text-blue-600" />
@@ -223,30 +223,30 @@ export default function EmployeeAttendancePage() {
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-2 hover-glow border-slate-200">
+          <Card className="card-interactive animate-scale-in stagger-2 hover-glow border-emerald-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-slate-900">
+                  <div className="text-2xl font-bold text-gray-900">
                     {averageHours.toFixed(1)}h
                   </div>
-                  <p className="text-sm text-slate-700 font-medium">Average Daily</p>
+                  <p className="text-sm text-gray-800 font-semibold">Average Daily</p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-full animate-float">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
+                <div className="p-3 bg-emerald-100 rounded-full animate-float">
+                  <TrendingUp className="h-6 w-6 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-3 hover-glow border-slate-200">
+          <Card className="card-interactive animate-scale-in stagger-3 hover-glow border-purple-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-slate-900">
+                  <div className="text-2xl font-bold text-gray-900">
                     {presentDays}
                   </div>
-                  <p className="text-sm text-slate-700 font-medium">Days Present</p>
+                  <p className="text-sm text-gray-800 font-semibold">Days Present</p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-full animate-float">
                   <Award className="h-6 w-6 text-purple-600" />
@@ -257,40 +257,40 @@ export default function EmployeeAttendancePage() {
         </div>
 
         <Tabs defaultValue="records" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="records">Attendance Records</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+          <TabsList className="bg-gray-100">
+            <TabsTrigger value="records" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Attendance Records</TabsTrigger>
+            <TabsTrigger value="calendar" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Calendar View</TabsTrigger>
           </TabsList>
 
           <TabsContent value="records" className="space-y-6">
-            <Card className="animate-slide-in-up card-glow border-slate-200">
+            <Card className="animate-slide-in-up card-glow border-gray-200">
               <CardHeader>
-                <CardTitle className="text-slate-900">My Attendance History</CardTitle>
-                <CardDescription className="text-slate-700">
+                <CardTitle className="text-gray-900">My Attendance History</CardTitle>
+                <CardDescription className="text-gray-800 font-medium">
                   Your complete attendance records
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border border-slate-200">
+                <div className="rounded-md border border-gray-200">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-slate-800 font-semibold">Date</TableHead>
-                        <TableHead className="text-slate-800 font-semibold">Check In</TableHead>
-                        <TableHead className="text-slate-800 font-semibold">Check Out</TableHead>
-                        <TableHead className="text-slate-800 font-semibold">Total Hours</TableHead>
-                        <TableHead className="text-slate-800 font-semibold">Status</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Date</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Check In</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Check Out</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Total Hours</TableHead>
+                        <TableHead className="text-gray-900 font-semibold">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {attendanceRecords.map((record) => (
                         <TableRow key={record.id}>
-                          <TableCell className="font-medium text-slate-900">
+                          <TableCell className="font-medium text-gray-900">
                             {format(new Date(record.date), 'MMM dd, yyyy')}
                           </TableCell>
-                          <TableCell className="text-slate-800">{record.check_in || '-'}</TableCell>
-                          <TableCell className="text-slate-800">{record.check_out || '-'}</TableCell>
-                          <TableCell className="text-slate-800">
+                          <TableCell className="text-gray-800 font-medium">{record.check_in || '-'}</TableCell>
+                          <TableCell className="text-gray-800 font-medium">{record.check_out || '-'}</TableCell>
+                          <TableCell className="text-gray-800 font-medium">
                             {record.total_hours ? `${record.total_hours.toFixed(1)}h` : '-'}
                           </TableCell>
                           <TableCell>
@@ -298,6 +298,10 @@ export default function EmployeeAttendancePage() {
                               variant={
                                 record.status === 'present' ? 'default' :
                                 record.status === 'late' ? 'destructive' : 'secondary'
+                              }
+                              className={
+                                record.status === 'present' ? 'bg-emerald-600 text-white' :
+                                record.status === 'late' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-800'
                               }
                             >
                               {record.status}
@@ -314,10 +318,10 @@ export default function EmployeeAttendancePage() {
 
           <TabsContent value="calendar" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="animate-slide-in-left card-glow border-slate-200">
+              <Card className="animate-slide-in-left card-glow border-gray-200">
                 <CardHeader>
-                  <CardTitle className="text-slate-900">Select Date</CardTitle>
-                  <CardDescription className="text-slate-700">
+                  <CardTitle className="text-gray-900">Select Date</CardTitle>
+                  <CardDescription className="text-gray-800 font-medium">
                     Choose a date to view attendance details
                   </CardDescription>
                 </CardHeader>
@@ -326,14 +330,14 @@ export default function EmployeeAttendancePage() {
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
-                    className="rounded-md border border-slate-200"
+                    className="rounded-md border border-gray-200"
                   />
                 </CardContent>
               </Card>
 
-              <Card className="animate-slide-in-right card-glow border-slate-200">
+              <Card className="animate-slide-in-right card-glow border-gray-200">
                 <CardHeader>
-                  <CardTitle className="text-slate-900">
+                  <CardTitle className="text-gray-900">
                     Attendance for {selectedDate ? format(selectedDate, 'MMMM dd, yyyy') : 'Select a date'}
                   </CardTitle>
                 </CardHeader>
@@ -347,26 +351,30 @@ export default function EmployeeAttendancePage() {
                         if (dayRecord) {
                           return (
                             <div className="space-y-3">
-                              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                                <span className="font-medium text-green-800">Check In</span>
-                                <Badge variant="outline" className="border-green-300 text-green-800">{dayRecord.check_in || 'Not recorded'}</Badge>
+                              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                                <span className="font-semibold text-emerald-800">Check In</span>
+                                <Badge variant="outline" className="border-emerald-300 text-emerald-800 font-semibold">{dayRecord.check_in || 'Not recorded'}</Badge>
                               </div>
                               <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                                <span className="font-medium text-red-800">Check Out</span>
-                                <Badge variant="outline" className="border-red-300 text-red-800">{dayRecord.check_out || 'Not recorded'}</Badge>
+                                <span className="font-semibold text-red-800">Check Out</span>
+                                <Badge variant="outline" className="border-red-300 text-red-800 font-semibold">{dayRecord.check_out || 'Not recorded'}</Badge>
                               </div>
                               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <span className="font-medium text-blue-800">Total Hours</span>
-                                <Badge variant="default" className="bg-blue-600 text-white">
+                                <span className="font-semibold text-blue-800">Total Hours</span>
+                                <Badge variant="default" className="bg-blue-600 text-white font-semibold">
                                   {dayRecord.total_hours ? `${dayRecord.total_hours.toFixed(1)}h` : '0h'}
                                 </Badge>
                               </div>
                               <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
-                                <span className="font-medium text-purple-800">Status</span>
+                                <span className="font-semibold text-purple-800">Status</span>
                                 <Badge 
                                   variant={
                                     dayRecord.status === 'present' ? 'default' :
                                     dayRecord.status === 'late' ? 'destructive' : 'secondary'
+                                  }
+                                  className={
+                                    dayRecord.status === 'present' ? 'bg-emerald-600 text-white' :
+                                    dayRecord.status === 'late' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-800'
                                   }
                                 >
                                   {dayRecord.status}
@@ -376,18 +384,18 @@ export default function EmployeeAttendancePage() {
                           );
                         } else {
                           return (
-                            <div className="text-center py-8 text-slate-600">
-                              <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-                              <p className="font-medium">No attendance record for this date</p>
+                            <div className="text-center py-8 text-gray-700">
+                              <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                              <p className="font-semibold">No attendance record for this date</p>
                             </div>
                           );
                         }
                       })()}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-slate-600">
-                      <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-                      <p className="font-medium">Please select a date to view details</p>
+                    <div className="text-center py-8 text-gray-700">
+                      <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <p className="font-semibold">Please select a date to view details</p>
                     </div>
                   )}
                 </CardContent>

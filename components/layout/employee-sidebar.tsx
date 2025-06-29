@@ -60,19 +60,19 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex flex-col bg-gradient-to-b from-slate-800 via-slate-700 to-slate-800 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0 shadow-2xl',
+          'fixed inset-y-0 left-0 z-30 flex flex-col bg-gradient-to-b from-emerald-800 via-emerald-700 to-emerald-800 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0 shadow-2xl',
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           collapsed ? 'w-16' : 'w-64'
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-600/50">
+        <div className="flex items-center justify-between p-4 border-b border-emerald-600/50">
           <div className={cn('flex items-center', collapsed && 'justify-center')}>
-            <div className="bg-gradient-to-r from-slate-600 to-slate-700 p-2 rounded-lg shadow-lg">
+            <div className="bg-emerald-600 p-2 rounded-lg shadow-lg">
               <Target className="h-6 w-6" />
             </div>
             {!collapsed && (
-              <span className="ml-3 text-xl font-semibold">
+              <span className="ml-3 text-xl font-bold">
                 {t('employeePortal')}
               </span>
             )}
@@ -80,7 +80,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
           <Button
             variant="ghost"
             size="sm"
-            className="hidden lg:flex text-slate-400 hover:text-white hover:bg-slate-600/50"
+            className="hidden lg:flex text-emerald-300 hover:text-white hover:bg-emerald-600/50"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
@@ -100,10 +100,10 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200',
+                  'group flex items-center px-3 py-3 text-sm font-semibold rounded-xl transition-all duration-200',
                   isActive
-                    ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg'
-                    : 'text-slate-300 hover:bg-slate-600/50 hover:text-white',
+                    ? 'bg-emerald-600 text-white shadow-lg'
+                    : 'text-emerald-200 hover:bg-emerald-600/50 hover:text-white',
                   collapsed && 'justify-center px-2'
                 )}
                 onClick={() => setOpen(false)}
@@ -111,7 +111,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
                 <item.icon
                   className={cn(
                     'h-5 w-5 flex-shrink-0 transition-colors duration-200',
-                    isActive ? 'text-white' : 'text-slate-400 group-hover:text-white',
+                    isActive ? 'text-white' : 'text-emerald-300 group-hover:text-white',
                     !collapsed && 'mr-3'
                   )}
                 />
@@ -128,13 +128,13 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
 
         {/* Quick Actions */}
         {!collapsed && (
-          <div className="px-4 py-4 border-t border-slate-600/50">
-            <p className="text-xs text-slate-400 mb-3 font-medium">{t('quickActions')}</p>
+          <div className="px-4 py-4 border-t border-emerald-600/50">
+            <p className="text-xs text-emerald-300 mb-3 font-semibold">{t('quickActions')}</p>
             <div className="space-y-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-slate-300 hover:bg-slate-600/50 hover:text-white"
+                className="w-full justify-start text-emerald-200 hover:bg-emerald-600/50 hover:text-white font-medium"
               >
                 <Coffee className="h-4 w-4 mr-2" />
                 Take Break
@@ -142,7 +142,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-slate-300 hover:bg-slate-600/50 hover:text-white"
+                className="w-full justify-start text-emerald-200 hover:bg-emerald-600/50 hover:text-white font-medium"
               >
                 <Clock className="h-4 w-4 mr-2" />
                 Check Status
@@ -152,19 +152,19 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
         )}
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-600/50">
+        <div className="p-4 border-t border-emerald-600/50">
           {!collapsed && (
             <div className="mb-4">
-              <p className="text-xs text-slate-400 mb-1">{t('signIn')}</p>
-              <p className="text-sm font-medium">{t('employees')}</p>
-              <p className="text-xs text-slate-400">{user?.email || 'employee@company.com'}</p>
+              <p className="text-xs text-emerald-300 mb-1 font-medium">{t('signIn')}</p>
+              <p className="text-sm font-semibold text-white">{t('employees')}</p>
+              <p className="text-xs text-emerald-300 font-medium">{user?.email || 'employee@company.com'}</p>
             </div>
           )}
           <Button
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              'w-full text-slate-300 hover:bg-red-600/20 hover:text-red-400 transition-all duration-200',
+              'w-full text-emerald-200 hover:bg-red-600/20 hover:text-red-300 transition-all duration-200 font-semibold',
               collapsed ? 'px-2' : 'justify-start'
             )}
           >

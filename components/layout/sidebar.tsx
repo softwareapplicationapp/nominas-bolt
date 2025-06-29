@@ -63,25 +63,25 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex flex-col bg-slate-800 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0',
+          'fixed inset-y-0 left-0 z-30 flex flex-col bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0 shadow-2xl',
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           collapsed ? 'w-16' : 'w-64'
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-600">
+        <div className="flex items-center justify-between p-4 border-b border-blue-700/50">
           <div className={cn('flex items-center', collapsed && 'justify-center')}>
-            <div className="bg-slate-600 p-2 rounded-lg">
+            <div className="bg-blue-700 p-2 rounded-lg shadow-lg">
               <Building2 className="h-6 w-6" />
             </div>
             {!collapsed && (
-              <span className="ml-3 text-xl font-semibold">ArcusHR</span>
+              <span className="ml-3 text-xl font-bold">ArcusHR</span>
             )}
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="hidden lg:flex text-slate-400 hover:text-white hover:bg-slate-600"
+            className="hidden lg:flex text-blue-300 hover:text-white hover:bg-blue-700/50"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
@@ -101,10 +101,10 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                  'group flex items-center px-3 py-3 text-sm font-semibold rounded-xl transition-all duration-200',
                   isActive
-                    ? 'bg-slate-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-600 hover:text-white',
+                    ? 'bg-blue-700 text-white shadow-lg'
+                    : 'text-blue-200 hover:bg-blue-700/50 hover:text-white',
                   collapsed && 'justify-center px-2'
                 )}
                 onClick={() => setOpen(false)}
@@ -112,7 +112,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                 <item.icon
                   className={cn(
                     'h-5 w-5 flex-shrink-0',
-                    isActive ? 'text-white' : 'text-slate-400 group-hover:text-white',
+                    isActive ? 'text-white' : 'text-blue-300 group-hover:text-white',
                     !collapsed && 'mr-3'
                   )}
                 />
@@ -123,19 +123,19 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-600">
+        <div className="p-4 border-t border-blue-700/50">
           {!collapsed && (
             <div className="mb-4">
-              <p className="text-xs text-slate-400 mb-1">{t('signIn')}</p>
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-slate-400">{user?.email || 'admin@company.com'}</p>
+              <p className="text-xs text-blue-300 mb-1 font-medium">{t('signIn')}</p>
+              <p className="text-sm font-semibold text-white">Admin User</p>
+              <p className="text-xs text-blue-300 font-medium">{user?.email || 'admin@company.com'}</p>
             </div>
           )}
           <Button
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              'w-full text-slate-300 hover:bg-slate-600 hover:text-white',
+              'w-full text-blue-200 hover:bg-red-600/20 hover:text-red-300 font-semibold',
               collapsed ? 'px-2' : 'justify-start'
             )}
           >
