@@ -107,23 +107,40 @@ export const dbRun = async (sql: string, params: any[] = []) => {
     }
 
     if (q.startsWith('insert into employees')) {
+      // The SQL query from auth/register/route.ts:
+      // INSERT INTO employees (user_id, employee_id, first_name, last_name, email, department, position, company_id, status)
+      // VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      // Parameters: [user.id, 'EMP001', 'Admin', 'User', email, 'Administration', 'Administrator', companyId, 'active']
+      
       const employeeData: any = {
+        user_id: params[0],
         employee_id: params[1],
         first_name: params[2],
         last_name: params[3],
         email: params[4],
-        department: params[6],
-        position: params[7],
-        start_date: params[8],
-        company_id: params[11],
-        status: params[12] || 'active',
+        department: params[5],
+        position: params[6],
+        company_id: params[7],
+        status: params[8] || 'active',
       };
 
-      // Add optional fields only if they have values
-      if (params[0]) employeeData.user_id = params[0];
-      if (params[5]) employeeData.phone = params[5];
-      if (params[9]) employeeData.salary = params[9];
-      if (params[10]) employeeData.location = params[10];
+      // For the more complex employee creation from employees API
+      if (params.length > 9) {
+        // This is from the employees API with more fields
+        // INSERT INTO employees (user_id, employee_id, first_name, last_name, email, phone, department, position, start_date, salary, location, company_id)
+        employeeData.phone = params[5];
+        employeeData.department = params[6];
+        employeeData.position = params[7];
+        employeeData.start_date = params[8];
+        employeeData.salary = params[9];
+        employeeData.location = params[10];
+        employeeData.company_id = params[11];
+        employeeData.status = params[12] || 'active';
+      } else {
+        // Simple employee creation from registration
+        // Set default values for missing fields
+        employeeData.start_date = new Date().toISOString().split('T')[0];
+      }
 
       const { data, error } = await supabase
         .from('employees')
