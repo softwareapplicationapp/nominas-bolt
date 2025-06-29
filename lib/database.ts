@@ -412,7 +412,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return { count: count || 0 };
     }
 
-    // Payroll sum query - FIXED: Use proper date comparison instead of LIKE
+    // Payroll sum query - FIXED: Use proper date range calculation
     if (q.includes('coalesce(sum(net_pay), 0) as total from payroll')) {
       const { data: employees } = await supabase
         .from('employees')
@@ -425,9 +425,17 @@ export const dbGet = async (sql: string, params: any[] = []) => {
 
       const employeeIds = employees.map(e => e.id);
       
-      // Use proper date range comparison instead of LIKE
-      const startOfMonth = `${params[1]}-01`;
-      const endOfMonth = `${params[1]}-31`; // This will work for most months, Supabase will handle edge cases
+      // Parse the year-month parameter (e.g., "2024-06")
+      const yearMonth = params[1];
+      const [year, month] = yearMonth.split('-');
+      
+      // Calculate the correct start and end dates for the month
+      const startOfMonth = `${year}-${month.padStart(2, '0')}-01`;
+      
+      // Calculate the last day of the month properly
+      const nextMonth = new Date(parseInt(year), parseInt(month), 1);
+      const lastDayOfMonth = new Date(nextMonth.getTime() - 1);
+      const endOfMonth = lastDayOfMonth.toISOString().split('T')[0];
       
       const { data, error } = await supabase
         .from('payroll')
