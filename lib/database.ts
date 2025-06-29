@@ -251,7 +251,7 @@ export const dbRun = async (sql: string, params: any[] = []) => {
           .update({ check_in: params[0], status: params[1] })
           .eq('id', params[2]);
         if (error) throw error;
-        return { lastID: params[2], changes:1 };
+        return { lastID: params[2], changes: 1 };
       } else if (q.includes('check_out = ?')) {
         const { error } = await supabase
           .from('attendance')
@@ -322,53 +322,71 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
-    // FIXED: Simplified approach for employee profile with role
+    // CRITICAL FIX: This is the main query that's failing
     if (q.includes('select e.*, u.role from employees e join users u on e.user_id = u.id where e.user_id = ?')) {
-      console.log('=== Employee profile query (SIMPLIFIED) ===');
+      console.log('=== DETAILED EMPLOYEE PROFILE QUERY DEBUG ===');
+      console.log('SQL Query:', q);
       console.log('Looking for user_id:', params[0]);
       console.log('User ID type:', typeof params[0]);
+      console.log('User ID length:', params[0]?.length);
       
-      // First, get the employee data directly
-      const { data: employeeData, error: employeeError } = await supabase
+      // First, let's check if the employee exists at all
+      console.log('Step 1: Checking if employee exists...');
+      const { data: employeeCheck, error: employeeCheckError } = await supabase
         .from('employees')
         .select('*')
-        .eq('user_id', params[0])
-        .maybeSingle();
+        .eq('user_id', params[0]);
       
-      if (employeeError) {
-        console.error('Employee query error:', employeeError);
-        throw employeeError;
+      console.log('Employee check result:', employeeCheck);
+      console.log('Employee check error:', employeeCheckError);
+      
+      if (employeeCheckError) {
+        console.error('Employee check failed:', employeeCheckError);
+        throw employeeCheckError;
       }
       
-      if (!employeeData) {
-        console.log('No employee found for user_id:', params[0]);
+      if (!employeeCheck || employeeCheck.length === 0) {
+        console.log('❌ No employee found with user_id:', params[0]);
+        
+        // Let's check what employees exist in the database
+        console.log('Step 2: Checking all employees in database...');
+        const { data: allEmployees, error: allEmployeesError } = await supabase
+          .from('employees')
+          .select('id, user_id, first_name, last_name, email');
+        
+        console.log('All employees in database:', allEmployees);
+        console.log('All employees error:', allEmployeesError);
+        
         return null;
       }
       
-      console.log('Employee data found:', employeeData);
+      console.log('✅ Employee found:', employeeCheck[0]);
       
-      // Then get the user role separately
+      // Now get the user role
+      console.log('Step 3: Getting user role...');
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('role')
         .eq('id', params[0])
         .maybeSingle();
       
+      console.log('User data result:', userData);
+      console.log('User error:', userError);
+      
       if (userError) {
-        console.error('User query error:', userError);
-        // Don't throw error here, just continue without role
-        console.log('Continuing without role data');
+        console.error('User query failed:', userError);
+        // Don't throw error, just continue without role
       }
       
-      console.log('User data found:', userData);
-      
-      // Combine the data
+      // Combine the results
       const result = {
-        ...employeeData,
-        role: userData?.role || 'employee' // Default to 'employee' if no role found
+        ...employeeCheck[0],
+        role: userData?.role || 'employee'
       };
       
-      console.log('Final result:', result);
+      console.log('✅ Final combined result:', result);
+      console.log('=== END DETAILED DEBUG ===');
+      
       return result;
     }
 
