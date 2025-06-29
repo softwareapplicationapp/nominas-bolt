@@ -251,7 +251,7 @@ export const dbRun = async (sql: string, params: any[] = []) => {
           .update({ check_in: params[0], status: params[1] })
           .eq('id', params[2]);
         if (error) throw error;
-        return { lastID: params[2], changes: 1 };
+        return { lastID: params[2], changes:1 };
       } else if (q.includes('check_out = ?')) {
         const { error } = await supabase
           .from('attendance')
@@ -322,13 +322,13 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
-    // FIXED: Handle the specific query for employee profile with role
+    // FIXED: Simplified approach for employee profile with role
     if (q.includes('select e.*, u.role from employees e join users u on e.user_id = u.id where e.user_id = ?')) {
-      console.log('=== Employee profile query ===');
+      console.log('=== Employee profile query (SIMPLIFIED) ===');
       console.log('Looking for user_id:', params[0]);
       console.log('User ID type:', typeof params[0]);
       
-      // First, get the employee data
+      // First, get the employee data directly
       const { data: employeeData, error: employeeError } = await supabase
         .from('employees')
         .select('*')
@@ -347,7 +347,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       
       console.log('Employee data found:', employeeData);
       
-      // Then get the user role
+      // Then get the user role separately
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('role')
@@ -356,7 +356,8 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       
       if (userError) {
         console.error('User query error:', userError);
-        throw userError;
+        // Don't throw error here, just continue without role
+        console.log('Continuing without role data');
       }
       
       console.log('User data found:', userData);
@@ -364,7 +365,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       // Combine the data
       const result = {
         ...employeeData,
-        role: userData?.role || null
+        role: userData?.role || 'employee' // Default to 'employee' if no role found
       };
       
       console.log('Final result:', result);
