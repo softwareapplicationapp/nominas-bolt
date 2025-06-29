@@ -134,11 +134,11 @@ export default function EmployeeDashboardPage() {
       <div className="space-y-8 p-6">
         {/* Welcome Header */}
         <div className="animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl p-8 hover-lift border border-emerald-200">
+          <div className="dashboard-welcome-card">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
                 <div className="relative">
-                  <div className="w-20 h-20 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                  <div className="w-20 h-20 profile-avatar">
                     {profile ? `${profile.first_name[0]}${profile.last_name[0]}` : user?.email?.[0]?.toUpperCase() || 'E'}
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-white animate-bounce-in"></div>
@@ -209,7 +209,7 @@ export default function EmployeeDashboardPage() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="card-interactive animate-scale-in stagger-1 hover-glow border-blue-200">
+          <Card className="stat-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -218,8 +218,8 @@ export default function EmployeeDashboardPage() {
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Horas Hoy</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full animate-float">
-                  <Clock className="h-6 w-6 text-blue-600" />
+                <div className="employee-stat-icon-blue">
+                  <Clock className="h-6 w-6" />
                 </div>
               </div>
               <div className="mt-4">
@@ -229,7 +229,7 @@ export default function EmployeeDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-2 hover-glow border-emerald-200">
+          <Card className="stat-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -238,8 +238,8 @@ export default function EmployeeDashboardPage() {
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Esta Semana</p>
                 </div>
-                <div className="p-3 bg-emerald-100 rounded-full animate-float">
-                  <TrendingUp className="h-6 w-6 text-emerald-600" />
+                <div className="employee-stat-icon-emerald">
+                  <TrendingUp className="h-6 w-6" />
                 </div>
               </div>
               <div className="mt-4">
@@ -249,7 +249,7 @@ export default function EmployeeDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-3 hover-glow border-purple-200">
+          <Card className="stat-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -258,8 +258,8 @@ export default function EmployeeDashboardPage() {
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Asistencia</p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-full animate-float">
-                  <Award className="h-6 w-6 text-purple-600" />
+                <div className="employee-stat-icon-purple">
+                  <Award className="h-6 w-6" />
                 </div>
               </div>
               <div className="mt-4">
@@ -269,7 +269,7 @@ export default function EmployeeDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-4 hover-glow border-amber-200">
+          <Card className="stat-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -278,8 +278,8 @@ export default function EmployeeDashboardPage() {
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Días de Permiso</p>
                 </div>
-                <div className="p-3 bg-amber-100 rounded-full animate-float">
-                  <Calendar className="h-6 w-6 text-amber-600" />
+                <div className="employee-stat-icon-amber">
+                  <Calendar className="h-6 w-6" />
                 </div>
               </div>
               <div className="mt-4">
@@ -304,28 +304,28 @@ export default function EmployeeDashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button className="w-full btn-primary justify-start" size="lg" asChild>
+              <Button className="quick-action-button quick-action-blue" size="lg" asChild>
                 <a href="/employee/leaves">
                   <Calendar className="h-5 w-5 mr-3" />
                   Solicitar Permiso
                 </a>
               </Button>
               
-              <Button className="w-full btn-success justify-start" size="lg" asChild>
+              <Button className="quick-action-button quick-action-emerald" size="lg" asChild>
                 <a href="/employee/attendance">
                   <ClockIcon className="h-5 w-5 mr-3" />
                   Ver Horario
                 </a>
               </Button>
               
-              <Button className="w-full btn-warning justify-start" size="lg" asChild>
+              <Button className="quick-action-button quick-action-amber" size="lg" asChild>
                 <a href="/employee/profile">
                   <User className="h-5 w-5 mr-3" />
                   Actualizar Perfil
                 </a>
               </Button>
               
-              <Button className="w-full btn-danger justify-start" size="lg">
+              <Button className="quick-action-button quick-action-red" size="lg">
                 <Coffee className="h-5 w-5 mr-3" />
                 Tiempo de Descanso
               </Button>
@@ -346,7 +346,7 @@ export default function EmployeeDashboardPage() {
             <CardContent>
               <div className="space-y-4">
                 {stats?.checkInTime && (
-                  <div className="flex items-start space-x-4 p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
+                  <div className="activity-card activity-card-emerald">
                     <div className="p-2 bg-emerald-100 rounded-full">
                       <CheckCircle className="h-4 w-4 text-emerald-600" />
                     </div>
@@ -357,7 +357,7 @@ export default function EmployeeDashboardPage() {
                   </div>
                 )}
                 
-                <div className="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg hover-scale border border-blue-200">
+                <div className="activity-card activity-card-blue">
                   <div className="p-2 bg-blue-100 rounded-full">
                     <Calendar className="h-4 w-4 text-blue-600" />
                   </div>
@@ -369,7 +369,7 @@ export default function EmployeeDashboardPage() {
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-4 p-4 bg-purple-50 rounded-lg hover-scale border border-purple-200">
+                <div className="activity-card activity-card-purple">
                   <div className="p-2 bg-purple-100 rounded-full">
                     <Award className="h-4 w-4 text-purple-600" />
                   </div>
@@ -395,35 +395,35 @@ export default function EmployeeDashboardPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg hover-scale border border-blue-200">
+                <div className="profile-field">
                   <Mail className="h-5 w-5 text-blue-600" />
                   <div>
-                    <p className="text-sm text-gray-700 font-semibold">Correo</p>
-                    <p className="font-bold text-gray-900">{user?.email}</p>
+                    <p className="profile-field-label">Correo</p>
+                    <p className="profile-field-value">{user?.email}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3 p-3 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
+                <div className="profile-field">
                   <Briefcase className="h-5 w-5 text-emerald-600" />
                   <div>
-                    <p className="text-sm text-gray-700 font-semibold">Departamento</p>
-                    <p className="font-bold text-gray-900">{profile?.department || 'No asignado'}</p>
+                    <p className="profile-field-label">Departamento</p>
+                    <p className="profile-field-value">{profile?.department || 'No asignado'}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg hover-scale border border-purple-200">
+                <div className="profile-field">
                   <MapPin className="h-5 w-5 text-purple-600" />
                   <div>
-                    <p className="text-sm text-gray-700 font-semibold">Ubicación</p>
-                    <p className="font-bold text-gray-900">{profile?.location || 'No especificada'}</p>
+                    <p className="profile-field-label">Ubicación</p>
+                    <p className="profile-field-value">{profile?.location || 'No especificada'}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3 p-3 bg-amber-50 rounded-lg hover-scale border border-amber-200">
+                <div className="profile-field">
                   <CalendarDays className="h-5 w-5 text-amber-600" />
                   <div>
-                    <p className="text-sm text-gray-700 font-semibold">Fecha de Inicio</p>
-                    <p className="font-bold text-gray-900">
+                    <p className="profile-field-label">Fecha de Inicio</p>
+                    <p className="profile-field-value">
                       {profile?.start_date ? format(new Date(profile.start_date), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined }) : 'No disponible'}
                     </p>
                   </div>
@@ -442,7 +442,7 @@ export default function EmployeeDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 bg-amber-50 rounded-lg hover-scale border border-amber-200">
+                <div className="activity-card activity-card-amber">
                   <div>
                     <p className="font-semibold text-amber-800">Solicitudes Pendientes</p>
                     <p className="text-sm text-amber-700 font-medium">Esperando aprobación</p>
@@ -452,7 +452,7 @@ export default function EmployeeDashboardPage() {
                   </Badge>
                 </div>
                 
-                <div className="flex justify-between items-center p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
+                <div className="activity-card activity-card-emerald">
                   <div>
                     <p className="font-semibold text-emerald-800">Permisos Aprobados</p>
                     <p className="text-sm text-emerald-700 font-medium">Este año</p>
@@ -462,7 +462,7 @@ export default function EmployeeDashboardPage() {
                   </Badge>
                 </div>
                 
-                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg hover-scale border border-blue-200">
+                <div className="activity-card activity-card-blue">
                   <div>
                     <p className="font-semibold text-blue-800">Días Restantes</p>
                     <p className="text-sm text-blue-700 font-medium">Disponibles para usar</p>

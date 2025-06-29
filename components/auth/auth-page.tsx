@@ -166,7 +166,7 @@ export default function AuthPage() {
 
           {/* Auth Forms */}
           <div className="lg:max-w-md animate-slide-in-right">
-            <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm hover-glow">
+            <Card className="auth-card">
               <CardHeader className="text-center pb-8">
                 <CardTitle className="text-3xl font-bold text-gray-900 mb-2">{language === 'es' ? 'Comenzar' : 'Get Started'}</CardTitle>
                 <CardDescription className="text-lg text-gray-800 font-semibold">
@@ -177,11 +177,11 @@ export default function AuthPage() {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="signin" className="space-y-6">
-                  <TabsList className="grid w-full grid-cols-2 bg-blue-50">
-                    <TabsTrigger value="signin" className="data-[state=active]:bg-white data-[state=active]:shadow-md font-semibold text-gray-900">
+                  <TabsList className="tabs-improved">
+                    <TabsTrigger value="signin" className="auth-tab">
                       {language === 'es' ? 'Iniciar Sesión' : 'Sign In'}
                     </TabsTrigger>
-                    <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:shadow-md font-semibold text-gray-900">
+                    <TabsTrigger value="signup" className="auth-tab">
                       {language === 'es' ? 'Registrarse' : 'Sign Up'}
                     </TabsTrigger>
                   </TabsList>
@@ -221,7 +221,7 @@ export default function AuthPage() {
                           type="email"
                           placeholder={userType === 'manager' ? 'admin@company.com' : 'employee@company.com'}
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
+                          className="auth-input"
                         />
                       </div>
                       <div className="space-y-2">
@@ -232,12 +232,12 @@ export default function AuthPage() {
                           type="password"
                           placeholder="••••••••"
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
+                          className="auth-input"
                         />
                       </div>
                       <Button 
                         type="submit" 
-                        className="w-full h-12 btn-primary text-lg font-semibold" 
+                        className="w-full h-12 auth-button" 
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -261,13 +261,13 @@ export default function AuthPage() {
                           name="company"
                           placeholder="Acme Corporation"
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
+                          className="auth-input"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="industry" className="text-gray-900 font-semibold">{language === 'es' ? 'Industria' : 'Industry'}</Label>
                         <Select value={industry} onValueChange={setIndustry}>
-                          <SelectTrigger className="h-12 hover-glow border-gray-300 text-gray-900">
+                          <SelectTrigger className="form-select">
                             <SelectValue placeholder={language === 'es' ? 'Selecciona una opción' : 'Select industry'} />
                           </SelectTrigger>
                           <SelectContent>
@@ -288,7 +288,7 @@ export default function AuthPage() {
                           type="email"
                           placeholder="admin@company.com"
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
+                          className="auth-input"
                         />
                       </div>
                       <div className="space-y-2">
@@ -299,7 +299,7 @@ export default function AuthPage() {
                           type="password"
                           placeholder="••••••••"
                           required
-                          className="h-12 hover-glow focus:scale-105 transition-all duration-200 border-gray-300 text-gray-900 placeholder:text-gray-600"
+                          className="auth-input"
                         />
                       </div>
                       <Button 
