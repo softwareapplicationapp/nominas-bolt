@@ -26,7 +26,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, Calendar as CalendarIcon, Users, AlertCircle, CheckCircle, Plus, Loader2, Edit, Save, X, Filter } from 'lucide-react';
+import { Clock, Calendar as CalendarIcon, Users, AlertCircle, CheckCircle, Plus, Loader2, Edit, Save, X, Filter, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
@@ -63,6 +63,7 @@ export default function AttendancePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AttendanceRecord | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Filter states
   const [selectedEmployee, setSelectedEmployee] = useState<string>('all');
@@ -131,6 +132,91 @@ export default function AttendancePage() {
     });
 
     setFilteredRecords(filtered);
+  };
+
+  const downloadCSV = async () => {
+    setIsDownloading(true);
+    try {
+      // Prepare CSV data
+      const headers = [
+        'Empleado',
+        'Departamento', 
+        'Fecha',
+        'Entrada',
+        'Salida',
+        'Horas Totales',
+        'Estado',
+        'Notas'
+      ];
+
+      const csvData = filteredRecords.map(record => [
+        `${record.first_name} ${record.last_name}`,
+        record.department,
+        format(new Date(record.date), 'dd/MM/yyyy'),
+        record.check_in || '',
+        record.check_out || '',
+        record.total_hours ? record.total_hours.toFixed(2) : '0',
+        record.status === 'present' ? 'Presente' :
+        record.status === 'absent' ? 'Ausente' :
+        record.status === 'late' ? 'Tarde' :
+        record.status === 'half_day' ? 'Medio Día' : record.status,
+        record.notes || ''
+      ]);
+
+      // Create CSV content
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => 
+          row.map(cell => 
+            // Escape commas and quotes in CSV
+            typeof cell === 'string' && (cell.includes(',') || cell.includes('"')) 
+              ? `"${cell.replace(/"/g, '""')}"` 
+              : cell
+          ).join(',')
+        )
+      ].join('\n');
+
+      // Add BOM for proper UTF-8 encoding in Excel
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+      // Generate filename based on filters
+      let filename = 'asistencia';
+      
+      if (selectedEmployee !== 'all') {
+        const employee = employees.find(emp => emp.id.toString() === selectedEmployee);
+        if (employee) {
+          filename += `_${employee.first_name}_${employee.last_name}`;
+        }
+      }
+      
+      if (selectedMonth) {
+        const monthYear = format(new Date(selectedMonth + '-01'), 'MM-yyyy');
+        filename += `_${monthYear}`;
+      }
+      
+      filename += `_${format(new Date(), 'dd-MM-yyyy')}.csv`;
+
+      // Download the file
+      const link = document.createElement('a');
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+      toast.success(`Archivo CSV descargado: ${filename}`);
+    } catch (error: any) {
+      console.error('Error downloading CSV:', error);
+      toast.error('Error al descargar el archivo CSV');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const loadAttendanceForDate = async (date: string) => {
@@ -268,112 +354,133 @@ export default function AttendancePage() {
           <p className="text-gray-600 mt-2">Track employee attendance and working hours</p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Attendance
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Attendance Record</DialogTitle>
-              <DialogDescription>
-                Record employee attendance for a specific date
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmitAttendance} className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="employee">Employee</Label>
-                <Select value={formData.employeeId} onValueChange={(value) => setFormData({...formData, employeeId: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select employee" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employees.map(emp => (
-                      <SelectItem key={emp.id} value={emp.id.toString()}>
-                        {emp.first_name} {emp.last_name} - {emp.department}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <Input 
-                  id="date" 
-                  type="date" 
-                  value={formData.date}
-                  onChange={(e) => setFormData({...formData, date: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="present">Present</SelectItem>
-                    <SelectItem value="absent">Absent</SelectItem>
-                    <SelectItem value="late">Late</SelectItem>
-                    <SelectItem value="half_day">Half Day</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {formData.status !== 'absent' && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="checkIn">Check In</Label>
-                      <Input 
-                        id="checkIn" 
-                        type="time" 
-                        value={formData.checkIn}
-                        onChange={(e) => setFormData({...formData, checkIn: e.target.value})}
-                      />
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={downloadCSV}
+            disabled={isDownloading || filteredRecords.length === 0}
+            className="hover:bg-green-50 hover:border-green-300"
+          >
+            {isDownloading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Descargando...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Descargar CSV ({filteredRecords.length})
+              </>
+            )}
+          </Button>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Attendance
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add Attendance Record</DialogTitle>
+                <DialogDescription>
+                  Record employee attendance for a specific date
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmitAttendance} className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="employee">Employee</Label>
+                  <Select value={formData.employeeId} onValueChange={(value) => setFormData({...formData, employeeId: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employees.map(emp => (
+                        <SelectItem key={emp.id} value={emp.id.toString()}>
+                          {emp.first_name} {emp.last_name} - {emp.department}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input 
+                    id="date" 
+                    type="date" 
+                    value={formData.date}
+                    onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="present">Present</SelectItem>
+                      <SelectItem value="absent">Absent</SelectItem>
+                      <SelectItem value="late">Late</SelectItem>
+                      <SelectItem value="half_day">Half Day</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {formData.status !== 'absent' && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="checkIn">Check In</Label>
+                        <Input 
+                          id="checkIn" 
+                          type="time" 
+                          value={formData.checkIn}
+                          onChange={(e) => setFormData({...formData, checkIn: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="checkOut">Check Out</Label>
+                        <Input 
+                          id="checkOut" 
+                          type="time" 
+                          value={formData.checkOut}
+                          onChange={(e) => setFormData({...formData, checkOut: e.target.value})}
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="checkOut">Check Out</Label>
-                      <Input 
-                        id="checkOut" 
-                        type="time" 
-                        value={formData.checkOut}
-                        onChange={(e) => setFormData({...formData, checkOut: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea 
-                  id="notes" 
-                  placeholder="Additional notes (optional)"
-                  rows={2}
-                  value={formData.notes}
-                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    'Add Record'
-                  )}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                  </>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea 
+                    id="notes" 
+                    placeholder="Additional notes (optional)"
+                    rows={2}
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      'Add Record'
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -483,7 +590,7 @@ export default function AttendancePage() {
                     </Select>
                   </div>
                   
-                  <div className="flex items-end">
+                  <div className="flex items-end space-x-2">
                     <Button 
                       variant="outline" 
                       onClick={() => {
@@ -494,9 +601,42 @@ export default function AttendancePage() {
                     >
                       Clear Filters
                     </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      onClick={downloadCSV}
+                      disabled={isDownloading || filteredRecords.length === 0}
+                      className="text-sm hover:bg-green-50 hover:border-green-300"
+                    >
+                      {isDownloading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
+
+              {/* Results Summary */}
+              {filteredRecords.length > 0 && (
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-blue-800 font-medium">
+                      Mostrando {filteredRecords.length} registros
+                      {selectedEmployee !== 'all' && (
+                        <span> para {employees.find(emp => emp.id.toString() === selectedEmployee)?.first_name} {employees.find(emp => emp.id.toString() === selectedEmployee)?.last_name}</span>
+                      )}
+                      {selectedMonth && (
+                        <span> en {format(new Date(selectedMonth + '-01'), 'MMMM yyyy')}</span>
+                      )}
+                    </span>
+                    <span className="text-blue-600 font-medium">
+                      Total horas: {filteredRecords.reduce((sum, record) => sum + (record.total_hours || 0), 0).toFixed(2)}h
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="rounded-md border">
                 <Table>
