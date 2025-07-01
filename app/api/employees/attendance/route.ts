@@ -1,3 +1,5 @@
+'use client';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth';
 import { dbRun, dbGet, dbAll } from '@/lib/database';
@@ -90,69 +92,73 @@ export async function POST(request: NextRequest) {
     console.log('Today:', today);
     console.log('Current time:', currentTime);
 
-    // Check if there's already an attendance record for today
-    const existingAttendance = await dbGet(`
-      SELECT * FROM attendance WHERE employee_id = ? AND date = ?
-    `, [employee.id, today]) as any;
-
-    console.log('Existing attendance:', existingAttendance);
-
     if (action === 'check_in') {
-      if (existingAttendance && existingAttendance.check_in) {
-        return NextResponse.json({ error: 'Already checked in today' }, { status: 400 });
-      }
+      // For check-in, always create a new record
+      console.log('Creating new check-in record');
+      
+      const result = await dbRun(`
+        INSERT INTO attendance (employee_id, date, check_in, status)
+        VALUES (?, ?, ?, 'present')
+      `, [employee.id, today, currentTime]) as any;
 
-      if (existingAttendance) {
-        // Update existing record
-        console.log('Updating existing attendance record with check_in');
-        await dbRun(`
-          UPDATE attendance 
-          SET check_in = ?, status = 'present'
-          WHERE id = ?
-        `, [currentTime, existingAttendance.id]);
-      } else {
-        // Create new record
-        console.log('Creating new attendance record with check_in');
-        await dbRun(`
-          INSERT INTO attendance (employee_id, date, check_in, status)
-          VALUES (?, ?, ?, 'present')
-        `, [employee.id, today, currentTime]);
-      }
+      console.log('New check-in record created with ID:', result.lastID);
+
+      // Return the new record
+      const newRecord = await dbGet(`
+        SELECT * FROM attendance WHERE id = ?
+      `, [result.lastID]);
+
+      console.log('New attendance record:', newRecord);
+      return NextResponse.json(newRecord);
+
     } else if (action === 'check_out') {
-      if (!existingAttendance || !existingAttendance.check_in) {
-        return NextResponse.json({ error: 'Must check in first' }, { status: 400 });
-      }
+      // For check-out, find the most recent check-in without check-out
+      console.log('Looking for most recent check-in without check-out');
+      
+      const openRecord = await dbGet(`
+        SELECT * FROM attendance 
+        WHERE employee_id = ? AND date = ? AND check_in IS NOT NULL AND check_out IS NULL
+        ORDER BY created_at DESC
+        LIMIT 1
+      `, [employee.id, today]) as any;
 
-      if (existingAttendance.check_out) {
-        return NextResponse.json({ error: 'Already checked out today' }, { status: 400 });
+      console.log('Open record found:', openRecord);
+
+      if (!openRecord) {
+        return NextResponse.json({ 
+          error: 'No open check-in found for today. Please check in first.' 
+        }, { status: 400 });
       }
 
       // Calculate total hours
-      const checkInTime = new Date(`2000-01-01 ${existingAttendance.check_in}`);
+      const checkInTime = new Date(`2000-01-01 ${openRecord.check_in}`);
       const checkOutTime = new Date(`2000-01-01 ${currentTime}`);
       const totalHours = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
 
       console.log('Calculating total hours:', {
-        checkIn: existingAttendance.check_in,
+        checkIn: openRecord.check_in,
         checkOut: currentTime,
         totalHours
       });
 
+      // Update the record with check-out time
       await dbRun(`
         UPDATE attendance 
         SET check_out = ?, total_hours = ?
         WHERE id = ?
-      `, [currentTime, totalHours, existingAttendance.id]);
+      `, [currentTime, totalHours, openRecord.id]);
+
+      // Return updated record
+      const updatedRecord = await dbGet(`
+        SELECT * FROM attendance WHERE id = ?
+      `, [openRecord.id]);
+
+      console.log('Updated attendance record:', updatedRecord);
+      return NextResponse.json(updatedRecord);
     }
 
-    // Return updated attendance record
-    const updatedAttendance = await dbGet(`
-      SELECT * FROM attendance WHERE employee_id = ? AND date = ?
-    `, [employee.id, today]);
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
 
-    console.log('Updated attendance record:', updatedAttendance);
-
-    return NextResponse.json(updatedAttendance);
   } catch (error) {
     console.error('Employee attendance action error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

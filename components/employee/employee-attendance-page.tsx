@@ -22,7 +22,9 @@ import {
   Timer,
   TrendingUp,
   Award,
-  Loader2
+  Loader2,
+  Plus,
+  AlertCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -38,13 +40,13 @@ interface AttendanceRecord {
   total_hours: number;
   status: string;
   notes?: string;
+  created_at: string;
 }
 
 export default function EmployeeAttendancePage() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [todayRecord, setTodayRecord] = useState<AttendanceRecord | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const { t, language } = useLanguage();
 
@@ -64,22 +66,14 @@ export default function EmployeeAttendancePage() {
       
       if (data && Array.isArray(data)) {
         setAttendanceRecords(data);
-        
-        // Find today's record
-        const today = new Date().toISOString().split('T')[0];
-        const todayAttendance = data.find((record: AttendanceRecord) => record.date === today);
-        console.log('Today record found:', todayAttendance);
-        setTodayRecord(todayAttendance || null);
       } else {
         console.log('No attendance data or invalid format');
         setAttendanceRecords([]);
-        setTodayRecord(null);
       }
     } catch (error: any) {
       console.error('Error loading attendance data:', error);
       toast.error('Error al cargar datos de asistencia: ' + error.message);
       setAttendanceRecords([]);
-      setTodayRecord(null);
     } finally {
       setLoading(false);
     }
@@ -91,8 +85,7 @@ export default function EmployeeAttendancePage() {
       console.log('=== Checking in ===');
       const data = await apiClient.checkInOut('check_in');
       console.log('Check-in response:', data);
-      setTodayRecord(data);
-      toast.success('¡Entrada registrada con éxito!');
+      toast.success('¡Nueva entrada registrada con éxito!');
       // Reload all data to refresh the table
       await loadAttendanceData();
     } catch (error: any) {
@@ -109,7 +102,6 @@ export default function EmployeeAttendancePage() {
       console.log('=== Checking out ===');
       const data = await apiClient.checkInOut('check_out');
       console.log('Check-out response:', data);
-      setTodayRecord(data);
       toast.success('¡Salida registrada con éxito!');
       // Reload all data to refresh the table
       await loadAttendanceData();
@@ -126,11 +118,19 @@ export default function EmployeeAttendancePage() {
   const averageHours = attendanceRecords.length > 0 ? totalHours / attendanceRecords.length : 0;
   const presentDays = attendanceRecords.filter(record => record.status === 'present').length;
 
+  // Get today's records
+  const today = new Date().toISOString().split('T')[0];
+  const todayRecords = attendanceRecords.filter(record => record.date === today);
+  const openCheckIn = todayRecords.find(record => record.check_in && !record.check_out);
+  const hasOpenCheckIn = !!openCheckIn;
+
   console.log('=== Stats calculation ===');
   console.log('Total records:', attendanceRecords.length);
   console.log('Total hours:', totalHours);
   console.log('Average hours:', averageHours);
   console.log('Present days:', presentDays);
+  console.log('Today records:', todayRecords.length);
+  console.log('Has open check-in:', hasOpenCheckIn);
 
   if (loading) {
     return (
@@ -163,36 +163,63 @@ export default function EmployeeAttendancePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                {todayRecord?.check_in && (
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    <span className="text-sm text-gray-900 font-semibold">Entrada a las {todayRecord.check_in}</span>
+            <div className="space-y-4">
+              {/* Today's Records Summary */}
+              {todayRecords.length > 0 && (
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-2">Registros de Hoy ({todayRecords.length})</h4>
+                  <div className="space-y-2">
+                    {todayRecords.map((record, index) => (
+                      <div key={record.id} className="flex items-center justify-between text-sm">
+                        <span className="text-blue-800">Sesión {index + 1}:</span>
+                        <div className="flex items-center space-x-2">
+                          {record.check_in && (
+                            <span className="text-emerald-600 font-medium">
+                              Entrada: {record.check_in}
+                            </span>
+                          )}
+                          {record.check_out ? (
+                            <span className="text-red-600 font-medium">
+                              Salida: {record.check_out}
+                            </span>
+                          ) : (
+                            <span className="text-amber-600 font-medium">
+                              (En curso)
+                            </span>
+                          )}
+                          {record.total_hours > 0 && (
+                            <span className="text-blue-600 font-medium">
+                              {record.total_hours.toFixed(2)}h
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
-                {todayRecord?.check_out && (
-                  <div className="flex items-center space-x-2">
-                    <LogOutIcon className="h-4 w-4 text-red-600" />
-                    <span className="text-sm text-gray-900 font-semibold">Salida a las {todayRecord.check_out}</span>
-                  </div>
-                )}
-                {todayRecord?.total_hours && todayRecord.total_hours > 0 && (
-                  <div className="flex items-center space-x-2">
-                    <Timer className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-gray-900 font-semibold">Horas totales: {todayRecord.total_hours.toFixed(1)}h</span>
-                  </div>
-                )}
-                {!todayRecord && (
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600 font-medium">No has fichado hoy</span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex space-x-2">
-                {!todayRecord?.check_in ? (
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  {hasOpenCheckIn ? (
+                    <div className="flex items-center space-x-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      <span className="text-sm text-amber-800 font-semibold">
+                        Tienes una entrada abierta desde las {openCheckIn?.check_in}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-gray-600 font-medium">
+                        Puedes registrar una nueva entrada
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex space-x-2">
                   <Button 
                     onClick={handleCheckIn}
                     disabled={actionLoading}
@@ -205,36 +232,46 @@ export default function EmployeeAttendancePage() {
                       </>
                     ) : (
                       <>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Marcar Entrada
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nueva Entrada
                       </>
                     )}
                   </Button>
-                ) : !todayRecord?.check_out ? (
-                  <Button 
-                    onClick={handleCheckOut}
-                    disabled={actionLoading}
-                    variant="outline"
-                    className="hover-glow border-gray-300 text-gray-800 hover:text-gray-900 font-semibold"
-                  >
-                    {actionLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Registrando...
-                      </>
-                    ) : (
-                      <>
-                        <LogOutIcon className="h-4 w-4 mr-2" />
-                        Marcar Salida
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Badge variant="default" className="text-lg px-4 py-2 bg-emerald-600 text-white font-semibold">
-                    Día Completado
-                  </Badge>
-                )}
+
+                  {hasOpenCheckIn && (
+                    <Button 
+                      onClick={handleCheckOut}
+                      disabled={actionLoading}
+                      variant="outline"
+                      className="hover-glow border-gray-300 text-gray-800 hover:text-gray-900 font-semibold"
+                    >
+                      {actionLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Registrando...
+                        </>
+                      ) : (
+                        <>
+                          <LogOutIcon className="h-4 w-4 mr-2" />
+                          Marcar Salida
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
+
+              {/* Today's Total */}
+              {todayRecords.length > 0 && (
+                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-emerald-800">Total de Horas Hoy:</span>
+                    <span className="text-2xl font-bold text-emerald-600">
+                      {todayRecords.reduce((sum, record) => sum + (record.total_hours || 0), 0).toFixed(2)}h
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -324,9 +361,13 @@ export default function EmployeeAttendancePage() {
                               {format(new Date(record.date), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined })}
                             </TableCell>
                             <TableCell className="text-gray-800 font-medium">{record.check_in || '-'}</TableCell>
-                            <TableCell className="text-gray-800 font-medium">{record.check_out || '-'}</TableCell>
                             <TableCell className="text-gray-800 font-medium">
-                              {record.total_hours ? `${record.total_hours.toFixed(1)}h` : '-'}
+                              {record.check_out || (
+                                <span className="text-amber-600 font-medium">En curso</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-gray-800 font-medium">
+                              {record.total_hours ? `${record.total_hours.toFixed(2)}h` : '-'}
                             </TableCell>
                             <TableCell>
                               <Badge 
@@ -387,37 +428,44 @@ export default function EmployeeAttendancePage() {
                     <div className="space-y-4">
                       {(() => {
                         const dateStr = format(selectedDate, 'yyyy-MM-dd');
-                        const dayRecord = attendanceRecords.find(r => r.date === dateStr);
+                        const dayRecords = attendanceRecords.filter(r => r.date === dateStr);
                         
-                        if (dayRecord) {
+                        if (dayRecords.length > 0) {
                           return (
                             <div className="space-y-3">
-                              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                                <span className="font-semibold text-emerald-800">Entrada</span>
-                                <Badge variant="outline" className="border-emerald-300 text-emerald-800 font-semibold">{dayRecord.check_in || 'No registrada'}</Badge>
-                              </div>
-                              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                                <span className="font-semibold text-red-800">Salida</span>
-                                <Badge variant="outline" className="border-red-300 text-red-800 font-semibold">{dayRecord.check_out || 'No registrada'}</Badge>
-                              </div>
-                              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <span className="font-semibold text-blue-800">Horas Totales</span>
-                                <Badge variant="default" className="bg-blue-600 text-white font-semibold">
-                                  {dayRecord.total_hours ? `${dayRecord.total_hours.toFixed(1)}h` : '0h'}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
-                                <span className="font-semibold text-purple-800">Estado</span>
-                                <Badge 
-                                  className={
-                                    dayRecord.status === 'present' ? 'badge-approved' :
-                                    dayRecord.status === 'late' ? 'badge-rejected' : 'badge-inactive'
-                                  }
-                                >
-                                  {dayRecord.status === 'present' ? 'Presente' :
-                                   dayRecord.status === 'absent' ? 'Ausente' :
-                                   dayRecord.status === 'late' ? 'Tarde' : dayRecord.status}
-                                </Badge>
+                              {dayRecords.map((record, index) => (
+                                <div key={record.id} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                  <h4 className="font-semibold text-blue-900 mb-2">Sesión {index + 1}</h4>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex items-center justify-between p-2 bg-emerald-50 rounded border border-emerald-200">
+                                      <span className="font-semibold text-emerald-800">Entrada</span>
+                                      <Badge variant="outline" className="border-emerald-300 text-emerald-800 font-semibold">
+                                        {record.check_in || 'No registrada'}
+                                      </Badge>
+                                    </div>
+                                    <div className="flex items-center justify-between p-2 bg-red-50 rounded border border-red-200">
+                                      <span className="font-semibold text-red-800">Salida</span>
+                                      <Badge variant="outline" className="border-red-300 text-red-800 font-semibold">
+                                        {record.check_out || 'En curso'}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                  <div className="mt-2 flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-200">
+                                    <span className="font-semibold text-purple-800">Horas</span>
+                                    <Badge variant="default" className="bg-purple-600 text-white font-semibold">
+                                      {record.total_hours ? `${record.total_hours.toFixed(2)}h` : '0h'}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              ))}
+                              
+                              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-semibold text-gray-800">Total del Día</span>
+                                  <Badge variant="default" className="bg-blue-600 text-white font-semibold text-lg">
+                                    {dayRecords.reduce((sum, r) => sum + (r.total_hours || 0), 0).toFixed(2)}h
+                                  </Badge>
+                                </div>
                               </div>
                             </div>
                           );

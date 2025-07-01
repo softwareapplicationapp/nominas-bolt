@@ -151,25 +151,45 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       return { lastID: data!.id, changes: 1 };
     }
 
-    if (q.startsWith('insert or replace into attendance') || q.startsWith('insert into attendance')) {
+    // UPDATED: Handle both INSERT and INSERT INTO for attendance
+    if (q.includes('insert') && q.includes('attendance')) {
       const attendanceData: any = {
         employee_id: params[0],
         date: params[1],
-        total_hours: params[4] || 0,
-        status: params[5] || 'present',
+        status: 'present', // Default status
       };
 
-      if (params[2]) attendanceData.check_in = params[2];
-      if (params[3]) attendanceData.check_out = params[3];
-      if (params[6]) attendanceData.notes = params[6];
+      // Check if this is a simple check-in (3 params) or full record (6+ params)
+      if (params.length === 3) {
+        // Simple check-in: INSERT INTO attendance (employee_id, date, check_in, status)
+        attendanceData.check_in = params[2];
+      } else {
+        // Full record: INSERT OR REPLACE INTO attendance (employee_id, date, check_in, check_out, total_hours, status, notes)
+        if (params[2]) attendanceData.check_in = params[2];
+        if (params[3]) attendanceData.check_out = params[3];
+        attendanceData.total_hours = params[4] || 0;
+        attendanceData.status = params[5] || 'present';
+        if (params[6]) attendanceData.notes = params[6];
+      }
 
-      const { data, error } = await supabase
-        .from('attendance')
-        .upsert(attendanceData, { onConflict: 'employee_id,date' })
-        .select('id')
-        .single();
-      if (error) throw error;
-      return { lastID: data!.id, changes: 1 };
+      // For simple INSERT, just insert. For INSERT OR REPLACE, use upsert
+      if (q.includes('or replace')) {
+        const { data, error } = await supabase
+          .from('attendance')
+          .upsert(attendanceData, { onConflict: 'employee_id,date' })
+          .select('id')
+          .single();
+        if (error) throw error;
+        return { lastID: data!.id, changes: 1 };
+      } else {
+        const { data, error } = await supabase
+          .from('attendance')
+          .insert(attendanceData)
+          .select('id')
+          .single();
+        if (error) throw error;
+        return { lastID: data!.id, changes: 1 };
+      }
     }
 
     if (q.startsWith('insert into leave_requests')) {
@@ -436,6 +456,41 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
+    // NEW: Handle query for most recent open check-in
+    if (q.includes('select * from attendance') && q.includes('check_in is not null and check_out is null')) {
+      console.log('=== FINDING MOST RECENT OPEN CHECK-IN ===');
+      console.log('Employee ID:', params[0]);
+      console.log('Date:', params[1]);
+      
+      const { data, error } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('employee_id', params[0])
+        .eq('date', params[1])
+        .not('check_in', 'is', null)
+        .is('check_out', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      console.log('Open check-in query result:', data);
+      console.log('Open check-in query error:', error);
+      
+      return data;
+    }
+
+    // Handle SELECT * FROM attendance WHERE id = ?
+    if (q.includes('select * from attendance where id = ?')) {
+      const { data, error } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('id', params[0])
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    }
+
     // Count queries
     if (q.includes('count(*) as count from employees')) {
       const { count } = await supabase
@@ -637,7 +692,7 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       // But in our case, we want ALL records, so we don't filter by date
       // The SQL query is: "SELECT * FROM attendance WHERE employee_id = ? ORDER BY date DESC, created_at DESC"
       
-      const { data, error } = await query.order('date', { ascending: false });
+      const { data, error } = await query.order('date', { ascending: false }).order('created_at', { ascending: false });
       
       console.log('Query result:', data);
       console.log('Query error:', error);
@@ -752,3 +807,6 @@ export const dbAll = async (sql: string, params: any[] = []) => {
 };
 
 export const dbExec = async (_sql: string) => true;
+
+// Export the functions
+export { dbRun, dbGet, dbAll, dbExec };
