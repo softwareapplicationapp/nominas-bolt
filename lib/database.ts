@@ -391,11 +391,23 @@ export const dbGet = async (sql: string, params: any[] = []) => {
     }
 
     if (q.includes('select id from employees where user_id = ?')) {
-      const { data } = await supabase
+      console.log('=== GETTING EMPLOYEE ID FOR USER ===');
+      console.log('Looking for user_id:', params[0]);
+      
+      const { data, error } = await supabase
         .from('employees')
         .select('id')
         .eq('user_id', params[0])
         .maybeSingle();
+      
+      console.log('Employee ID query result:', data);
+      console.log('Employee ID query error:', error);
+      
+      if (error) {
+        console.error('Employee ID query failed:', error);
+        throw error;
+      }
+      
       return data;
     }
 
@@ -411,13 +423,27 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
+    // CRITICAL FIX: This is the attendance query that's failing for My Attendance page
     if (q.includes('select * from attendance where employee_id = ? and date = ?')) {
-      const { data } = await supabase
+      console.log('=== ATTENDANCE QUERY FOR SPECIFIC DATE ===');
+      console.log('Employee ID:', params[0]);
+      console.log('Date:', params[1]);
+      
+      const { data, error } = await supabase
         .from('attendance')
         .select('*')
         .eq('employee_id', params[0])
         .eq('date', params[1])
         .maybeSingle();
+      
+      console.log('Attendance query result:', data);
+      console.log('Attendance query error:', error);
+      
+      if (error) {
+        console.error('Attendance query failed:', error);
+        throw error;
+      }
+      
       return data;
     }
 
@@ -507,24 +533,49 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return { total };
     }
 
-    // Employee stats queries
+    // Employee stats queries - THESE ARE THE KEY QUERIES FOR DASHBOARD STATS
     if (q.includes('coalesce(sum(total_hours), 0) as total from attendance')) {
+      console.log('=== WEEKLY HOURS QUERY ===');
+      console.log('Employee ID:', params[0]);
+      console.log('Since date:', params[1]);
+      
       const { data, error } = await supabase
         .from('attendance')
         .select('total_hours')
         .eq('employee_id', params[0])
         .gte('date', params[1]);
-      if (error) throw error;
+      
+      console.log('Weekly hours query result:', data);
+      console.log('Weekly hours query error:', error);
+      
+      if (error) {
+        console.error('Weekly hours query failed:', error);
+        throw error;
+      }
+      
       const total = (data || []).reduce((sum, a) => sum + (a.total_hours || 0), 0);
+      console.log('Calculated total hours:', total);
+      
       return { total };
     }
 
     if (q.includes('count(case when status = \'pending\' then 1 end) as pending_leaves')) {
+      console.log('=== LEAVE STATS QUERY ===');
+      console.log('Employee ID:', params[0]);
+      
       const { data, error } = await supabase
         .from('leave_requests')
         .select('status, days')
         .eq('employee_id', params[0]);
-      if (error) throw error;
+      
+      console.log('Leave stats query result:', data);
+      console.log('Leave stats query error:', error);
+      
+      if (error) {
+        console.error('Leave stats query failed:', error);
+        throw error;
+      }
+      
       const stats = (data || []).reduce((acc, lr) => {
         if (lr.status === 'pending') acc.pending_leaves++;
         if (lr.status === 'approved') {
@@ -533,16 +584,30 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         }
         return acc;
       }, { pending_leaves: 0, approved_leaves: 0, used_leave_days: 0 });
+      
+      console.log('Calculated leave stats:', stats);
       return stats;
     }
 
     if (q.includes('count(*) as total_days') && q.includes('present_days')) {
+      console.log('=== MONTHLY ATTENDANCE QUERY ===');
+      console.log('Employee ID:', params[0]);
+      console.log('Month:', params[1]);
+      
       const { data, error } = await supabase
         .from('attendance')
         .select('status')
         .eq('employee_id', params[0])
         .like('date', `${params[1]}%`);
-      if (error) throw error;
+      
+      console.log('Monthly attendance query result:', data);
+      console.log('Monthly attendance query error:', error);
+      
+      if (error) {
+        console.error('Monthly attendance query failed:', error);
+        throw error;
+      }
+      
       const stats = (data || []).reduce(
         (acc, a) => {
           acc.total_days++;
@@ -551,6 +616,8 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         },
         { total_days: 0, present_days: 0 }
       );
+      
+      console.log('Calculated monthly attendance stats:', stats);
       return [stats];
     }
 
@@ -608,7 +675,7 @@ export const dbAll = async (sql: string, params: any[] = []) => {
 
     // FIXED: Employee attendance query - this is the key fix for My Attendance page
     if (q.includes('select * from attendance where employee_id = ?')) {
-      console.log('=== EMPLOYEE ATTENDANCE QUERY ===');
+      console.log('=== EMPLOYEE ATTENDANCE QUERY (dbAll) ===');
       console.log('Employee ID:', params[0]);
       console.log('Date filter:', params[1] || 'No date filter');
       

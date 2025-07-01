@@ -75,16 +75,30 @@ export default function EmployeeDashboardPage() {
 
   const loadEmployeeData = async () => {
     try {
+      console.log('=== DASHBOARD: Loading employee data ===');
       setLoading(true);
+      
       const [statsData, profileData] = await Promise.all([
         apiClient.getMyStats(),
         apiClient.getMyProfile()
       ]);
 
+      console.log('=== DASHBOARD: Stats data received ===');
+      console.log('Stats data:', statsData);
+      console.log('Total hours today:', statsData?.totalHoursToday);
+      console.log('Weekly hours:', statsData?.weeklyHours);
+      console.log('Check in time:', statsData?.checkInTime);
+      console.log('Check out time:', statsData?.checkOutTime);
+      console.log('Attendance today:', statsData?.attendanceToday);
+
+      console.log('=== DASHBOARD: Profile data received ===');
+      console.log('Profile data:', profileData);
+
       setStats(statsData);
       setProfile(profileData);
       setIsCheckedIn(statsData.attendanceToday && statsData.checkInTime && !statsData.checkOutTime);
     } catch (error: any) {
+      console.error('DASHBOARD: Error loading employee data:', error);
       toast.error('Error al cargar datos: ' + error.message);
     } finally {
       setLoading(false);
@@ -94,11 +108,13 @@ export default function EmployeeDashboardPage() {
   const handleCheckIn = async () => {
     setCheckingIn(true);
     try {
+      console.log('=== DASHBOARD: Checking in ===');
       await apiClient.checkInOut('check_in');
       setIsCheckedIn(true);
       toast.success('¡Entrada registrada con éxito!');
       loadEmployeeData();
     } catch (error: any) {
+      console.error('DASHBOARD: Check-in error:', error);
       toast.error(error.message);
     } finally {
       setCheckingIn(false);
@@ -108,11 +124,13 @@ export default function EmployeeDashboardPage() {
   const handleCheckOut = async () => {
     setCheckingIn(true);
     try {
+      console.log('=== DASHBOARD: Checking out ===');
       await apiClient.checkInOut('check_out');
       setIsCheckedIn(false);
       toast.success('¡Salida registrada con éxito!');
       loadEmployeeData();
     } catch (error: any) {
+      console.error('DASHBOARD: Check-out error:', error);
       toast.error(error.message);
     } finally {
       setCheckingIn(false);
@@ -217,6 +235,10 @@ export default function EmployeeDashboardPage() {
                     {stats?.totalHoursToday.toFixed(1) || '0.0'}h
                   </div>
                   <p className="text-xs sm:text-sm text-gray-800 font-semibold">Horas Hoy</p>
+                  {/* DEBUG INFO */}
+                  <p className="text-xs text-blue-600 mt-1">
+                    Debug: {stats?.totalHoursToday || 0}
+                  </p>
                 </div>
                 <div className="p-2 sm:p-3 bg-blue-100 rounded-full animate-float">
                   <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
@@ -237,6 +259,10 @@ export default function EmployeeDashboardPage() {
                     {stats?.weeklyHours.toFixed(1) || '0.0'}h
                   </div>
                   <p className="text-xs sm:text-sm text-gray-800 font-semibold">Esta Semana</p>
+                  {/* DEBUG INFO */}
+                  <p className="text-xs text-emerald-600 mt-1">
+                    Debug: {stats?.weeklyHours || 0}
+                  </p>
                 </div>
                 <div className="p-2 sm:p-3 bg-emerald-100 rounded-full animate-float">
                   <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
@@ -353,6 +379,10 @@ export default function EmployeeDashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-emerald-800 text-sm sm:text-base">Entrada registrada con éxito</p>
                       <p className="text-xs sm:text-sm text-emerald-700 font-medium">Hoy a las {stats.checkInTime}</p>
+                      {/* DEBUG INFO */}
+                      <p className="text-xs text-emerald-600 mt-1">
+                        Debug - Total horas hoy: {stats.totalHoursToday}
+                      </p>
                     </div>
                   </div>
                 )}
