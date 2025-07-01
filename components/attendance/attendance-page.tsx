@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -21,12 +23,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, Calendar as CalendarIcon, Users, AlertCircle, CheckCircle, Plus, Loader2 } from 'lucide-react';
+import { Clock, Calendar as CalendarIcon, Users, AlertCircle, CheckCircle, Plus, Loader2, Edit, Save, X, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
@@ -43,6 +43,7 @@ interface AttendanceRecord {
   total_hours: number;
   status: string;
   notes?: string;
+  created_at: string;
 }
 
 interface Employee {
@@ -54,11 +55,18 @@ interface Employee {
 
 export default function AttendancePage() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [filteredRecords, setFilteredRecords] = useState<AttendanceRecord[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<AttendanceRecord | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // Filter states
+  const [selectedEmployee, setSelectedEmployee] = useState<string>('all');
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
 
   // Form state
   const [formData, setFormData] = useState({
@@ -70,15 +78,21 @@ export default function AttendancePage() {
     notes: ''
   });
 
+  // Edit form state
+  const [editFormData, setEditFormData] = useState({
+    checkIn: '',
+    checkOut: '',
+    status: 'present',
+    notes: ''
+  });
+
   useEffect(() => {
     loadData();
   }, []);
 
   useEffect(() => {
-    if (selectedDate) {
-      loadAttendanceForDate(format(selectedDate, 'yyyy-MM-dd'));
-    }
-  }, [selectedDate]);
+    applyFilters();
+  }, [attendanceRecords, selectedEmployee, selectedMonth]);
 
   const loadData = async () => {
     try {
@@ -94,6 +108,29 @@ export default function AttendancePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyFilters = () => {
+    let filtered = [...attendanceRecords];
+
+    // Filter by employee
+    if (selectedEmployee !== 'all') {
+      filtered = filtered.filter(record => record.employee_id.toString() === selectedEmployee);
+    }
+
+    // Filter by month
+    if (selectedMonth) {
+      filtered = filtered.filter(record => record.date.startsWith(selectedMonth));
+    }
+
+    // Sort by date and created_at (most recent first)
+    filtered.sort((a, b) => {
+      const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime();
+      if (dateCompare !== 0) return dateCompare;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    setFilteredRecords(filtered);
   };
 
   const loadAttendanceForDate = async (date: string) => {
@@ -137,13 +174,67 @@ export default function AttendancePage() {
     }
   };
 
+  const handleEditRecord = (record: AttendanceRecord) => {
+    setEditingRecord(record);
+    setEditFormData({
+      checkIn: record.check_in || '',
+      checkOut: record.check_out || '',
+      status: record.status,
+      notes: record.notes || ''
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateRecord = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingRecord) return;
+
+    setIsSubmitting(true);
+    try {
+      // Calculate total hours if both times are provided
+      let totalHours = 0;
+      if (editFormData.checkIn && editFormData.checkOut) {
+        const checkInTime = new Date(`2000-01-01 ${editFormData.checkIn}`);
+        const checkOutTime = new Date(`2000-01-01 ${editFormData.checkOut}`);
+        totalHours = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
+      }
+
+      await apiClient.updateAttendance(editingRecord.id, {
+        checkIn: editFormData.checkIn || null,
+        checkOut: editFormData.checkOut || null,
+        totalHours,
+        status: editFormData.status,
+        notes: editFormData.notes || null
+      });
+
+      toast.success('Attendance record updated successfully!');
+      setIsEditDialogOpen(false);
+      setEditingRecord(null);
+      loadData();
+    } catch (error: any) {
+      toast.error('Failed to update attendance record: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Calculate stats
   const today = format(new Date(), 'yyyy-MM-dd');
-  const todayRecords = attendanceRecords.filter(record => record.date === today);
+  const todayRecords = filteredRecords.filter(record => record.date === today);
   const presentToday = todayRecords.filter(record => record.status === 'present').length;
   const absentToday = employees.length - todayRecords.length;
   const lateToday = todayRecords.filter(record => record.status === 'late').length;
   const attendanceRate = employees.length > 0 ? Math.round((presentToday / employees.length) * 100) : 0;
+
+  // Generate month options for the last 12 months
+  const monthOptions = [];
+  for (let i = 0; i < 12; i++) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    const value = format(date, 'yyyy-MM');
+    const label = format(date, 'MMMM yyyy');
+    monthOptions.push({ value, label });
+  }
 
   if (loading) {
     return (
@@ -335,6 +426,62 @@ export default function AttendancePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Filters */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <Filter className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700">Filters:</span>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Employee</Label>
+                    <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                      <SelectTrigger className="w-full sm:w-48">
+                        <SelectValue placeholder="All employees" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Employees</SelectItem>
+                        {employees.map(emp => (
+                          <SelectItem key={emp.id} value={emp.id.toString()}>
+                            {emp.first_name} {emp.last_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-600">Month</Label>
+                    <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                      <SelectTrigger className="w-full sm:w-48">
+                        <SelectValue placeholder="Select month" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {monthOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-end">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setSelectedEmployee('all');
+                        setSelectedMonth(format(new Date(), 'yyyy-MM'));
+                      }}
+                      className="text-sm"
+                    >
+                      Clear Filters
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -346,31 +493,54 @@ export default function AttendancePage() {
                       <TableHead>Check Out</TableHead>
                       <TableHead>Total Hours</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {attendanceRecords.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell className="font-medium">
-                          {record.first_name} {record.last_name}
-                        </TableCell>
-                        <TableCell>{record.department}</TableCell>
-                        <TableCell>{format(new Date(record.date), 'MMM dd, yyyy')}</TableCell>
-                        <TableCell>{record.check_in || '-'}</TableCell>
-                        <TableCell>{record.check_out || '-'}</TableCell>
-                        <TableCell>{record.total_hours ? `${record.total_hours.toFixed(1)}h` : '-'}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={
-                              record.status === 'present' ? 'default' :
-                              record.status === 'late' ? 'destructive' : 'secondary'
-                            }
-                          >
-                            {record.status}
-                          </Badge>
+                    {filteredRecords.length > 0 ? (
+                      filteredRecords.map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell className="font-medium">
+                            {record.first_name} {record.last_name}
+                          </TableCell>
+                          <TableCell>{record.department}</TableCell>
+                          <TableCell>{format(new Date(record.date), 'MMM dd, yyyy')}</TableCell>
+                          <TableCell>{record.check_in || '-'}</TableCell>
+                          <TableCell>
+                            {record.check_out || (
+                              <span className="text-amber-600 font-medium">In Progress</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{record.total_hours ? `${record.total_hours.toFixed(2)}h` : '-'}</TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={
+                                record.status === 'present' ? 'default' :
+                                record.status === 'late' ? 'destructive' : 'secondary'
+                              }
+                            >
+                              {record.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditRecord(record)}
+                              className="hover:bg-blue-50"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                          No attendance records found for the selected filters
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -412,19 +582,19 @@ export default function AttendancePage() {
                     <div className="grid grid-cols-3 gap-4">
                       <div className="text-center p-4 bg-green-50 rounded-lg">
                         <div className="text-2xl font-bold text-green-600">
-                          {attendanceRecords.filter(r => r.status === 'present').length}
+                          {attendanceRecords.filter(r => r.date === format(selectedDate, 'yyyy-MM-dd') && r.status === 'present').length}
                         </div>
                         <p className="text-sm text-green-700">Present</p>
                       </div>
                       <div className="text-center p-4 bg-red-50 rounded-lg">
                         <div className="text-2xl font-bold text-red-600">
-                          {attendanceRecords.filter(r => r.status === 'absent').length}
+                          {attendanceRecords.filter(r => r.date === format(selectedDate, 'yyyy-MM-dd') && r.status === 'absent').length}
                         </div>
                         <p className="text-sm text-red-700">Absent</p>
                       </div>
                       <div className="text-center p-4 bg-orange-50 rounded-lg">
                         <div className="text-2xl font-bold text-orange-600">
-                          {attendanceRecords.filter(r => r.status === 'late').length}
+                          {attendanceRecords.filter(r => r.date === format(selectedDate, 'yyyy-MM-dd') && r.status === 'late').length}
                         </div>
                         <p className="text-sm text-orange-700">Late</p>
                       </div>
@@ -433,8 +603,8 @@ export default function AttendancePage() {
                     <div className="mt-6">
                       <h4 className="font-semibold mb-3">Department Breakdown</h4>
                       <div className="space-y-2">
-                        {Array.from(new Set(attendanceRecords.map(r => r.department))).map(dept => {
-                          const deptRecords = attendanceRecords.filter(r => r.department === dept);
+                        {Array.from(new Set(attendanceRecords.filter(r => r.date === format(selectedDate, 'yyyy-MM-dd')).map(r => r.department))).map(dept => {
+                          const deptRecords = attendanceRecords.filter(r => r.date === format(selectedDate, 'yyyy-MM-dd') && r.department === dept);
                           const presentCount = deptRecords.filter(r => r.status === 'present').length;
                           const totalInDept = employees.filter(e => e.department === dept).length;
                           
@@ -459,6 +629,88 @@ export default function AttendancePage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Attendance Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Attendance Record</DialogTitle>
+            <DialogDescription>
+              Modify the attendance details for {editingRecord?.first_name} {editingRecord?.last_name} on {editingRecord?.date ? format(new Date(editingRecord.date), 'MMM dd, yyyy') : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateRecord} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editStatus">Status</Label>
+              <Select value={editFormData.status} onValueChange={(value) => setEditFormData({...editFormData, status: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="present">Present</SelectItem>
+                  <SelectItem value="absent">Absent</SelectItem>
+                  <SelectItem value="late">Late</SelectItem>
+                  <SelectItem value="half_day">Half Day</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {editFormData.status !== 'absent' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editCheckIn">Check In</Label>
+                  <Input 
+                    id="editCheckIn" 
+                    type="time" 
+                    value={editFormData.checkIn}
+                    onChange={(e) => setEditFormData({...editFormData, checkIn: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editCheckOut">Check Out</Label>
+                  <Input 
+                    id="editCheckOut" 
+                    type="time" 
+                    value={editFormData.checkOut}
+                    onChange={(e) => setEditFormData({...editFormData, checkOut: e.target.value})}
+                  />
+                </div>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="editNotes">Notes</Label>
+              <Textarea 
+                id="editNotes" 
+                placeholder="Additional notes (optional)"
+                rows={2}
+                value={editFormData.notes}
+                onChange={(e) => setEditFormData({...editFormData, notes: e.target.value})}
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                <X className="h-4 w-4 mr-2" />
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Update Record
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -279,6 +279,20 @@ export const dbRun = async (sql: string, params: any[] = []) => {
           .eq('id', params[2]);
         if (error) throw error;
         return { lastID: params[2], changes: 1 };
+      } else if (q.includes('set check_in = ?, check_out = ?, total_hours = ?, status = ?, notes = ?')) {
+        // Handle the new update query for editing attendance records
+        const { error } = await supabase
+          .from('attendance')
+          .update({
+            check_in: params[0],
+            check_out: params[1],
+            total_hours: params[2],
+            status: params[3],
+            notes: params[4]
+          })
+          .eq('id', params[5]);
+        if (error) throw error;
+        return { lastID: params[5], changes: 1 };
       }
     }
 
@@ -293,6 +307,16 @@ export const dbRun = async (sql: string, params: any[] = []) => {
         .eq('id', params[2]);
       if (error) throw error;
       return { lastID: params[2], changes: 1 };
+    }
+
+    // Handle DELETE queries
+    if (q.includes('delete from attendance where id = ?')) {
+      const { error } = await supabase
+        .from('attendance')
+        .delete()
+        .eq('id', params[0]);
+      if (error) throw error;
+      return { lastID: params[0], changes: 1 };
     }
 
     return { lastID: 0, changes: 0 };
@@ -491,6 +515,32 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
+    // Handle attendance record with employee details
+    if (q.includes('select a.*, e.first_name, e.last_name, e.department from attendance a join employees e')) {
+      const { data, error } = await supabase
+        .from('attendance')
+        .select(`
+          *,
+          employees!inner(first_name, last_name, department)
+        `)
+        .eq('id', params[0])
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data) {
+        const employee = (data as any).employees;
+        return {
+          ...data,
+          first_name: employee.first_name,
+          last_name: employee.last_name,
+          department: employee.department
+        };
+      }
+      
+      return data;
+    }
+
     // Count queries
     if (q.includes('count(*) as count from employees')) {
       const { count } = await supabase
@@ -656,12 +706,17 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       }
 
       const employeeIds = employees.map(e => e.id);
-      const { data, error } = await supabase
+      let query = supabase
         .from('attendance')
         .select('*')
-        .in('employee_id', employeeIds)
-        .eq('date', params[1])
-        .order('created_at', { ascending: false });
+        .in('employee_id', employeeIds);
+
+      // Apply date filter if provided
+      if (params[1]) {
+        query = query.eq('date', params[1]);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
       

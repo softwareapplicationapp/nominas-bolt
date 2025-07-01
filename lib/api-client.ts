@@ -233,6 +233,19 @@ class ApiClient {
     });
   }
 
+  async updateAttendance(attendanceId: number, attendanceData: any) {
+    return this.request(`/attendance/${attendanceId}`, {
+      method: 'PUT',
+      body: JSON.stringify(attendanceData),
+    });
+  }
+
+  async deleteAttendance(attendanceId: number) {
+    return this.request(`/attendance/${attendanceId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Leave methods (Admin)
   async getLeaves() {
     return this.request('/leaves');
