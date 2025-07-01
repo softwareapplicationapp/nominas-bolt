@@ -36,29 +36,24 @@ export async function GET(request: NextRequest) {
     const date = searchParams.get('date');
     console.log('Date parameter:', date);
 
-    let attendance;
-    if (date) {
-      // Get attendance for specific date
-      console.log('Getting attendance for specific date:', date);
-      attendance = await dbAll(`
-        SELECT * FROM attendance 
-        WHERE employee_id = ? AND date = ?
-        ORDER BY created_at DESC
-      `, [employee.id, date]);
-    } else {
-      // Get all attendance records for the employee
-      console.log('Getting all attendance records for employee_id:', employee.id);
-      attendance = await dbAll(`
-        SELECT * FROM attendance 
-        WHERE employee_id = ?
-        ORDER BY date DESC, created_at DESC
-      `, [employee.id]);
-    }
+    console.log('=== CALLING dbAll for attendance ===');
+    console.log('Employee ID:', employee.id);
+    console.log('Date filter:', date);
 
+    // Use the corrected dbAll function
+    const attendance = await dbAll(`
+      SELECT * FROM attendance 
+      WHERE employee_id = ?
+      ORDER BY date DESC, created_at DESC
+    `, [employee.id, date]); // Pass date as second parameter even if null
+
+    console.log('=== dbAll RESULT ===');
     console.log('Attendance records found:', attendance?.length || 0);
     if (attendance && attendance.length > 0) {
       console.log('First record:', attendance[0]);
       console.log('Last record:', attendance[attendance.length - 1]);
+    } else {
+      console.log('No attendance records found');
     }
 
     return NextResponse.json(attendance || []);
