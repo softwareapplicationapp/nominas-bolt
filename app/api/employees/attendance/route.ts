@@ -1,5 +1,3 @@
-'use client';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth';
 import { dbRun, dbGet, dbAll } from '@/lib/database';
