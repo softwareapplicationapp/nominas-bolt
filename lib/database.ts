@@ -606,14 +606,34 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       });
     }
 
+    // FIXED: Employee attendance query - this is the key fix for My Attendance page
     if (q.includes('select * from attendance where employee_id = ?')) {
+      console.log('=== EMPLOYEE ATTENDANCE QUERY ===');
+      console.log('Employee ID:', params[0]);
+      console.log('Date filter:', params[1] || 'No date filter');
+      
       let query = supabase
         .from('attendance')
         .select('*')
         .eq('employee_id', params[0]);
-      if (params[1]) query = query.eq('date', params[1]);
-      const { data, error } = await query.order('created_at', { ascending: false });
-      if (error) throw error;
+      
+      // Apply date filter if provided
+      if (params[1]) {
+        query = query.eq('date', params[1]);
+        console.log('Filtering by date:', params[1]);
+      }
+      
+      const { data, error } = await query.order('date', { ascending: false });
+      
+      console.log('Query result:', data);
+      console.log('Query error:', error);
+      console.log('Number of records:', data?.length || 0);
+      
+      if (error) {
+        console.error('Attendance query failed:', error);
+        throw error;
+      }
+      
       return data || [];
     }
 

@@ -44,7 +44,6 @@ export default function EmployeeAttendancePage() {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [todayRecord, setTodayRecord] = useState<AttendanceRecord | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const { t, language } = useLanguage();
@@ -55,17 +54,32 @@ export default function EmployeeAttendancePage() {
 
   const loadAttendanceData = async () => {
     try {
+      console.log('=== Loading employee attendance data ===');
       setLoading(true);
-      const data = await apiClient.getMyAttendance();
-      setAttendanceRecords(data);
       
-      // Check if already checked in today
-      const today = new Date().toISOString().split('T')[0];
-      const todayAttendance = data.find((record: AttendanceRecord) => record.date === today);
-      setTodayRecord(todayAttendance || null);
-      setIsCheckedIn(!!todayAttendance?.check_in && !todayAttendance?.check_out);
+      // Load all attendance records for the employee
+      const data = await apiClient.getMyAttendance();
+      console.log('Attendance data received:', data);
+      console.log('Number of records:', data?.length || 0);
+      
+      if (data && Array.isArray(data)) {
+        setAttendanceRecords(data);
+        
+        // Find today's record
+        const today = new Date().toISOString().split('T')[0];
+        const todayAttendance = data.find((record: AttendanceRecord) => record.date === today);
+        console.log('Today record found:', todayAttendance);
+        setTodayRecord(todayAttendance || null);
+      } else {
+        console.log('No attendance data or invalid format');
+        setAttendanceRecords([]);
+        setTodayRecord(null);
+      }
     } catch (error: any) {
+      console.error('Error loading attendance data:', error);
       toast.error('Error al cargar datos de asistencia: ' + error.message);
+      setAttendanceRecords([]);
+      setTodayRecord(null);
     } finally {
       setLoading(false);
     }
@@ -74,12 +88,15 @@ export default function EmployeeAttendancePage() {
   const handleCheckIn = async () => {
     setActionLoading(true);
     try {
+      console.log('=== Checking in ===');
       const data = await apiClient.checkInOut('check_in');
+      console.log('Check-in response:', data);
       setTodayRecord(data);
-      setIsCheckedIn(true);
       toast.success('¡Entrada registrada con éxito!');
-      loadAttendanceData();
+      // Reload all data to refresh the table
+      await loadAttendanceData();
     } catch (error: any) {
+      console.error('Check-in error:', error);
       toast.error(error.message);
     } finally {
       setActionLoading(false);
@@ -89,22 +106,31 @@ export default function EmployeeAttendancePage() {
   const handleCheckOut = async () => {
     setActionLoading(true);
     try {
+      console.log('=== Checking out ===');
       const data = await apiClient.checkInOut('check_out');
+      console.log('Check-out response:', data);
       setTodayRecord(data);
-      setIsCheckedIn(false);
       toast.success('¡Salida registrada con éxito!');
-      loadAttendanceData();
+      // Reload all data to refresh the table
+      await loadAttendanceData();
     } catch (error: any) {
+      console.error('Check-out error:', error);
       toast.error(error.message);
     } finally {
       setActionLoading(false);
     }
   };
 
-  // Calculate stats
+  // Calculate stats from the loaded data
   const totalHours = attendanceRecords.reduce((sum, record) => sum + (record.total_hours || 0), 0);
   const averageHours = attendanceRecords.length > 0 ? totalHours / attendanceRecords.length : 0;
   const presentDays = attendanceRecords.filter(record => record.status === 'present').length;
+
+  console.log('=== Stats calculation ===');
+  console.log('Total records:', attendanceRecords.length);
+  console.log('Total hours:', totalHours);
+  console.log('Average hours:', averageHours);
+  console.log('Present days:', presentDays);
 
   if (loading) {
     return (
@@ -151,10 +177,16 @@ export default function EmployeeAttendancePage() {
                     <span className="text-sm text-gray-900 font-semibold">Salida a las {todayRecord.check_out}</span>
                   </div>
                 )}
-                {todayRecord?.total_hours && (
+                {todayRecord?.total_hours && todayRecord.total_hours > 0 && (
                   <div className="flex items-center space-x-2">
                     <Timer className="h-4 w-4 text-blue-600" />
                     <span className="text-sm text-gray-900 font-semibold">Horas totales: {todayRecord.total_hours.toFixed(1)}h</span>
+                  </div>
+                )}
+                {!todayRecord && (
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600 font-medium">No has fichado hoy</span>
                   </div>
                 )}
               </div>
@@ -273,45 +305,53 @@ export default function EmployeeAttendancePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border border-gray-200">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-gray-900 font-semibold">Fecha</TableHead>
-                        <TableHead className="text-gray-900 font-semibold">Entrada</TableHead>
-                        <TableHead className="text-gray-900 font-semibold">Salida</TableHead>
-                        <TableHead className="text-gray-900 font-semibold">Horas Totales</TableHead>
-                        <TableHead className="text-gray-900 font-semibold">Estado</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {attendanceRecords.map((record) => (
-                        <TableRow key={record.id}>
-                          <TableCell className="font-medium text-gray-900">
-                            {format(new Date(record.date), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined })}
-                          </TableCell>
-                          <TableCell className="text-gray-800 font-medium">{record.check_in || '-'}</TableCell>
-                          <TableCell className="text-gray-800 font-medium">{record.check_out || '-'}</TableCell>
-                          <TableCell className="text-gray-800 font-medium">
-                            {record.total_hours ? `${record.total_hours.toFixed(1)}h` : '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              className={
-                                record.status === 'present' ? 'badge-approved' :
-                                record.status === 'late' ? 'badge-rejected' : 'badge-inactive'
-                              }
-                            >
-                              {record.status === 'present' ? 'Presente' :
-                               record.status === 'absent' ? 'Ausente' :
-                               record.status === 'late' ? 'Tarde' : record.status}
-                            </Badge>
-                          </TableCell>
+                {attendanceRecords.length > 0 ? (
+                  <div className="rounded-md border border-gray-200">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-gray-900 font-semibold">Fecha</TableHead>
+                          <TableHead className="text-gray-900 font-semibold">Entrada</TableHead>
+                          <TableHead className="text-gray-900 font-semibold">Salida</TableHead>
+                          <TableHead className="text-gray-900 font-semibold">Horas Totales</TableHead>
+                          <TableHead className="text-gray-900 font-semibold">Estado</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {attendanceRecords.map((record) => (
+                          <TableRow key={record.id}>
+                            <TableCell className="font-medium text-gray-900">
+                              {format(new Date(record.date), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined })}
+                            </TableCell>
+                            <TableCell className="text-gray-800 font-medium">{record.check_in || '-'}</TableCell>
+                            <TableCell className="text-gray-800 font-medium">{record.check_out || '-'}</TableCell>
+                            <TableCell className="text-gray-800 font-medium">
+                              {record.total_hours ? `${record.total_hours.toFixed(1)}h` : '-'}
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                className={
+                                  record.status === 'present' ? 'badge-approved' :
+                                  record.status === 'late' ? 'badge-rejected' : 'badge-inactive'
+                                }
+                              >
+                                {record.status === 'present' ? 'Presente' :
+                                 record.status === 'absent' ? 'Ausente' :
+                                 record.status === 'late' ? 'Tarde' : record.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-gray-600 font-semibold">No hay registros de asistencia</p>
+                    <p className="text-gray-500 text-sm mt-2">Comienza marcando tu entrada para ver tu historial</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
