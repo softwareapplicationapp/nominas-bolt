@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, Bell, Search, User, Clock, Coffee } from 'lucide-react';
+import { Menu, Bell, Search, User, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -59,11 +59,7 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
             <Search className="h-5 w-5" />
           </Button>
 
-          {/* Quick Actions */}
-          <Button variant="ghost" size="sm" className="hover-scale text-amber-600 p-2 hidden sm:flex">
-            <Coffee className="h-5 w-5" />
-          </Button>
-          
+          {/* Quick Actions - Removed Coffee Break */}
           <Button variant="ghost" size="sm" className="hover-scale text-blue-600 p-2 hidden sm:flex">
             <Clock className="h-5 w-5" />
           </Button>

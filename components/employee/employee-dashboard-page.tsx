@@ -10,7 +10,6 @@ import {
   Calendar, 
   User, 
   CheckCircle,
-  Coffee,
   LogOut as LogOutIcon,
   TrendingUp,
   Award,
@@ -21,7 +20,8 @@ import {
   Mail,
   CalendarDays,
   ClockIcon,
-  Loader2
+  Loader2,
+  Plus
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -111,7 +111,7 @@ export default function EmployeeDashboardPage() {
       console.log('=== DASHBOARD: Checking in ===');
       await apiClient.checkInOut('check_in');
       setIsCheckedIn(true);
-      toast.success('¡Entrada registrada con éxito!');
+      toast.success('¡Nueva entrada registrada con éxito!');
       loadEmployeeData();
     } catch (error: any) {
       console.error('DASHBOARD: Check-in error:', error);
@@ -176,25 +176,25 @@ export default function EmployeeDashboardPage() {
               
               <div className="text-center lg:text-right">
                 <div className="flex flex-col sm:flex-row lg:flex-col items-center space-y-2 sm:space-y-0 sm:space-x-4 lg:space-x-0 lg:space-y-4">
-                  {!isCheckedIn ? (
-                    <Button 
-                      onClick={handleCheckIn}
-                      disabled={checkingIn}
-                      className="btn-success text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 animate-bounce-in w-full sm:w-auto"
-                    >
-                      {checkingIn ? (
-                        <>
-                          <Timer className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
-                          Registrando...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                          Marcar Entrada
-                        </>
-                      )}
-                    </Button>
-                  ) : (
+                  <Button 
+                    onClick={handleCheckIn}
+                    disabled={checkingIn}
+                    className="btn-success text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 animate-bounce-in w-full sm:w-auto"
+                  >
+                    {checkingIn ? (
+                      <>
+                        <Timer className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
+                        Registrando...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                        Nueva Entrada
+                      </>
+                    )}
+                  </Button>
+
+                  {isCheckedIn && (
                     <Button 
                       onClick={handleCheckOut}
                       disabled={checkingIn}
@@ -318,7 +318,7 @@ export default function EmployeeDashboardPage() {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Quick Actions */}
+          {/* Quick Actions - Removed Coffee Break */}
           <Card className="lg:col-span-1 animate-slide-in-left card-glow border-emerald-200">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-gray-900 text-lg sm:text-xl">
@@ -349,11 +349,6 @@ export default function EmployeeDashboardPage() {
                   <User className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                   Actualizar Perfil
                 </a>
-              </Button>
-              
-              <Button className="w-full btn-danger justify-start text-sm sm:text-base" size="lg">
-                <Coffee className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                Tiempo de Descanso
               </Button>
             </CardContent>
           </Card>

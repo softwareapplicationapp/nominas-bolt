@@ -14,7 +14,6 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Coffee,
   Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -126,19 +125,11 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
           })}
         </nav>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Removed Coffee Break */}
         {!collapsed && (
           <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-emerald-600/50">
             <p className="text-xs text-emerald-300 mb-2 sm:mb-3 font-semibold">{t('quickActions')}</p>
             <div className="space-y-1 sm:space-y-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-emerald-200 hover:bg-emerald-600/50 hover:text-white font-medium text-xs sm:text-sm"
-              >
-                <Coffee className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                Tiempo de Descanso
-              </Button>
               <Button
                 variant="ghost"
                 size="sm"
