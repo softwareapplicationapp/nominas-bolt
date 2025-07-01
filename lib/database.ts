@@ -265,7 +265,45 @@ export const dbRun = async (sql: string, params: any[] = []) => {
     }
 
     if (q.includes('update attendance')) {
-      if (q.includes('check_in = ?')) {
+      if (q.includes('check_in = ?, check_out = ?, total_hours = ?, status = ?, notes = ?')) {
+        // Handle the new update query for editing attendance records
+        console.log('=== UPDATING ATTENDANCE RECORD ===');
+        console.log('Parameters received:', params);
+        console.log('check_in:', params[0]);
+        console.log('check_out:', params[1]);
+        console.log('total_hours:', params[2]);
+        console.log('status:', params[3]);
+        console.log('notes:', params[4]);
+        console.log('id:', params[5]);
+
+        // Validate status before updating
+        const validStatuses = ['present', 'absent', 'late', 'half_day'];
+        const status = params[3];
+        
+        if (!validStatuses.includes(status)) {
+          console.error('Invalid status value:', status);
+          throw new Error(`Invalid status value: ${status}. Must be one of: ${validStatuses.join(', ')}`);
+        }
+
+        const { error } = await supabase
+          .from('attendance')
+          .update({
+            check_in: params[0],
+            check_out: params[1],
+            total_hours: params[2],
+            status: params[3],
+            notes: params[4]
+          })
+          .eq('id', params[5]);
+        
+        if (error) {
+          console.error('Supabase update error:', error);
+          throw error;
+        }
+        
+        console.log('✅ Attendance record updated successfully');
+        return { lastID: params[5], changes: 1 };
+      } else if (q.includes('check_in = ?')) {
         const { error } = await supabase
           .from('attendance')
           .update({ check_in: params[0], status: params[1] })
@@ -279,20 +317,6 @@ export const dbRun = async (sql: string, params: any[] = []) => {
           .eq('id', params[2]);
         if (error) throw error;
         return { lastID: params[2], changes: 1 };
-      } else if (q.includes('set check_in = ?, check_out = ?, total_hours = ?, status = ?, notes = ?')) {
-        // Handle the new update query for editing attendance records
-        const { error } = await supabase
-          .from('attendance')
-          .update({
-            check_in: params[0],
-            check_out: params[1],
-            total_hours: params[2],
-            status: params[3],
-            notes: params[4]
-          })
-          .eq('id', params[5]);
-        if (error) throw error;
-        return { lastID: params[5], changes: 1 };
       }
     }
 

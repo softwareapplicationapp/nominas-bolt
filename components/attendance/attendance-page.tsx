@@ -176,10 +176,20 @@ export default function AttendancePage() {
 
   const handleEditRecord = (record: AttendanceRecord) => {
     setEditingRecord(record);
+    
+    // Validate and set the status - ensure it's always a valid value
+    const validStatuses = ['present', 'absent', 'late', 'half_day'];
+    const status = validStatuses.includes(record.status) ? record.status : 'present';
+    
+    console.log('=== EDITING RECORD ===');
+    console.log('Original record:', record);
+    console.log('Original status:', record.status);
+    console.log('Validated status:', status);
+    
     setEditFormData({
       checkIn: record.check_in || '',
       checkOut: record.check_out || '',
-      status: record.status,
+      status: status,
       notes: record.notes || ''
     });
     setIsEditDialogOpen(true);
@@ -199,6 +209,11 @@ export default function AttendancePage() {
         totalHours = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
       }
 
+      console.log('=== UPDATING RECORD ===');
+      console.log('Record ID:', editingRecord.id);
+      console.log('Form data:', editFormData);
+      console.log('Calculated total hours:', totalHours);
+
       await apiClient.updateAttendance(editingRecord.id, {
         checkIn: editFormData.checkIn || null,
         checkOut: editFormData.checkOut || null,
@@ -212,6 +227,7 @@ export default function AttendancePage() {
       setEditingRecord(null);
       loadData();
     } catch (error: any) {
+      console.error('Update error:', error);
       toast.error('Failed to update attendance record: ' + error.message);
     } finally {
       setIsSubmitting(false);
