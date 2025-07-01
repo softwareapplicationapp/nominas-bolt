@@ -651,24 +651,70 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return { total };
     }
 
-    // Employee stats queries
+    // CRITICAL FIX: Employee stats queries - Updated to sum ALL records for each calculation
     if (q.includes('coalesce(sum(total_hours), 0) as total from attendance')) {
-      const { data, error } = await supabase
-        .from('attendance')
-        .select('total_hours')
-        .eq('employee_id', params[0])
-        .gte('date', params[1]);
-      if (error) throw error;
-      const total = (data || []).reduce((sum, a) => sum + (a.total_hours || 0), 0);
-      return { total };
+      console.log('=== EMPLOYEE STATS: Total hours query ===');
+      console.log('Employee ID:', params[0]);
+      
+      if (q.includes('date >= date(\'now\', \'-7 days\')')) {
+        // Weekly hours calculation
+        console.log('Calculating weekly hours (last 7 days)');
+        
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+        
+        const { data, error } = await supabase
+          .from('attendance')
+          .select('total_hours')
+          .eq('employee_id', params[0])
+          .gte('date', sevenDaysAgoStr);
+        
+        if (error) {
+          console.error('Weekly hours query error:', error);
+          throw error;
+        }
+        
+        const total = (data || []).reduce((sum, a) => sum + (a.total_hours || 0), 0);
+        console.log('Weekly hours result:', { total, records: data?.length || 0 });
+        return { total };
+      } else {
+        // Today's hours calculation
+        console.log('Calculating today\'s hours');
+        
+        const today = new Date().toISOString().split('T')[0];
+        
+        const { data, error } = await supabase
+          .from('attendance')
+          .select('total_hours')
+          .eq('employee_id', params[0])
+          .eq('date', today);
+        
+        if (error) {
+          console.error('Today\'s hours query error:', error);
+          throw error;
+        }
+        
+        const total = (data || []).reduce((sum, a) => sum + (a.total_hours || 0), 0);
+        console.log('Today\'s hours result:', { total, records: data?.length || 0, data });
+        return { total };
+      }
     }
 
     if (q.includes('count(case when status = \'pending\' then 1 end) as pending_leaves')) {
+      console.log('=== EMPLOYEE STATS: Leave statistics query ===');
+      console.log('Employee ID:', params[0]);
+      
       const { data, error } = await supabase
         .from('leave_requests')
         .select('status, days')
         .eq('employee_id', params[0]);
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Leave stats query error:', error);
+        throw error;
+      }
+      
       const stats = (data || []).reduce((acc, lr) => {
         if (lr.status === 'pending') acc.pending_leaves++;
         if (lr.status === 'approved') {
@@ -677,16 +723,27 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         }
         return acc;
       }, { pending_leaves: 0, approved_leaves: 0, used_leave_days: 0 });
+      
+      console.log('Leave stats result:', stats);
       return stats;
     }
 
     if (q.includes('count(*) as total_days') && q.includes('present_days')) {
+      console.log('=== EMPLOYEE STATS: Monthly attendance query ===');
+      console.log('Employee ID:', params[0]);
+      console.log('Month filter:', params[1]);
+      
       const { data, error } = await supabase
         .from('attendance')
         .select('status')
         .eq('employee_id', params[0])
         .like('date', `${params[1]}%`);
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Monthly attendance query error:', error);
+        throw error;
+      }
+      
       const stats = (data || []).reduce(
         (acc, a) => {
           acc.total_days++;
@@ -695,6 +752,8 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         },
         { total_days: 0, present_days: 0 }
       );
+      
+      console.log('Monthly attendance result:', stats);
       return [stats];
     }
 
