@@ -807,6 +807,3 @@ export const dbAll = async (sql: string, params: any[] = []) => {
 };
 
 export const dbExec = async (_sql: string) => true;
-
-// Export the functions
-export { dbRun, dbGet, dbAll, dbExec };
