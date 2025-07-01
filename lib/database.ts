@@ -621,22 +621,21 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       });
     }
 
-    // FIXED: Employee attendance query - this is the key fix for My Attendance page
-    if (q.includes('select * from attendance where employee_id = ?')) {
+    // CRITICAL FIX: This is the main query for My Attendance page
+    if (q.includes('select * from attendance') && q.includes('where employee_id = ?')) {
       console.log('=== EMPLOYEE ATTENDANCE QUERY (dbAll) ===');
       console.log('Employee ID:', params[0]);
       console.log('Date filter:', params[1] || 'No date filter');
+      console.log('Full SQL query:', q);
       
       let query = supabase
         .from('attendance')
         .select('*')
         .eq('employee_id', params[0]);
       
-      // Apply date filter if provided
-      if (params[1]) {
-        query = query.eq('date', params[1]);
-        console.log('Filtering by date:', params[1]);
-      }
+      // Apply date filter if provided (params[1] would be the date)
+      // But in our case, we want ALL records, so we don't filter by date
+      // The SQL query is: "SELECT * FROM attendance WHERE employee_id = ? ORDER BY date DESC, created_at DESC"
       
       const { data, error } = await query.order('date', { ascending: false });
       
