@@ -22,28 +22,36 @@ export async function GET(request: NextRequest) {
     }
 
     // Get employee record
-    console.log('=== STATS: Getting employee record ===');
-    console.log('Looking for user_id:', user.id);
-    console.log('User ID type:', typeof user.id);
-    
+    console.log('Getting employee record for user_id:', user.id);
     const employee = await dbGet(`
       SELECT id FROM employees WHERE user_id = ?
     `, [user.id]) as any;
 
-    console.log('=== STATS: Employee query result ===');
     console.log('Employee record found:', employee);
 
     if (!employee) {
-      console.log('❌ Employee profile not found for user_id:', user.id);
+      console.log('Employee profile not found for user_id:', user.id);
       return NextResponse.json({ error: 'Employee profile not found' }, { status: 404 });
     }
 
     const today = new Date().toISOString().split('T')[0];
     const currentMonth = new Date().toISOString().slice(0, 7);
 
+    // Calculate the Monday of the current week
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // If Sunday, go back 6 days, otherwise go back (currentDay - 1) days
+    
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - daysFromMonday);
+    monday.setHours(0, 0, 0, 0);
+    
+    const mondayStr = monday.toISOString().split('T')[0];
+
     console.log('=== STATS: Date calculations ===');
     console.log('Today:', today);
     console.log('Current month:', currentMonth);
+    console.log('Monday of current week:', mondayStr);
     console.log('Employee ID for queries:', employee.id);
 
     // Get today's attendance with detailed logging
@@ -60,20 +68,26 @@ export async function GET(request: NextRequest) {
     console.log('Raw result:', todayAttendance);
     console.log('Total hours today:', todayAttendance?.total || 0);
 
-    // Get weekly hours (last 7 days) with detailed logging
+    // Get weekly hours (current week - Monday to Sunday) with detailed logging
     console.log('=== STATS: Getting weekly hours ===');
-    console.log('SQL Query: SELECT COALESCE(SUM(total_hours), 0) as total FROM attendance WHERE employee_id = ? AND date >= date(\'now\', \'-7 days\')');
-    console.log('Parameters:', [employee.id]);
+    console.log('SQL Query: SELECT COALESCE(SUM(total_hours), 0) as total FROM attendance WHERE employee_id = ? AND date >= ?');
+    console.log('Parameters:', [employee.id, mondayStr]);
     
-    const weeklyHours = await dbGet(`
-      SELECT COALESCE(SUM(total_hours), 0) as total
-      FROM attendance 
-      WHERE employee_id = ? AND date >= date('now', '-7 days')
-    `, [employee.id]) as any;
-
+    // Get all attendance records since Monday of current week
+    const { data: weeklyAttendanceData } = await supabase
+      .from('attendance')
+      .select('total_hours, date')
+      .eq('employee_id', employee.id)
+      .gte('date', mondayStr);
+    
+    console.log('Weekly attendance records:', weeklyAttendanceData);
+    
+    // Calculate total hours for the week
+    const weeklyTotal = (weeklyAttendanceData || []).reduce((sum, record) => sum + (record.total_hours || 0), 0);
+    
     console.log('=== STATS: Weekly hours result ===');
-    console.log('Raw result:', weeklyHours);
-    console.log('Total weekly hours:', weeklyHours?.total || 0);
+    console.log('Weekly records found:', weeklyAttendanceData?.length || 0);
+    console.log('Total weekly hours calculated:', weeklyTotal);
 
     // Get monthly attendance rate with detailed logging
     console.log('=== STATS: Getting monthly attendance ===');
@@ -154,7 +168,7 @@ export async function GET(request: NextRequest) {
       checkInTime: null, // We'll need to get this separately if needed
       checkOutTime: null, // We'll need to get this separately if needed
       totalHoursToday: todayAttendance?.total || 0,
-      weeklyHours: weeklyHours?.total || 0,
+      weeklyHours: weeklyTotal || 0, // Use the calculated weekly total
       monthlyAttendance: attendanceRate,
       pendingLeaves: leaveStats?.pending_leaves || 0,
       approvedLeaves: leaveStats?.approved_leaves || 0,

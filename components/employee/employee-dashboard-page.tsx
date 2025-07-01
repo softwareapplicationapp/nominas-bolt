@@ -235,10 +235,6 @@ export default function EmployeeDashboardPage() {
                     {stats?.totalHoursToday.toFixed(1) || '0.0'}h
                   </div>
                   <p className="text-xs sm:text-sm text-gray-800 font-semibold">Horas Hoy</p>
-                  {/* DEBUG INFO */}
-                  <p className="text-xs text-blue-600 mt-1">
-                    Debug: {stats?.totalHoursToday || 0}
-                  </p>
                 </div>
                 <div className="p-2 sm:p-3 bg-blue-100 rounded-full animate-float">
                   <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
@@ -259,10 +255,6 @@ export default function EmployeeDashboardPage() {
                     {stats?.weeklyHours.toFixed(1) || '0.0'}h
                   </div>
                   <p className="text-xs sm:text-sm text-gray-800 font-semibold">Esta Semana</p>
-                  {/* DEBUG INFO */}
-                  <p className="text-xs text-emerald-600 mt-1">
-                    Debug: {stats?.weeklyHours || 0}
-                  </p>
                 </div>
                 <div className="p-2 sm:p-3 bg-emerald-100 rounded-full animate-float">
                   <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
@@ -374,10 +366,6 @@ export default function EmployeeDashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-emerald-800 text-sm sm:text-base">Entrada registrada con éxito</p>
                       <p className="text-xs sm:text-sm text-emerald-700 font-medium">Hoy a las {stats.checkInTime}</p>
-                      {/* DEBUG INFO */}
-                      <p className="text-xs text-emerald-600 mt-1">
-                        Debug - Total horas hoy: {stats.totalHoursToday}
-                      </p>
                     </div>
                   </div>
                 )}

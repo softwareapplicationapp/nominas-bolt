@@ -651,32 +651,52 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return { total };
     }
 
-    // CRITICAL FIX: Employee stats queries - Updated to sum ALL records for each calculation
+    // CRITICAL FIX: Employee stats queries - Updated to calculate weekly hours correctly
     if (q.includes('coalesce(sum(total_hours), 0) as total from attendance')) {
       console.log('=== EMPLOYEE STATS: Total hours query ===');
       console.log('Employee ID:', params[0]);
       
       if (q.includes('date >= date(\'now\', \'-7 days\')')) {
-        // Weekly hours calculation
-        console.log('Calculating weekly hours (last 7 days)');
+        // Weekly hours calculation - FIXED to calculate current week (Monday to Sunday)
+        console.log('Calculating weekly hours (current week)');
         
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+        // Get the current date
+        const now = new Date();
         
+        // Calculate the Monday of the current week
+        const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // If Sunday, go back 6 days, otherwise go back (currentDay - 1) days
+        
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - daysFromMonday);
+        monday.setHours(0, 0, 0, 0);
+        
+        const mondayStr = monday.toISOString().split('T')[0];
+        
+        console.log('Current date:', now.toISOString().split('T')[0]);
+        console.log('Current day of week:', currentDay);
+        console.log('Days from Monday:', daysFromMonday);
+        console.log('Monday of current week:', mondayStr);
+        
+        // Get all attendance records for this week (from Monday to today)
         const { data, error } = await supabase
           .from('attendance')
-          .select('total_hours')
+          .select('total_hours, date')
           .eq('employee_id', params[0])
-          .gte('date', sevenDaysAgoStr);
+          .gte('date', mondayStr);
         
         if (error) {
           console.error('Weekly hours query error:', error);
           throw error;
         }
         
+        console.log('Weekly hours records found:', data?.length || 0);
+        if (data && data.length > 0) {
+          console.log('Records:', data.map(r => ({ date: r.date, hours: r.total_hours })));
+        }
+        
         const total = (data || []).reduce((sum, a) => sum + (a.total_hours || 0), 0);
-        console.log('Weekly hours result:', { total, records: data?.length || 0 });
+        console.log('Weekly hours total calculated:', total);
         return { total };
       } else {
         // Today's hours calculation
