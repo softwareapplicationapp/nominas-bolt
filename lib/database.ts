@@ -720,10 +720,10 @@ export const dbGet = async (sql: string, params: any[] = []) => {
           .from('payroll')
           .select(`
             *,
-            employees!inner(
+            employee:employees!inner(
               id, employee_id, first_name, last_name, email, phone, 
               department, position, start_date, location,
-              companies!inner(name)
+              company:companies!inner(name)
             )
           `)
           .eq('id', params[0])
@@ -737,8 +737,8 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         console.log('Payroll query result:', data);
         
         if (data) {
-          const employee = (data as any).employees;
-          const company = employee.companies;
+          const employee = (data as any).employee;
+          const company = employee.company;
           return {
             ...data,
             employee_id: employee.id,
@@ -939,6 +939,8 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         console.log('Weekly hours records found:', data?.length || 0);
         if (data && data.length > 0) {
           console.log('Records:', data.map(r => ({ date: r.date, hours: r.total_hours })));
+        } else {
+          console.log('No attendance records found');
         }
         
         const total = (data || []).reduce((sum, a) => sum + (a.total_hours || 0), 0);
@@ -981,7 +983,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         throw error;
       }
       
-      const stats = (data || []).reduce((acc, lr) => {
+      const stats = (data || []).reduce((acc: Record<string, number>, lr) => {
         if (lr.status === 'pending') acc.pending_leaves++;
         if (lr.status === 'approved') {
           acc.approved_leaves++;
@@ -1204,22 +1206,13 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       const employeeIds = employees.map(e => e.id);
       console.log('Employee IDs for payroll query:', employeeIds);
       
-      // CRITICAL FIX: Direct query to check if payroll records exist for these employees
-      const { count: payrollCount, error: countError } = await supabase
-        .from('payroll')
-        .select('*', { count: 'exact', head: true })
-        .in('employee_id', employeeIds);
-        
-      console.log('Total payroll records for these employees:', payrollCount);
-      
-      if (countError) {
-        console.error('Payroll count query failed:', countError);
-      }
-      
-      // Now get payroll records for these employees
+      // CRITICAL FIX: Use proper join syntax for Supabase
       const { data: payrollData, error: payrollError } = await supabase
         .from('payroll')
-        .select('*')
+        .select(`
+          *,
+          employee:employees!inner(first_name, last_name, department, employee_id)
+        `)
         .in('employee_id', employeeIds)
         .order('pay_period_start', { ascending: false });
       
@@ -1234,38 +1227,15 @@ export const dbAll = async (sql: string, params: any[] = []) => {
         throw payrollError;
       }
       
-      // CRITICAL FIX: If no records found, try a direct query to see all payroll records
-      if (!payrollData || payrollData.length === 0) {
-        console.log('=== NO PAYROLL RECORDS FOUND, CHECKING ALL RECORDS ===');
-        const { data: allPayroll, error: allPayrollError } = await supabase
-          .from('payroll')
-          .select('*')
-          .limit(10);
-          
-        console.log('All payroll records (up to 10):', allPayroll);
-        console.log('All payroll error:', allPayrollError);
-        
-        if (allPayroll && allPayroll.length > 0) {
-          console.log('There are payroll records in the database, but none for the current company employees');
-          console.log('Employee IDs in company:', employeeIds);
-          console.log('Employee IDs in payroll records:', allPayroll.map(p => p.employee_id));
-          
-          // Check if there's a mismatch between employee IDs
-          const payrollEmployeeIds = allPayroll.map(p => p.employee_id);
-          const matchingIds = employeeIds.filter(id => payrollEmployeeIds.includes(id));
-          console.log('Matching employee IDs:', matchingIds);
-        }
-      }
-      
-      // Combine payroll data with employee information
+      // Map the results to the expected format
       const result = (payrollData || []).map(p => {
-        const employee = employees.find(e => e.id === p.employee_id);
+        const employee = (p as any).employee;
         return {
           ...p,
-          first_name: employee?.first_name || '',
-          last_name: employee?.last_name || '',
-          department: employee?.department || '',
-          employee_id: employee?.employee_id || '', // This is the employee code like EMP001
+          first_name: employee.first_name,
+          last_name: employee.last_name,
+          department: employee.department,
+          employee_id: employee.employee_id, // This is the employee code like EMP001
         };
       });
       
