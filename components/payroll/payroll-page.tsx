@@ -36,7 +36,7 @@ import {
   Loader2,
   Plus,
   Eye,
-  FilePdf,
+  File,
   Printer,
   Mail
 } from 'lucide-react';
@@ -539,7 +539,7 @@ export default function PayrollPage() {
                                     {isDownloading === record.id ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
                                     ) : (
-                                      <FilePdf className="h-4 w-4" />
+                                      <File className="h-4 w-4" />
                                     )}
                                   </Button>
                                   <Button 
