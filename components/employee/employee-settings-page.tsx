@@ -19,7 +19,9 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  Globe
+  Globe,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
@@ -49,6 +51,32 @@ interface PrivacySettings {
   allowDirectMessages: boolean;
 }
 
+// Helper functions for localStorage persistence
+const STORAGE_KEYS = {
+  PERSONAL_SETTINGS: 'arcushr_personal_settings',
+  NOTIFICATION_SETTINGS: 'arcushr_notification_settings',
+  PRIVACY_SETTINGS: 'arcushr_privacy_settings'
+};
+
+const loadFromStorage = <T>(key: string, defaultValue: T): T => {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+};
+
+const saveToStorage = <T>(key: string, value: T): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+};
+
 export default function EmployeeSettingsPage() {
   const { user } = useAuth();
   const { t, language, setLanguage } = useLanguage();
@@ -57,6 +85,7 @@ export default function EmployeeSettingsPage() {
   const [activeTab, setActiveTab] = useState('personal');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const [personalSettings, setPersonalSettings] = useState<PersonalSettings>({
     theme: 'light',
@@ -92,16 +121,56 @@ export default function EmployeeSettingsPage() {
   }, []);
 
   useEffect(() => {
+    // Update personal settings when language changes from context
     setPersonalSettings(prev => ({ ...prev, language }));
   }, [language]);
 
   const loadSettings = async () => {
     try {
       setLoading(true);
-      // In a real app, this would fetch from API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      // Load settings from localStorage
+      const loadedPersonalSettings = loadFromStorage(STORAGE_KEYS.PERSONAL_SETTINGS, {
+        theme: 'light',
+        language: language,
+        timezone: 'America/New_York',
+        dateFormat: 'MM/DD/YYYY',
+        timeFormat: '12h'
+      });
+
+      const loadedNotificationSettings = loadFromStorage(STORAGE_KEYS.NOTIFICATION_SETTINGS, {
+        emailNotifications: true,
+        leaveUpdates: true,
+        payrollNotifications: true,
+        reminderAlerts: false,
+        mobileNotifications: true
+      });
+
+      const loadedPrivacySettings = loadFromStorage(STORAGE_KEYS.PRIVACY_SETTINGS, {
+        profileVisibility: 'team',
+        showEmail: false,
+        showPhone: false,
+        allowDirectMessages: true
+      });
+
+      setPersonalSettings(loadedPersonalSettings);
+      setNotificationSettings(loadedNotificationSettings);
+      setPrivacySettings(loadedPrivacySettings);
+
+      // Apply theme if it's saved
+      if (loadedPersonalSettings.theme && typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('dark', loadedPersonalSettings.theme === 'dark');
+      }
+
+      console.log('Settings loaded from localStorage:', {
+        personal: loadedPersonalSettings,
+        notifications: loadedNotificationSettings,
+        privacy: loadedPrivacySettings
+      });
+
     } catch (error) {
-      toast.error(t('saveError'));
+      console.error('Error loading settings:', error);
+      toast.error('Error al cargar configuraciones');
     } finally {
       setLoading(false);
     }
@@ -110,11 +179,32 @@ export default function EmployeeSettingsPage() {
   const saveSettings = async () => {
     setSaving(true);
     try {
-      // In a real app, this would save to API
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      toast.success(t('saveSuccess'));
+      // Save to localStorage
+      saveToStorage(STORAGE_KEYS.PERSONAL_SETTINGS, personalSettings);
+      saveToStorage(STORAGE_KEYS.NOTIFICATION_SETTINGS, notificationSettings);
+      saveToStorage(STORAGE_KEYS.PRIVACY_SETTINGS, privacySettings);
+
+      // Apply theme immediately
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('dark', personalSettings.theme === 'dark');
+      }
+
+      // Update language in context if it changed
+      if (personalSettings.language !== language) {
+        setLanguage(personalSettings.language as Language);
+      }
+
+      console.log('Settings saved to localStorage:', {
+        personal: personalSettings,
+        notifications: notificationSettings,
+        privacy: privacySettings
+      });
+
+      setHasUnsavedChanges(false);
+      toast.success('¡Configuraciones guardadas exitosamente!');
     } catch (error) {
-      toast.error(t('saveError'));
+      console.error('Error saving settings:', error);
+      toast.error('Error al guardar configuraciones');
     } finally {
       setSaving(false);
     }
@@ -148,6 +238,30 @@ export default function EmployeeSettingsPage() {
     }
   };
 
+  // Helper function to mark changes
+  const markAsChanged = () => {
+    setHasUnsavedChanges(true);
+  };
+
+  // Helper function to get formatted date/time examples
+  const getDateTimeExamples = () => {
+    const now = new Date();
+    const examples = {
+      date: {
+        'MM/DD/YYYY': now.toLocaleDateString('en-US'),
+        'DD/MM/YYYY': now.toLocaleDateString('en-GB'),
+        'YYYY-MM-DD': now.toISOString().split('T')[0]
+      },
+      time: {
+        '12h': now.toLocaleTimeString('en-US', { hour12: true }),
+        '24h': now.toLocaleTimeString('en-US', { hour12: false })
+      }
+    };
+    return examples;
+  };
+
+  const examples = getDateTimeExamples();
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
@@ -167,19 +281,27 @@ export default function EmployeeSettingsPage() {
             <p className="text-gray-800 mt-2 font-semibold">Gestiona tus preferencias personales y configuración de cuenta</p>
           </div>
           
-          <Button onClick={saveSettings} disabled={saving} className="btn-primary">
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Guardar Cambios
-              </>
+          <div className="flex items-center space-x-2">
+            {hasUnsavedChanges && (
+              <div className="flex items-center space-x-2 text-amber-600">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">Cambios sin guardar</span>
+              </div>
             )}
-          </Button>
+            <Button onClick={saveSettings} disabled={saving} className="btn-primary">
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Guardar Cambios
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -205,7 +327,14 @@ export default function EmployeeSettingsPage() {
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="language" className="text-gray-900 font-semibold">Idioma</Label>
-                    <Select value={language} onValueChange={(value: Language) => setLanguage(value)}>
+                    <Select 
+                      value={personalSettings.language} 
+                      onValueChange={(value: Language) => {
+                        setPersonalSettings({...personalSettings, language: value});
+                        setLanguage(value);
+                        markAsChanged();
+                      }}
+                    >
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
@@ -220,6 +349,29 @@ export default function EmployeeSettingsPage() {
                             </div>
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="timezone" className="text-gray-900 font-semibold">Zona Horaria</Label>
+                    <Select 
+                      value={personalSettings.timezone} 
+                      onValueChange={(value) => {
+                        setPersonalSettings({...personalSettings, timezone: value});
+                        markAsChanged();
+                      }}
+                    >
+                      <SelectTrigger className="border-gray-300 text-gray-900">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="America/New_York">Hora del Este (EST)</SelectItem>
+                        <SelectItem value="America/Chicago">Hora Central (CST)</SelectItem>
+                        <SelectItem value="America/Denver">Hora de Montaña (MST)</SelectItem>
+                        <SelectItem value="America/Los_Angeles">Hora del Pacífico (PST)</SelectItem>
+                        <SelectItem value="Europe/Madrid">España (CET)</SelectItem>
+                        <SelectItem value="Europe/London">GMT</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -251,7 +403,13 @@ export default function EmployeeSettingsPage() {
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="theme" className="text-gray-900 font-semibold">Tema</Label>
-                    <Select value={personalSettings.theme} onValueChange={(value) => setPersonalSettings({...personalSettings, theme: value})}>
+                    <Select 
+                      value={personalSettings.theme} 
+                      onValueChange={(value) => {
+                        setPersonalSettings({...personalSettings, theme: value});
+                        markAsChanged();
+                      }}
+                    >
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
@@ -264,50 +422,91 @@ export default function EmployeeSettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="timezone" className="text-gray-900 font-semibold">Zona Horaria</Label>
-                    <Select value={personalSettings.timezone} onValueChange={(value) => setPersonalSettings({...personalSettings, timezone: value})}>
-                      <SelectTrigger className="border-gray-300 text-gray-900">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="America/New_York">Hora del Este</SelectItem>
-                        <SelectItem value="America/Chicago">Hora Central</SelectItem>
-                        <SelectItem value="America/Denver">Hora de Montaña</SelectItem>
-                        <SelectItem value="America/Los_Angeles">Hora del Pacífico</SelectItem>
-                        <SelectItem value="Europe/Madrid">España (CET)</SelectItem>
-                        <SelectItem value="Europe/London">GMT</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
                     <Label htmlFor="dateFormat" className="text-gray-900 font-semibold">Formato de Fecha</Label>
-                    <Select value={personalSettings.dateFormat} onValueChange={(value) => setPersonalSettings({...personalSettings, dateFormat: value})}>
+                    <Select 
+                      value={personalSettings.dateFormat} 
+                      onValueChange={(value) => {
+                        setPersonalSettings({...personalSettings, dateFormat: value});
+                        markAsChanged();
+                      }}
+                    >
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="MM/DD/YYYY">MM/DD/AAAA</SelectItem>
-                        <SelectItem value="DD/MM/YYYY">DD/MM/AAAA</SelectItem>
-                        <SelectItem value="YYYY-MM-DD">AAAA-MM-DD</SelectItem>
+                        <SelectItem value="MM/DD/YYYY">
+                          <div className="flex justify-between w-full">
+                            <span>MM/DD/AAAA</span>
+                            <span className="text-gray-500 ml-4">{examples.date['MM/DD/YYYY']}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="DD/MM/YYYY">
+                          <div className="flex justify-between w-full">
+                            <span>DD/MM/AAAA</span>
+                            <span className="text-gray-500 ml-4">{examples.date['DD/MM/YYYY']}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="YYYY-MM-DD">
+                          <div className="flex justify-between w-full">
+                            <span>AAAA-MM-DD</span>
+                            <span className="text-gray-500 ml-4">{examples.date['YYYY-MM-DD']}</span>
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="timeFormat" className="text-gray-900 font-semibold">Formato de Hora</Label>
-                    <Select value={personalSettings.timeFormat} onValueChange={(value) => setPersonalSettings({...personalSettings, timeFormat: value})}>
+                    <Select 
+                      value={personalSettings.timeFormat} 
+                      onValueChange={(value) => {
+                        setPersonalSettings({...personalSettings, timeFormat: value});
+                        markAsChanged();
+                      }}
+                    >
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="12h">12 Horas (AM/PM)</SelectItem>
-                        <SelectItem value="24h">24 Horas</SelectItem>
+                        <SelectItem value="12h">
+                          <div className="flex justify-between w-full">
+                            <span>12 Horas (AM/PM)</span>
+                            <span className="text-gray-500 ml-4">{examples.time['12h']}</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="24h">
+                          <div className="flex justify-between w-full">
+                            <span>24 Horas</span>
+                            <span className="text-gray-500 ml-4">{examples.time['24h']}</span>
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <h4 className="font-semibold text-purple-900 mb-2">
+                      Vista Previa de Configuración
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <p><strong>Tema:</strong> {personalSettings.theme === 'light' ? 'Claro' : personalSettings.theme === 'dark' ? 'Oscuro' : 'Auto'}</p>
+                      <p><strong>Zona Horaria:</strong> {personalSettings.timezone}</p>
+                      <p><strong>Fecha:</strong> {examples.date[personalSettings.dateFormat as keyof typeof examples.date]}</p>
+                      <p><strong>Hora:</strong> {examples.time[personalSettings.timeFormat as keyof typeof examples.time]}</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
+            </div>
+
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center space-x-2 text-green-800">
+                <CheckCircle className="h-5 w-5" />
+                <span className="font-medium">
+                  Las configuraciones se guardan automáticamente en tu navegador y se aplicarán inmediatamente
+                </span>
+              </div>
             </div>
           </TabsContent>
 
@@ -330,7 +529,10 @@ export default function EmployeeSettingsPage() {
                   </div>
                   <Switch
                     checked={notificationSettings.emailNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, emailNotifications: checked})}
+                    onCheckedChange={(checked) => {
+                      setNotificationSettings({...notificationSettings, emailNotifications: checked});
+                      markAsChanged();
+                    }}
                   />
                 </div>
                 
@@ -341,7 +543,10 @@ export default function EmployeeSettingsPage() {
                   </div>
                   <Switch
                     checked={notificationSettings.leaveUpdates}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, leaveUpdates: checked})}
+                    onCheckedChange={(checked) => {
+                      setNotificationSettings({...notificationSettings, leaveUpdates: checked});
+                      markAsChanged();
+                    }}
                   />
                 </div>
                 
@@ -352,7 +557,10 @@ export default function EmployeeSettingsPage() {
                   </div>
                   <Switch
                     checked={notificationSettings.payrollNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, payrollNotifications: checked})}
+                    onCheckedChange={(checked) => {
+                      setNotificationSettings({...notificationSettings, payrollNotifications: checked});
+                      markAsChanged();
+                    }}
                   />
                 </div>
                 
@@ -363,7 +571,10 @@ export default function EmployeeSettingsPage() {
                   </div>
                   <Switch
                     checked={notificationSettings.reminderAlerts}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, reminderAlerts: checked})}
+                    onCheckedChange={(checked) => {
+                      setNotificationSettings({...notificationSettings, reminderAlerts: checked});
+                      markAsChanged();
+                    }}
                   />
                 </div>
                 
@@ -374,7 +585,10 @@ export default function EmployeeSettingsPage() {
                   </div>
                   <Switch
                     checked={notificationSettings.mobileNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, mobileNotifications: checked})}
+                    onCheckedChange={(checked) => {
+                      setNotificationSettings({...notificationSettings, mobileNotifications: checked});
+                      markAsChanged();
+                    }}
                   />
                 </div>
               </CardContent>
@@ -395,7 +609,13 @@ export default function EmployeeSettingsPage() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="profileVisibility" className="text-gray-900 font-semibold">Visibilidad del Perfil</Label>
-                  <Select value={privacySettings.profileVisibility} onValueChange={(value) => setPrivacySettings({...privacySettings, profileVisibility: value})}>
+                  <Select 
+                    value={privacySettings.profileVisibility} 
+                    onValueChange={(value) => {
+                      setPrivacySettings({...privacySettings, profileVisibility: value});
+                      markAsChanged();
+                    }}
+                  >
                     <SelectTrigger className="border-gray-300 text-gray-900">
                       <SelectValue />
                     </SelectTrigger>
@@ -415,7 +635,10 @@ export default function EmployeeSettingsPage() {
                   </div>
                   <Switch
                     checked={privacySettings.showEmail}
-                    onCheckedChange={(checked) => setPrivacySettings({...privacySettings, showEmail: checked})}
+                    onCheckedChange={(checked) => {
+                      setPrivacySettings({...privacySettings, showEmail: checked});
+                      markAsChanged();
+                    }}
                   />
                 </div>
                 
@@ -426,7 +649,10 @@ export default function EmployeeSettingsPage() {
                   </div>
                   <Switch
                     checked={privacySettings.showPhone}
-                    onCheckedChange={(checked) => setPrivacySettings({...privacySettings, showPhone: checked})}
+                    onCheckedChange={(checked) => {
+                      setPrivacySettings({...privacySettings, showPhone: checked});
+                      markAsChanged();
+                    }}
                   />
                 </div>
                 
@@ -437,7 +663,10 @@ export default function EmployeeSettingsPage() {
                   </div>
                   <Switch
                     checked={privacySettings.allowDirectMessages}
-                    onCheckedChange={(checked) => setPrivacySettings({...privacySettings, allowDirectMessages: checked})}
+                    onCheckedChange={(checked) => {
+                      setPrivacySettings({...privacySettings, allowDirectMessages: checked});
+                      markAsChanged();
+                    }}
                   />
                 </div>
               </CardContent>
