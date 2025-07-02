@@ -1,3 +1,4 @@
+// lib/pdf-generator.ts
 import jsPDF from 'jspdf';
 
 export interface PayrollData {
@@ -314,8 +315,8 @@ export class PayrollPDFGenerator {
     // Page number
     this.doc.text('Página 1 de 1', this.pageWidth - this.margin, footerY, { align: 'right' });
     
-    // Document ID
-    this.doc.text(`ID Documento: PAY-${data.payroll.id}-${new Date().getFullYear()}`, this.pageWidth - this.margin, footerY + 5, { align: 'right' });
+    // Document ID - FIXED: Use data.id instead of data.payroll.id
+    this.doc.text(`ID Documento: PAY-${data.id}-${new Date().getFullYear()}`, this.pageWidth - this.margin, footerY + 5, { align: 'right' });
   }
 }
 
