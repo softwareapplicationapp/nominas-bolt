@@ -365,7 +365,6 @@ export default function EmployeeLeavesPage() {
                           {/* NEW: Show comment indicator */}
                           {request.admin_comments && (
                               <MessageSquare className="h-4 w-4 text-blue-600" />
-                            </span>
                           )}
                         </div>
                       </TableCell>
