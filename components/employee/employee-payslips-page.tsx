@@ -20,7 +20,7 @@ import {
   TrendingUp,
   Eye,
   Loader2,
-  FilePdf,
+  FileIcon,
   Printer,
   Mail
 } from 'lucide-react';
@@ -302,7 +302,7 @@ export default function EmployeePayslipsPage() {
                               {isDownloading === payslip.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
-                                <FilePdf className="h-4 w-4" />
+                                <FileIcon className="h-4 w-4" />
                               )}
                             </Button>
                             <Button 
