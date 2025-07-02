@@ -271,25 +271,47 @@ class ApiClient {
     return this.request('/dashboard/stats');
   }
 
-  // NEW: Payroll methods
+  // FIXED: Payroll methods with better error handling
   async getPayroll() {
-    return this.request('/payroll');
+    try {
+      console.log('API Client: Fetching payroll records');
+      const data = await this.request('/payroll');
+      console.log('API Client: Payroll records fetched:', data?.length || 0);
+      return data;
+    } catch (error) {
+      console.error('API Client: Error fetching payroll:', error);
+      throw error;
+    }
   }
 
   async createPayroll(payrollData: any) {
-    console.log('API Client: Creating payroll with data:', payrollData);
-    return this.request('/payroll', {
-      method: 'POST',
-      body: JSON.stringify(payrollData),
-    });
+    try {
+      console.log('API Client: Creating payroll with data:', payrollData);
+      const data = await this.request('/payroll', {
+        method: 'POST',
+        body: JSON.stringify(payrollData),
+      });
+      console.log('API Client: Payroll created successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('API Client: Error creating payroll:', error);
+      throw error;
+    }
   }
 
   async updatePayroll(payrollId: number, payrollData: any) {
-    console.log('API Client: Updating payroll', payrollId, 'with data:', payrollData);
-    return this.request(`/payroll/${payrollId}`, {
-      method: 'PUT',
-      body: JSON.stringify(payrollData),
-    });
+    try {
+      console.log('API Client: Updating payroll', payrollId, 'with data:', payrollData);
+      const data = await this.request(`/payroll/${payrollId}`, {
+        method: 'PUT',
+        body: JSON.stringify(payrollData),
+      });
+      console.log('API Client: Payroll updated successfully');
+      return data;
+    } catch (error) {
+      console.error('API Client: Error updating payroll:', error);
+      throw error;
+    }
   }
 
   async deletePayroll(payrollId: number) {
@@ -298,25 +320,46 @@ class ApiClient {
     });
   }
 
-  // NEW: Download payroll PDF
+  // FIXED: Download payroll PDF with better error handling
   async downloadPayrollPDF(payrollId: number): Promise<Blob> {
-    console.log('API Client: Downloading PDF for payroll', payrollId);
-    const url = `${this.baseUrl}/payroll/${payrollId}/pdf`;
-    const headers = new Headers();
-    
-    if (this.token) {
-      headers.set('Authorization', `Bearer ${this.token}`);
+    try {
+      console.log('API Client: Downloading PDF for payroll', payrollId);
+      
+      // Use direct fetch instead of this.request to get binary data
+      const url = `${this.baseUrl}/payroll/${payrollId}/pdf`;
+      const headers = new Headers();
+      
+      if (this.token) {
+        headers.set('Authorization', `Bearer ${this.token}`);
+      }
+      
+      console.log('API Client: Sending PDF request to:', url);
+      console.log('API Client: With authorization header:', !!this.token);
+
+      const response = await fetch(url, { headers });
+
+      if (!response.ok) {
+        console.error('API Client: PDF download failed:', response.status, response.statusText);
+        
+        // Try to parse error response
+        let errorMessage = 'Failed to download PDF';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If we can't parse JSON, use text
+          errorMessage = await response.text() || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      console.log('API Client: PDF download successful');
+      return response.blob();
+    } catch (error) {
+      console.error('API Client: Error downloading PDF:', error);
+      throw error;
     }
-
-    const response = await fetch(url, { headers });
-
-    if (!response.ok) {
-      console.error('PDF download failed:', response.status, response.statusText);
-      const error = await response.json().catch(() => ({ error: 'Network error' }));
-      throw new Error(error.error || 'Failed to download PDF');
-    }
-
-    return response.blob();
   }
 }
 

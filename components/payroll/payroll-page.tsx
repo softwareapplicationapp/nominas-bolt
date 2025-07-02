@@ -38,7 +38,8 @@ import {
   Eye,
   FileIcon,
   Printer,
-  Mail
+  Mail,
+  AlertTriangle
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { toast } from 'sonner';
@@ -78,6 +79,7 @@ export default function PayrollPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDownloading, setIsDownloading] = useState<number | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { t, language } = useLanguage();
 
   // Form state
@@ -98,15 +100,22 @@ export default function PayrollPage() {
   const loadData = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
+      
+      console.log('Loading payroll data...');
       const [payrollData, employeesData] = await Promise.all([
         apiClient.getPayroll(),
         apiClient.getEmployees()
       ]);
-      console.log('Payroll data loaded:', payrollData);
+      
+      console.log('Payroll data loaded:', payrollData?.length || 0, 'records');
+      console.log('Employees data loaded:', employeesData?.length || 0, 'employees');
+      
       setPayrollRecords(payrollData || []);
       setEmployees(employeesData);
     } catch (error: any) {
       console.error('Failed to load payroll data:', error);
+      setLoadError(error.message || 'Failed to load data');
       toast.error('Failed to load data: ' + error.message);
     } finally {
       setLoading(false);
@@ -170,7 +179,26 @@ export default function PayrollPage() {
   const handleDownloadPDF = async (id: number) => {
     setIsDownloading(id);
     try {
-      const blob = await apiClient.downloadPayrollPDF(id);
+      console.log('Attempting to download payroll PDF for ID:', id);
+      
+      // Create a direct URL to the PDF endpoint
+      const token = localStorage.getItem('accessToken');
+      const url = `/api/payroll/${id}/pdf`;
+      
+      // Use fetch directly with proper headers
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('PDF download failed:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to download PDF: ${response.status} ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
       
       // Find the payroll record to get employee name for filename
       const record = payrollRecords.find(r => r.id === id);
@@ -178,14 +206,14 @@ export default function PayrollPage() {
       const periodStart = record ? format(new Date(record.pay_period_start), 'yyyy-MM') : 'period';
       
       // Create a download link
-      const url = URL.createObjectURL(blob);
+      const url2 = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = url2;
       a.download = `nomina_${employeeName.toLowerCase()}_${periodStart}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url2);
       
       toast.success('Payroll PDF downloaded successfully!');
     } catch (error: any) {
@@ -378,6 +406,25 @@ export default function PayrollPage() {
           </Dialog>
         </div>
       </div>
+
+      {/* Error Alert */}
+      {loadError && (
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 flex items-start">
+          <AlertTriangle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+          <div>
+            <h3 className="font-semibold">Error loading payroll data</h3>
+            <p className="text-sm mt-1">{loadError}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={loadData} 
+              className="mt-2 text-red-600 border-red-300 hover:bg-red-50"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

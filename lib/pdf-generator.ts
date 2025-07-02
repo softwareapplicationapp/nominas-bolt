@@ -49,6 +49,10 @@ export class PayrollPDFGenerator {
 
   generatePayrollPDF(data: PayrollData): Uint8Array {
     console.log('PDF Generator: Starting PDF generation for payroll ID:', data.id);
+    console.log('PDF Generator: Employee:', `${data.employee.first_name} ${data.employee.last_name}`);
+    console.log('PDF Generator: Company:', data.company.name);
+    console.log('PDF Generator: Period:', `${data.payroll.pay_period_start} to ${data.payroll.pay_period_end}`);
+    console.log('PDF Generator: Net pay:', data.payroll.net_pay);
     
     try {
       this.addHeader(data);

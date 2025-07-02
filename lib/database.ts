@@ -211,24 +211,29 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       return { lastID: data!.id, changes: 1 };
     }
 
-    // NEW: Handle payroll insertions
+    // FIXED: Handle payroll insertions with better logging
     if (q.startsWith('insert into payroll')) {
       console.log('=== INSERTING PAYROLL RECORD ===');
       console.log('Parameters:', params);
       
+      // Create the payroll data object
+      const payrollData = {
+        employee_id: params[0],
+        pay_period_start: params[1],
+        pay_period_end: params[2],
+        base_salary: params[3],
+        bonus: params[4],
+        deductions: params[5],
+        net_pay: params[6],
+        status: params[7],
+        processed_at: params[7] === 'processed' ? new Date().toISOString() : null
+      };
+      
+      console.log('Payroll data to insert:', payrollData);
+      
       const { data, error } = await supabase
         .from('payroll')
-        .insert({
-          employee_id: params[0],
-          pay_period_start: params[1],
-          pay_period_end: params[2],
-          base_salary: params[3],
-          bonus: params[4],
-          deductions: params[5],
-          net_pay: params[6],
-          status: params[7],
-          processed_at: params[7] === 'processed' ? new Date().toISOString() : null
-        })
+        .insert(payrollData)
         .select('id')
         .single();
       
@@ -380,9 +385,10 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       return { lastID: params[3], changes: 1 };
     }
 
-    // NEW: Handle payroll updates
+    // FIXED: Handle payroll updates with better logging
     if (q.includes('update payroll')) {
       console.log('=== UPDATING PAYROLL RECORD ===');
+      console.log('SQL Query:', q);
       console.log('Parameters:', params);
       
       const updateData: any = {};
@@ -392,19 +398,27 @@ export const dbRun = async (sql: string, params: any[] = []) => {
         updateData.status = params[0];
         if (params[1]) {
           updateData.processed_at = params[1];
+        } else if (params[0] === 'processed') {
+          // If status is processed but no processed_at date provided, set it to now
+          updateData.processed_at = new Date().toISOString();
         }
         
-        const { error } = await supabase
+        console.log('Updating payroll status to:', updateData.status);
+        console.log('Setting processed_at to:', updateData.processed_at);
+        
+        const { data, error } = await supabase
           .from('payroll')
           .update(updateData)
-          .eq('id', params[2]);
+          .eq('id', params[2])
+          .select()
+          .single();
         
         if (error) {
           console.error('Payroll update error:', error);
           throw error;
         }
         
-        console.log('Payroll record updated successfully');
+        console.log('Payroll record updated successfully:', data);
         return { lastID: params[2], changes: 1 };
       } else {
         // Full payroll update
@@ -776,6 +790,23 @@ export const dbGet = async (sql: string, params: any[] = []) => {
           employee_id: employee.employee_id
         };
       }
+      
+      return data;
+    }
+
+    // ADDED: Direct payroll query without joins
+    if (q.includes('select * from payroll where id = ?')) {
+      console.log('=== DIRECT PAYROLL QUERY ===');
+      console.log('Payroll ID:', params[0]);
+      
+      const { data, error } = await supabase
+        .from('payroll')
+        .select('*')
+        .eq('id', params[0])
+        .maybeSingle();
+      
+      console.log('Direct payroll query result:', data);
+      console.log('Direct payroll query error:', error);
       
       return data;
     }
@@ -1173,6 +1204,18 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       const employeeIds = employees.map(e => e.id);
       console.log('Employee IDs for payroll query:', employeeIds);
       
+      // CRITICAL FIX: Direct query to check if payroll records exist for these employees
+      const { count: payrollCount, error: countError } = await supabase
+        .from('payroll')
+        .select('*', { count: 'exact', head: true })
+        .in('employee_id', employeeIds);
+        
+      console.log('Total payroll records for these employees:', payrollCount);
+      
+      if (countError) {
+        console.error('Payroll count query failed:', countError);
+      }
+      
       // Now get payroll records for these employees
       const { data: payrollData, error: payrollError } = await supabase
         .from('payroll')
@@ -1180,13 +1223,38 @@ export const dbAll = async (sql: string, params: any[] = []) => {
         .in('employee_id', employeeIds)
         .order('pay_period_start', { ascending: false });
       
-      console.log('Payroll query result:', payrollData);
+      console.log('Payroll query result count:', payrollData?.length || 0);
+      if (payrollData && payrollData.length > 0) {
+        console.log('First payroll record:', payrollData[0]);
+      }
       console.log('Payroll query error:', payrollError);
-      console.log('Number of payroll records found:', payrollData?.length || 0);
       
       if (payrollError) {
         console.error('Payroll query failed:', payrollError);
         throw payrollError;
+      }
+      
+      // CRITICAL FIX: If no records found, try a direct query to see all payroll records
+      if (!payrollData || payrollData.length === 0) {
+        console.log('=== NO PAYROLL RECORDS FOUND, CHECKING ALL RECORDS ===');
+        const { data: allPayroll, error: allPayrollError } = await supabase
+          .from('payroll')
+          .select('*')
+          .limit(10);
+          
+        console.log('All payroll records (up to 10):', allPayroll);
+        console.log('All payroll error:', allPayrollError);
+        
+        if (allPayroll && allPayroll.length > 0) {
+          console.log('There are payroll records in the database, but none for the current company employees');
+          console.log('Employee IDs in company:', employeeIds);
+          console.log('Employee IDs in payroll records:', allPayroll.map(p => p.employee_id));
+          
+          // Check if there's a mismatch between employee IDs
+          const payrollEmployeeIds = allPayroll.map(p => p.employee_id);
+          const matchingIds = employeeIds.filter(id => payrollEmployeeIds.includes(id));
+          console.log('Matching employee IDs:', matchingIds);
+        }
       }
       
       // Combine payroll data with employee information
@@ -1202,6 +1270,10 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       });
       
       console.log('Final payroll result with employee data:', result.length, 'records');
+      if (result.length > 0) {
+        console.log('Sample result:', result[0]);
+      }
+      
       return result;
     }
 

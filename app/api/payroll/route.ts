@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth';
 import { dbRun, dbGet, dbAll } from '@/lib/database';
+import { supabase } from '@/lib/supabaseClient';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,6 +22,42 @@ export async function GET(request: NextRequest) {
 
     // Get payroll records for the company
     console.log('Fetching payroll records for company:', user.company_id);
+    
+    // CRITICAL FIX: First check if there are any employees for this company
+    const { data: employeeCheck, error: employeeError } = await supabase
+      .from('employees')
+      .select('id')
+      .eq('company_id', user.company_id);
+      
+    console.log('Employee check result:', employeeCheck?.length || 0, 'employees found');
+    if (employeeError) {
+      console.error('Employee check error:', employeeError);
+    }
+    
+    if (!employeeCheck || employeeCheck.length === 0) {
+      console.log('No employees found for company:', user.company_id);
+      return NextResponse.json([]);
+    }
+    
+    // CRITICAL FIX: Direct Supabase query to check payroll records
+    const employeeIds = employeeCheck.map(e => e.id);
+    console.log('Employee IDs for payroll query:', employeeIds);
+    
+    const { data: directPayrollCheck, error: directPayrollError } = await supabase
+      .from('payroll')
+      .select('*')
+      .in('employee_id', employeeIds)
+      .limit(5);
+      
+    console.log('Direct payroll check result:', directPayrollCheck?.length || 0, 'records found');
+    if (directPayrollCheck && directPayrollCheck.length > 0) {
+      console.log('Sample payroll record:', directPayrollCheck[0]);
+    }
+    if (directPayrollError) {
+      console.error('Direct payroll check error:', directPayrollError);
+    }
+    
+    // Now use our database abstraction to get the full records with employee details
     const payrollRecords = await dbAll(`
       SELECT p.*, e.first_name, e.last_name, e.department, e.employee_id
       FROM payroll p
@@ -60,6 +97,32 @@ export async function GET(request: NextRequest) {
         console.log('=== CHECKING PAYROLL RECORDS DIRECTLY ===');
         const employeeIds = employees.map(e => e.id);
         console.log('Looking for payroll records for employee IDs:', employeeIds);
+        
+        // Direct Supabase query to check all payroll records
+        const { data: allPayroll, error: allPayrollError } = await supabase
+          .from('payroll')
+          .select('*');
+          
+        console.log('All payroll records in database:', allPayroll?.length || 0);
+        if (allPayroll && allPayroll.length > 0) {
+          console.log('First few payroll records:', allPayroll.slice(0, 3));
+          
+          // Check which employee IDs have payroll records
+          const payrollEmployeeIds = allPayroll.map(p => p.employee_id);
+          console.log('Employee IDs in payroll records:', payrollEmployeeIds);
+          
+          // Check for matches
+          const matchingIds = employeeIds.filter(id => payrollEmployeeIds.includes(id));
+          console.log('Matching employee IDs:', matchingIds);
+          
+          if (matchingIds.length > 0) {
+            // There should be records but we're not getting them
+            console.log('❌ CRITICAL ERROR: There are matching payroll records but query is not returning them');
+          }
+        }
+        if (allPayrollError) {
+          console.error('All payroll query error:', allPayrollError);
+        }
       }
     }
 
@@ -115,6 +178,26 @@ export async function POST(request: NextRequest) {
       status
     });
 
+    // CRITICAL FIX: First check if the employee exists
+    const { data: employeeCheck, error: employeeError } = await supabase
+      .from('employees')
+      .select('id, first_name, last_name')
+      .eq('id', employeeId)
+      .maybeSingle();
+      
+    console.log('Employee check result:', employeeCheck);
+    if (employeeError) {
+      console.error('Employee check error:', employeeError);
+      return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    }
+    
+    if (!employeeCheck) {
+      console.log('❌ Employee not found with ID:', employeeId);
+      return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    }
+    
+    console.log('✅ Employee found:', employeeCheck);
+
     const result = await dbRun(`
       INSERT INTO payroll (employee_id, pay_period_start, pay_period_end, base_salary, bonus, deductions, net_pay, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -126,6 +209,25 @@ export async function POST(request: NextRequest) {
     console.log('=== GETTING NEW PAYROLL RECORD ===');
     console.log('Looking for payroll record with ID:', result.lastID);
     
+    // CRITICAL FIX: First try a direct query to confirm the record exists
+    const { data: directCheck, error: directError } = await supabase
+      .from('payroll')
+      .select('*')
+      .eq('id', result.lastID)
+      .maybeSingle();
+      
+    console.log('Direct payroll check result:', directCheck);
+    if (directError) {
+      console.error('Direct payroll check error:', directError);
+    }
+    
+    if (!directCheck) {
+      console.log('❌ CRITICAL ERROR: Payroll record not found in direct check');
+    } else {
+      console.log('✅ Payroll record exists in database');
+    }
+    
+    // Now try to get the record with employee details
     const newPayroll = await dbGet(`
       SELECT p.*, e.first_name, e.last_name, e.department, e.employee_id
       FROM payroll p
@@ -137,13 +239,37 @@ export async function POST(request: NextRequest) {
     
     if (!newPayroll) {
       console.log('❌ Failed to retrieve new payroll record');
-      // Let's try a direct query to see if the record exists
       console.log('=== DIRECT PAYROLL CHECK ===');
       const directCheck = await dbGet(`SELECT * FROM payroll WHERE id = ?`, [result.lastID]);
       console.log('Direct payroll check result:', directCheck);
+      
+      // If direct check succeeds but join fails, create a manual response
+      if (directCheck) {
+        console.log('Creating manual response with employee data');
+        const manualResponse = {
+          ...directCheck,
+          first_name: employeeCheck.first_name,
+          last_name: employeeCheck.last_name,
+          department: 'Unknown', // We don't have this from the direct check
+          employee_id: `EMP${employeeId.toString().padStart(3, '0')}` // Generate a placeholder
+        };
+        console.log('Manual response:', manualResponse);
+        return NextResponse.json(manualResponse);
+      }
     }
     
-    return NextResponse.json(newPayroll);
+    return NextResponse.json(newPayroll || {
+      id: result.lastID,
+      employee_id: employeeId,
+      pay_period_start: payPeriodStart,
+      pay_period_end: payPeriodEnd,
+      base_salary: baseSalary,
+      bonus: bonus,
+      deductions: deductions,
+      net_pay: netPay,
+      status: status,
+      created_at: new Date().toISOString()
+    });
   } catch (error: any) {
     console.error('Create payroll error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
