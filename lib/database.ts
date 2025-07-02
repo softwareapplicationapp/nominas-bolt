@@ -896,12 +896,25 @@ export const dbAll = async (sql: string, params: any[] = []) => {
           };
         });
       } else if (q.includes('where lr.employee_id = ?')) {
+        console.log('=== EMPLOYEE LEAVES QUERY (dbAll) ===');
+        console.log('Employee ID:', params[0]);
+        console.log('SQL Query:', q);
+        
         const { data, error } = await supabase
           .from('leave_requests')
           .select('*, approver:employees!approved_by(first_name,last_name)')
           .eq('employee_id', params[0])
           .order('created_at', { ascending: false });
-        if (error) throw error;
+        
+        console.log('Leave requests query result:', data);
+        console.log('Leave requests query error:', error);
+        console.log('Number of leave requests found:', data?.length || 0);
+        
+        if (error) {
+          console.error('Leave requests query failed:', error);
+          throw error;
+        }
+        
         return (data || []).map(lr => ({
           ...lr,
           approver_first_name: (lr as any).approver?.first_name,
