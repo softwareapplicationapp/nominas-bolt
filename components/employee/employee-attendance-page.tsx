@@ -118,19 +118,22 @@ export default function EmployeeAttendancePage() {
   const averageHours = attendanceRecords.length > 0 ? totalHours / attendanceRecords.length : 0;
   const presentDays = attendanceRecords.filter(record => record.status === 'present').length;
 
-  // Get today's records
+  // Get today's records and check for open check-ins
   const today = new Date().toISOString().split('T')[0];
   const todayRecords = attendanceRecords.filter(record => record.date === today);
+  
+  // CRITICAL FIX: Check if there's any open check-in (check_in exists but check_out is null)
   const openCheckIn = todayRecords.find(record => record.check_in && !record.check_out);
   const hasOpenCheckIn = !!openCheckIn;
+  
+  // Calculate if we can show "Nueva Entrada" button
+  const canCheckIn = !hasOpenCheckIn; // Only allow check-in if there's no open check-in
 
-  console.log('=== Stats calculation ===');
-  console.log('Total records:', attendanceRecords.length);
-  console.log('Total hours:', totalHours);
-  console.log('Average hours:', averageHours);
-  console.log('Present days:', presentDays);
+  console.log('=== Button Logic Debug ===');
   console.log('Today records:', todayRecords.length);
+  console.log('Open check-in record:', openCheckIn);
   console.log('Has open check-in:', hasOpenCheckIn);
+  console.log('Can check in:', canCheckIn);
 
   if (loading) {
     return (
@@ -199,7 +202,7 @@ export default function EmployeeAttendancePage() {
                 </div>
               )}
 
-              {/* Action Buttons */}
+              {/* Status and Action Buttons */}
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
                   {hasOpenCheckIn ? (
@@ -213,31 +216,38 @@ export default function EmployeeAttendancePage() {
                     <div className="flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4 text-gray-400" />
                       <span className="text-sm text-gray-600 font-medium">
-                        Puedes registrar una nueva entrada
+                        {todayRecords.length > 0 
+                          ? 'Todas las sesiones están cerradas. Puedes registrar una nueva entrada'
+                          : 'Puedes registrar una nueva entrada'
+                        }
                       </span>
                     </div>
                   )}
                 </div>
                 
                 <div className="flex space-x-2">
-                  <Button 
-                    onClick={handleCheckIn}
-                    disabled={actionLoading}
-                    className="btn-success"
-                  >
-                    {actionLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Registrando...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Nueva Entrada
-                      </>
-                    )}
-                  </Button>
+                  {/* CRITICAL FIX: Only show "Nueva Entrada" if there's no open check-in */}
+                  {canCheckIn && (
+                    <Button 
+                      onClick={handleCheckIn}
+                      disabled={actionLoading}
+                      className="btn-success"
+                    >
+                      {actionLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Registrando...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Nueva Entrada
+                        </>
+                      )}
+                    </Button>
+                  )}
 
+                  {/* Only show "Marcar Salida" if there's an open check-in */}
                   {hasOpenCheckIn && (
                     <Button 
                       onClick={handleCheckOut}
@@ -270,6 +280,11 @@ export default function EmployeeAttendancePage() {
                       {todayRecords.reduce((sum, record) => sum + (record.total_hours || 0), 0).toFixed(2)}h
                     </span>
                   </div>
+                  {hasOpenCheckIn && (
+                    <div className="mt-2 text-xs text-emerald-700 font-medium">
+                      * Sesión en curso no incluida en el total
+                    </div>
+                  )}
                 </div>
               )}
             </div>
