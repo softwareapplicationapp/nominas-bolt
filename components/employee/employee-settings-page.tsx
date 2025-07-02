@@ -58,7 +58,7 @@ const STORAGE_KEYS = {
   PRIVACY_SETTINGS: 'arcushr_privacy_settings'
 };
 
-const loadFromStorage = <T>(key: string, defaultValue: T): T => {
+const loadFromStorage = (key: string, defaultValue: T): T => {
   if (typeof window === 'undefined') return defaultValue;
   try {
     const stored = localStorage.getItem(key);
@@ -68,7 +68,7 @@ const loadFromStorage = <T>(key: string, defaultValue: T): T => {
   }
 };
 
-const saveToStorage = <T>(key: string, value: T): void => {
+const saveToStorage = (key: string, value: T): void => {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(key, JSON.stringify(value));
