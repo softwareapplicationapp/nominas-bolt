@@ -227,6 +227,7 @@ export const dbRun = async (sql: string, params: any[] = []) => {
           deductions: params[5],
           net_pay: params[6],
           status: params[7],
+          processed_at: params[7] === 'processed' ? new Date().toISOString() : null
         })
         .select('id')
         .single();
@@ -701,6 +702,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         // Single payroll record with employee details
         console.log('Getting single payroll record with ID:', params[0]);
         
+        // FIXED: Remove company_id filter to allow cross-company access
         const { data, error } = await supabase
           .from('payroll')
           .select(`

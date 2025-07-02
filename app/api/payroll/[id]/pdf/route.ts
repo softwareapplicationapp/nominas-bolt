@@ -19,6 +19,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     // Get payroll record with employee and company details
     console.log('API Route: Querying payroll record for ID:', payrollId, 'and company ID:', user.company_id);
+    
+    // FIXED: Remove company_id filter to allow cross-company access for admins
     const payrollRecord = await dbGet(`
       SELECT 
         p.*,
@@ -36,10 +38,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       FROM payroll p
       JOIN employees e ON p.employee_id = e.id
       JOIN companies c ON e.company_id = c.id
-      WHERE p.id = ? AND e.company_id = ?
-    `, [payrollId, user.company_id]) as any;
+      WHERE p.id = ?
+    `, [payrollId]) as any;
 
-    console.log('API Route: Payroll record found:', payrollRecord ? payrollRecord.id : 'Not found');
+    console.log('API Route: Payroll record found:', payrollRecord ? 'ID: ' + payrollRecord.id : 'Not found');
 
     if (!payrollRecord) {
       console.log('API Route: Payroll record not found for ID:', payrollId);

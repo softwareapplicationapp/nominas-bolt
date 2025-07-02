@@ -113,6 +113,7 @@ export default function EmployeePayslipsPage() {
   const handleDownloadPayslip = async (payslipId: number) => {
     setIsDownloading(payslipId);
     try {
+      console.log('Attempting to download payslip PDF for ID:', payslipId);
       const blob = await apiClient.downloadPayrollPDF(payslipId);
       
       // Create a download link
@@ -128,7 +129,7 @@ export default function EmployeePayslipsPage() {
       toast.success('Recibo de pago descargado con éxito');
     } catch (error: any) {
       console.error('Error downloading payslip:', error);
-      toast.error('Error al descargar el recibo de pago');
+      toast.error('Error al descargar el recibo de pago: ' + error.message);
     } finally {
       setIsDownloading(null);
     }
