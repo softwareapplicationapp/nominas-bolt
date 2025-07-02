@@ -565,6 +565,30 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
+    // CRITICAL FIX: Handle leave requests query for single employee
+    if (q.includes('select lr.*') && q.includes('from leave_requests lr') && q.includes('where lr.id = ?')) {
+      console.log('=== SINGLE LEAVE REQUEST QUERY ===');
+      console.log('Leave request ID:', params[0]);
+      
+      const { data, error } = await supabase
+        .from('leave_requests')
+        .select('*, approver:employees!approved_by(first_name,last_name)')
+        .eq('id', params[0])
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data) {
+        return {
+          ...data,
+          approver_first_name: (data as any).approver?.first_name,
+          approver_last_name: (data as any).approver?.last_name,
+        };
+      }
+      
+      return data;
+    }
+
     // Count queries
     if (q.includes('count(*) as count from employees')) {
       const { count } = await supabase
@@ -864,8 +888,16 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       return data || [];
     }
 
-    if (q.includes('select lr.*, e.first_name')) {
+    // CRITICAL FIX: Handle leave requests queries properly
+    if (q.includes('select lr.*') && q.includes('from leave_requests lr')) {
+      console.log('=== LEAVE REQUESTS QUERY (dbAll) ===');
+      console.log('SQL Query:', q);
+      console.log('Parameters:', params);
+      
       if (q.includes('where e.company_id = ?')) {
+        // This is for admin/manager view - get all leaves for company
+        console.log('Getting leaves for company:', params[0]);
+        
         const { data: employees } = await supabase
           .from('employees')
           .select('id, first_name, last_name, department')
@@ -896,9 +928,8 @@ export const dbAll = async (sql: string, params: any[] = []) => {
           };
         });
       } else if (q.includes('where lr.employee_id = ?')) {
-        console.log('=== EMPLOYEE LEAVES QUERY (dbAll) ===');
-        console.log('Employee ID:', params[0]);
-        console.log('SQL Query:', q);
+        // This is for employee view - get leaves for specific employee
+        console.log('Getting leaves for employee:', params[0]);
         
         const { data, error } = await supabase
           .from('leave_requests')
