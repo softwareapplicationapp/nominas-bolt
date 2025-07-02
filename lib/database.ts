@@ -211,6 +211,26 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       return { lastID: data!.id, changes: 1 };
     }
 
+    // NEW: Handle payroll insertions
+    if (q.startsWith('insert into payroll')) {
+      const { data, error } = await supabase
+        .from('payroll')
+        .insert({
+          employee_id: params[0],
+          pay_period_start: params[1],
+          pay_period_end: params[2],
+          base_salary: params[3],
+          bonus: params[4],
+          deductions: params[5],
+          net_pay: params[6],
+          status: params[7],
+        })
+        .select('id')
+        .single();
+      if (error) throw error;
+      return { lastID: data!.id, changes: 1 };
+    }
+
     // Handle UPDATE queries
     if (q.includes('update employees')) {
       if (q.includes('where id = ?') && q.includes('company_id = ?')) {
@@ -350,10 +370,39 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       return { lastID: params[3], changes: 1 };
     }
 
+    // NEW: Handle payroll updates
+    if (q.includes('update payroll')) {
+      const { error } = await supabase
+        .from('payroll')
+        .update({
+          pay_period_start: params[0],
+          pay_period_end: params[1],
+          base_salary: params[2],
+          bonus: params[3],
+          deductions: params[4],
+          net_pay: params[5],
+          status: params[6],
+          processed_at: params[7] ? new Date().toISOString() : null,
+        })
+        .eq('id', params[8]);
+      if (error) throw error;
+      return { lastID: params[8], changes: 1 };
+    }
+
     // Handle DELETE queries
     if (q.includes('delete from attendance where id = ?')) {
       const { error } = await supabase
         .from('attendance')
+        .delete()
+        .eq('id', params[0]);
+      if (error) throw error;
+      return { lastID: params[0], changes: 1 };
+    }
+
+    // NEW: Handle payroll deletions
+    if (q.includes('delete from payroll where id = ?')) {
+      const { error } = await supabase
+        .from('payroll')
         .delete()
         .eq('id', params[0]);
       if (error) throw error;
@@ -604,6 +653,48 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       }
       
       return data;
+    }
+
+    // NEW: Handle payroll queries
+    if (q.includes('select p.*, e.') && q.includes('from payroll p join employees e')) {
+      if (q.includes('where p.id = ?')) {
+        // Single payroll record with employee details
+        const { data, error } = await supabase
+          .from('payroll')
+          .select(`
+            *,
+            employees!inner(
+              id, employee_id, first_name, last_name, email, phone, 
+              department, position, start_date, location,
+              companies!inner(name)
+            )
+          `)
+          .eq('id', params[0])
+          .maybeSingle();
+        
+        if (error) throw error;
+        
+        if (data) {
+          const employee = (data as any).employees;
+          const company = employee.companies;
+          return {
+            ...data,
+            employee_id: employee.id,
+            employee_code: employee.employee_id,
+            first_name: employee.first_name,
+            last_name: employee.last_name,
+            email: employee.email,
+            phone: employee.phone,
+            department: employee.department,
+            position: employee.position,
+            start_date: employee.start_date,
+            location: employee.location,
+            company_name: company.name
+          };
+        }
+        
+        return data;
+      }
     }
 
     // Count queries
@@ -969,6 +1060,38 @@ export const dbAll = async (sql: string, params: any[] = []) => {
           approver_last_name: (lr as any).approver?.last_name,
         }));
       }
+    }
+
+    // NEW: Handle payroll queries
+    if (q.includes('select p.*, e.first_name') && q.includes('from payroll p join employees e')) {
+      const { data: employees } = await supabase
+        .from('employees')
+        .select('id, first_name, last_name, department, employee_id')
+        .eq('company_id', params[0]);
+      
+      if (!employees || employees.length === 0) {
+        return [];
+      }
+
+      const employeeIds = employees.map(e => e.id);
+      const { data, error } = await supabase
+        .from('payroll')
+        .select('*')
+        .in('employee_id', employeeIds)
+        .order('pay_period_start', { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data || []).map(p => {
+        const employee = employees.find(e => e.id === p.employee_id);
+        return {
+          ...p,
+          first_name: employee?.first_name || '',
+          last_name: employee?.last_name || '',
+          department: employee?.department || '',
+          employee_id: employee?.employee_id || '',
+        };
+      });
     }
 
     if (q.includes('select department, count(*) as count from employees')) {

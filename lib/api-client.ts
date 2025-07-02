@@ -270,6 +270,50 @@ class ApiClient {
   async getDashboardStats() {
     return this.request('/dashboard/stats');
   }
+
+  // NEW: Payroll methods
+  async getPayroll() {
+    return this.request('/payroll');
+  }
+
+  async createPayroll(payrollData: any) {
+    return this.request('/payroll', {
+      method: 'POST',
+      body: JSON.stringify(payrollData),
+    });
+  }
+
+  async updatePayroll(payrollId: number, payrollData: any) {
+    return this.request(`/payroll/${payrollId}`, {
+      method: 'PUT',
+      body: JSON.stringify(payrollData),
+    });
+  }
+
+  async deletePayroll(payrollId: number) {
+    return this.request(`/payroll/${payrollId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // NEW: Download payroll PDF
+  async downloadPayrollPDF(payrollId: number): Promise<Blob> {
+    const url = `${this.baseUrl}/payroll/${payrollId}/pdf`;
+    const headers = new Headers();
+    
+    if (this.token) {
+      headers.set('Authorization', `Bearer ${this.token}`);
+    }
+
+    const response = await fetch(url, { headers });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Network error' }));
+      throw new Error(error.error || 'Failed to download PDF');
+    }
+
+    return response.blob();
+  }
 }
 
 export const apiClient = new ApiClient();

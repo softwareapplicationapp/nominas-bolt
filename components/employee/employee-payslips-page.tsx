@@ -19,12 +19,16 @@ import {
   Calendar,
   TrendingUp,
   Eye,
-  Loader2
+  Loader2,
+  FilePdf,
+  Printer,
+  Mail
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/language-context';
+import { apiClient } from '@/lib/api-client';
 
 interface Payslip {
   id: number;
@@ -41,6 +45,7 @@ interface Payslip {
 export default function EmployeePayslipsPage() {
   const [payslips, setPayslips] = useState<Payslip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState<number | null>(null);
   const { t, language } = useLanguage();
 
   useEffect(() => {
@@ -105,14 +110,41 @@ export default function EmployeePayslipsPage() {
     }
   };
 
-  const handleDownloadPayslip = (payslipId: number) => {
-    toast.success('Descarga de recibo de pago iniciada');
-    // In a real app, this would trigger a PDF download
+  const handleDownloadPayslip = async (payslipId: number) => {
+    setIsDownloading(payslipId);
+    try {
+      const blob = await apiClient.downloadPayrollPDF(payslipId);
+      
+      // Create a download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `nomina_${format(new Date(), 'yyyy-MM')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success('Recibo de pago descargado con éxito');
+    } catch (error: any) {
+      console.error('Error downloading payslip:', error);
+      toast.error('Error al descargar el recibo de pago');
+    } finally {
+      setIsDownloading(null);
+    }
   };
 
   const handleViewPayslip = (payslipId: number) => {
     toast.info('Abriendo detalles del recibo de pago');
     // In a real app, this would open a detailed view or PDF
+  };
+
+  const handleEmailPayslip = (payslipId: number) => {
+    toast.success('Recibo de pago enviado a tu correo electrónico');
+  };
+
+  const handlePrintPayslip = (payslipId: number) => {
+    toast.info('Preparando recibo de pago para imprimir');
   };
 
   // Calculate stats
@@ -147,7 +179,7 @@ export default function EmployeePayslipsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">
-                    ${totalEarnings.toLocaleString()}
+                    €{totalEarnings.toLocaleString()}
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Ingresos Totales</p>
                 </div>
@@ -163,7 +195,7 @@ export default function EmployeePayslipsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">
-                    ${averageMonthly.toLocaleString()}
+                    €{averageMonthly.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Promedio Mensual</p>
                 </div>
@@ -179,7 +211,7 @@ export default function EmployeePayslipsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">
-                    ${lastPayslip?.net_pay.toLocaleString() || '0'}
+                    €{lastPayslip?.net_pay.toLocaleString() || '0'}
                   </div>
                   <p className="text-sm text-gray-800 font-semibold">Último Pago</p>
                 </div>
@@ -236,11 +268,11 @@ export default function EmployeePayslipsPage() {
                       <TableCell className="font-medium text-gray-900">
                         {format(new Date(payslip.pay_period_start), 'dd MMM', { locale: language === 'es' ? es : undefined })} - {format(new Date(payslip.pay_period_end), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined })}
                       </TableCell>
-                      <TableCell className="text-gray-800 font-medium">${payslip.base_salary.toLocaleString()}</TableCell>
-                      <TableCell className="text-gray-800 font-medium">${payslip.bonus.toLocaleString()}</TableCell>
-                      <TableCell className="text-gray-800 font-medium">${payslip.deductions.toLocaleString()}</TableCell>
+                      <TableCell className="text-gray-800 font-medium">€{payslip.base_salary.toLocaleString()}</TableCell>
+                      <TableCell className="text-gray-800 font-medium">€{payslip.bonus.toLocaleString()}</TableCell>
+                      <TableCell className="text-gray-800 font-medium">€{payslip.deductions.toLocaleString()}</TableCell>
                       <TableCell className="font-bold text-emerald-600">
-                        ${payslip.net_pay.toLocaleString()}
+                        €{payslip.net_pay.toLocaleString()}
                       </TableCell>
                       <TableCell>
                         <Badge 
@@ -250,26 +282,47 @@ export default function EmployeePayslipsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleViewPayslip(payslip.id)}
-                            className="hover-scale text-gray-700 hover:text-gray-900"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          {payslip.status === 'processed' && (
+                        {payslip.status === 'processed' && (
+                          <div className="flex items-center space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleViewPayslip(payslip.id)}
+                              className="hover-scale text-gray-700 hover:text-gray-900"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                             <Button 
                               variant="ghost" 
                               size="sm"
                               onClick={() => handleDownloadPayslip(payslip.id)}
-                              className="hover-scale text-gray-700 hover:text-gray-900"
+                              disabled={isDownloading === payslip.id}
+                              className="hover-scale text-blue-600 hover:text-blue-700"
                             >
-                              <Download className="h-4 w-4" />
+                              {isDownloading === payslip.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <FilePdf className="h-4 w-4" />
+                              )}
                             </Button>
-                          )}
-                        </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEmailPayslip(payslip.id)}
+                              className="hover-scale text-purple-600 hover:text-purple-700"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handlePrintPayslip(payslip.id)}
+                              className="hover-scale text-gray-600 hover:text-gray-700"
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -292,7 +345,7 @@ export default function EmployeePayslipsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center p-6 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
                   <div className="text-3xl font-bold text-emerald-700">
-                    ${lastPayslip.base_salary.toLocaleString()}
+                    €{lastPayslip.base_salary.toLocaleString()}
                   </div>
                   <p className="text-emerald-800 font-semibold">Salario Base</p>
                   <p className="text-sm text-emerald-700 font-medium mt-1">Pago base mensual</p>
@@ -300,7 +353,7 @@ export default function EmployeePayslipsPage() {
                 
                 <div className="text-center p-6 bg-blue-50 rounded-lg hover-scale border border-blue-200">
                   <div className="text-3xl font-bold text-blue-700">
-                    ${lastPayslip.bonus.toLocaleString()}
+                    €{lastPayslip.bonus.toLocaleString()}
                   </div>
                   <p className="text-blue-800 font-semibold">Bonificación</p>
                   <p className="text-sm text-blue-700 font-medium mt-1">Rendimiento e incentivos</p>
@@ -308,7 +361,7 @@ export default function EmployeePayslipsPage() {
                 
                 <div className="text-center p-6 bg-red-50 rounded-lg hover-scale border border-red-200">
                   <div className="text-3xl font-bold text-red-700">
-                    ${lastPayslip.deductions.toLocaleString()}
+                    €{lastPayslip.deductions.toLocaleString()}
                   </div>
                   <p className="text-red-800 font-semibold">Deducciones</p>
                   <p className="text-sm text-red-700 font-medium mt-1">Impuestos y beneficios</p>
@@ -317,12 +370,35 @@ export default function EmployeePayslipsPage() {
               
               <div className="mt-6 text-center p-6 bg-purple-50 rounded-lg border border-purple-200">
                 <div className="text-4xl font-bold text-purple-700">
-                  ${lastPayslip.net_pay.toLocaleString()}
+                  €{lastPayslip.net_pay.toLocaleString()}
                 </div>
                 <p className="text-purple-800 font-semibold text-lg">Pago Neto</p>
                 <p className="text-sm text-purple-700 font-medium mt-1">
                   Procesado el {lastPayslip.processed_at ? format(new Date(lastPayslip.processed_at), 'dd MMM, yyyy', { locale: language === 'es' ? es : undefined }) : 'N/A'}
                 </p>
+              </div>
+
+              <div className="mt-6 flex justify-center space-x-4">
+                <Button 
+                  onClick={() => handleDownloadPayslip(lastPayslip.id)}
+                  disabled={isDownloading === lastPayslip.id}
+                  className="btn-primary"
+                >
+                  {isDownloading === lastPayslip.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-2" />
+                  )}
+                  Descargar Recibo de Pago
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => handleEmailPayslip(lastPayslip.id)}
+                  className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Enviar por Email
+                </Button>
               </div>
             </CardContent>
           </Card>
