@@ -803,5 +803,3 @@ export default function EmployeeSettingsPage() {
     </div>
   );
 }
-
-export default EmployeeSettingsPage;
