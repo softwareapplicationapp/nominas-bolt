@@ -692,9 +692,9 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
-    // NEW: Handle payroll queries
+    // FIXED: Handle payroll queries - this was the main issue
     if (q.includes('select p.*, e.') && q.includes('from payroll p join employees e')) {
-      console.log('=== PAYROLL QUERY ===');
+      console.log('=== PAYROLL QUERY (dbGet) ===');
       console.log('SQL Query:', q);
       console.log('Parameters:', params);
       
@@ -702,7 +702,6 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         // Single payroll record with employee details
         console.log('Getting single payroll record with ID:', params[0]);
         
-        // FIXED: Remove company_id filter to allow cross-company access
         const { data, error } = await supabase
           .from('payroll')
           .select(`
@@ -744,6 +743,41 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         
         return data;
       }
+    }
+
+    // FIXED: Handle simple payroll query by ID
+    if (q.includes('select p.*, e.first_name, e.last_name, e.department, e.employee_id from payroll p join employees e') && q.includes('where p.id = ?')) {
+      console.log('=== SIMPLE PAYROLL QUERY BY ID ===');
+      console.log('Payroll ID:', params[0]);
+      
+      const { data, error } = await supabase
+        .from('payroll')
+        .select(`
+          *,
+          employees!inner(first_name, last_name, department, employee_id)
+        `)
+        .eq('id', params[0])
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Simple payroll query error:', error);
+        throw error;
+      }
+      
+      console.log('Simple payroll query result:', data);
+      
+      if (data) {
+        const employee = (data as any).employees;
+        return {
+          ...data,
+          first_name: employee.first_name,
+          last_name: employee.last_name,
+          department: employee.department,
+          employee_id: employee.employee_id
+        };
+      }
+      
+      return data;
     }
 
     // Count queries
@@ -1111,51 +1145,64 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       }
     }
 
-    // NEW: Handle payroll queries
+    // FIXED: Handle payroll queries - this was the main issue causing 0 records
     if (q.includes('select p.*, e.first_name') && q.includes('from payroll p join employees e')) {
       console.log('=== PAYROLL QUERY (dbAll) ===');
       console.log('SQL Query:', q);
       console.log('Parameters:', params);
       
-      const { data: employees } = await supabase
+      // First get employees for the company
+      const { data: employees, error: employeesError } = await supabase
         .from('employees')
         .select('id, first_name, last_name, department, employee_id')
         .eq('company_id', params[0]);
       
       console.log('Found employees:', employees?.length || 0);
+      console.log('Employees error:', employeesError);
+      
+      if (employeesError) {
+        console.error('Employees query failed:', employeesError);
+        throw employeesError;
+      }
       
       if (!employees || employees.length === 0) {
+        console.log('No employees found for company:', params[0]);
         return [];
       }
 
       const employeeIds = employees.map(e => e.id);
       console.log('Employee IDs for payroll query:', employeeIds);
       
-      const { data, error } = await supabase
+      // Now get payroll records for these employees
+      const { data: payrollData, error: payrollError } = await supabase
         .from('payroll')
         .select('*')
         .in('employee_id', employeeIds)
         .order('pay_period_start', { ascending: false });
       
-      console.log('Payroll query result:', data);
-      console.log('Payroll query error:', error);
-      console.log('Number of payroll records found:', data?.length || 0);
+      console.log('Payroll query result:', payrollData);
+      console.log('Payroll query error:', payrollError);
+      console.log('Number of payroll records found:', payrollData?.length || 0);
       
-      if (error) {
-        console.error('Payroll query failed:', error);
-        throw error;
+      if (payrollError) {
+        console.error('Payroll query failed:', payrollError);
+        throw payrollError;
       }
       
-      return (data || []).map(p => {
+      // Combine payroll data with employee information
+      const result = (payrollData || []).map(p => {
         const employee = employees.find(e => e.id === p.employee_id);
         return {
           ...p,
           first_name: employee?.first_name || '',
           last_name: employee?.last_name || '',
           department: employee?.department || '',
-          employee_id: employee?.employee_id || '',
+          employee_id: employee?.employee_id || '', // This is the employee code like EMP001
         };
       });
+      
+      console.log('Final payroll result with employee data:', result.length, 'records');
+      return result;
     }
 
     if (q.includes('select department, count(*) as count from employees')) {
