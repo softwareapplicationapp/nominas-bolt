@@ -213,6 +213,9 @@ export const dbRun = async (sql: string, params: any[] = []) => {
 
     // NEW: Handle payroll insertions
     if (q.startsWith('insert into payroll')) {
+      console.log('=== INSERTING PAYROLL RECORD ===');
+      console.log('Parameters:', params);
+      
       const { data, error } = await supabase
         .from('payroll')
         .insert({
@@ -227,7 +230,13 @@ export const dbRun = async (sql: string, params: any[] = []) => {
         })
         .select('id')
         .single();
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Payroll insert error:', error);
+        throw error;
+      }
+      
+      console.log('Payroll record created with ID:', data!.id);
       return { lastID: data!.id, changes: 1 };
     }
 
@@ -372,21 +381,48 @@ export const dbRun = async (sql: string, params: any[] = []) => {
 
     // NEW: Handle payroll updates
     if (q.includes('update payroll')) {
-      const { error } = await supabase
-        .from('payroll')
-        .update({
-          pay_period_start: params[0],
-          pay_period_end: params[1],
-          base_salary: params[2],
-          bonus: params[3],
-          deductions: params[4],
-          net_pay: params[5],
-          status: params[6],
-          processed_at: params[7] ? new Date().toISOString() : null,
-        })
-        .eq('id', params[8]);
-      if (error) throw error;
-      return { lastID: params[8], changes: 1 };
+      console.log('=== UPDATING PAYROLL RECORD ===');
+      console.log('Parameters:', params);
+      
+      const updateData: any = {};
+      
+      // Check if this is a status update (for processing payroll)
+      if (q.includes('status = ?') && q.includes('processed_at')) {
+        updateData.status = params[0];
+        if (params[1]) {
+          updateData.processed_at = params[1];
+        }
+        
+        const { error } = await supabase
+          .from('payroll')
+          .update(updateData)
+          .eq('id', params[2]);
+        
+        if (error) {
+          console.error('Payroll update error:', error);
+          throw error;
+        }
+        
+        console.log('Payroll record updated successfully');
+        return { lastID: params[2], changes: 1 };
+      } else {
+        // Full payroll update
+        const { error } = await supabase
+          .from('payroll')
+          .update({
+            pay_period_start: params[0],
+            pay_period_end: params[1],
+            base_salary: params[2],
+            bonus: params[3],
+            deductions: params[4],
+            net_pay: params[5],
+            status: params[6],
+            processed_at: params[7] ? new Date().toISOString() : null,
+          })
+          .eq('id', params[8]);
+        if (error) throw error;
+        return { lastID: params[8], changes: 1 };
+      }
     }
 
     // Handle DELETE queries
@@ -657,8 +693,14 @@ export const dbGet = async (sql: string, params: any[] = []) => {
 
     // NEW: Handle payroll queries
     if (q.includes('select p.*, e.') && q.includes('from payroll p join employees e')) {
+      console.log('=== PAYROLL QUERY ===');
+      console.log('SQL Query:', q);
+      console.log('Parameters:', params);
+      
       if (q.includes('where p.id = ?')) {
         // Single payroll record with employee details
+        console.log('Getting single payroll record with ID:', params[0]);
+        
         const { data, error } = await supabase
           .from('payroll')
           .select(`
@@ -672,7 +714,12 @@ export const dbGet = async (sql: string, params: any[] = []) => {
           .eq('id', params[0])
           .maybeSingle();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Payroll query error:', error);
+          throw error;
+        }
+        
+        console.log('Payroll query result:', data);
         
         if (data) {
           const employee = (data as any).employees;
@@ -1064,23 +1111,38 @@ export const dbAll = async (sql: string, params: any[] = []) => {
 
     // NEW: Handle payroll queries
     if (q.includes('select p.*, e.first_name') && q.includes('from payroll p join employees e')) {
+      console.log('=== PAYROLL QUERY (dbAll) ===');
+      console.log('SQL Query:', q);
+      console.log('Parameters:', params);
+      
       const { data: employees } = await supabase
         .from('employees')
         .select('id, first_name, last_name, department, employee_id')
         .eq('company_id', params[0]);
+      
+      console.log('Found employees:', employees?.length || 0);
       
       if (!employees || employees.length === 0) {
         return [];
       }
 
       const employeeIds = employees.map(e => e.id);
+      console.log('Employee IDs for payroll query:', employeeIds);
+      
       const { data, error } = await supabase
         .from('payroll')
         .select('*')
         .in('employee_id', employeeIds)
         .order('pay_period_start', { ascending: false });
       
-      if (error) throw error;
+      console.log('Payroll query result:', data);
+      console.log('Payroll query error:', error);
+      console.log('Number of payroll records found:', data?.length || 0);
+      
+      if (error) {
+        console.error('Payroll query failed:', error);
+        throw error;
+      }
       
       return (data || []).map(p => {
         const employee = employees.find(e => e.id === p.employee_id);

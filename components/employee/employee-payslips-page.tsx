@@ -336,7 +336,7 @@ export default function EmployeePayslipsPage() {
         {lastPayslip && (
           <Card className="animate-slide-in-up card-glow border-gray-200">
             <CardHeader>
-              <CardTitle className="text-gray-900">Desglose del Último Recibo de Pago</CardTitle>
+              <CardTitle>Desglose del Último Recibo de Pago</CardTitle>
               <CardDescription className="text-gray-800 font-medium">
                 Desglose detallado de tu pago más reciente
               </CardDescription>

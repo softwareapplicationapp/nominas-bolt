@@ -102,9 +102,11 @@ export default function PayrollPage() {
         apiClient.getPayroll(),
         apiClient.getEmployees()
       ]);
+      console.log('Payroll data loaded:', payrollData);
       setPayrollRecords(payrollData || []);
       setEmployees(employeesData);
     } catch (error: any) {
+      console.error('Failed to load payroll data:', error);
       toast.error('Failed to load data: ' + error.message);
     } finally {
       setLoading(false);
@@ -126,7 +128,9 @@ export default function PayrollPage() {
         status: formData.status
       };
 
-      await apiClient.createPayroll(payrollData);
+      console.log('Creating payroll with data:', payrollData);
+      const newPayroll = await apiClient.createPayroll(payrollData);
+      console.log('Payroll created:', newPayroll);
       
       toast.success('Payroll record created successfully!');
       setIsDialogOpen(false);
@@ -139,8 +143,11 @@ export default function PayrollPage() {
         deductions: '',
         status: 'pending'
       });
-      loadData();
+      
+      // Reload data to show the new record
+      await loadData();
     } catch (error: any) {
+      console.error('Failed to create payroll:', error);
       toast.error('Failed to create payroll record: ' + error.message);
     } finally {
       setIsSubmitting(false);
@@ -182,6 +189,7 @@ export default function PayrollPage() {
       
       toast.success('Payroll PDF downloaded successfully!');
     } catch (error: any) {
+      console.error('Failed to download PDF:', error);
       toast.error('Failed to download PDF: ' + error.message);
     } finally {
       setIsDownloading(null);
@@ -197,7 +205,7 @@ export default function PayrollPage() {
 
   // Filter payroll records by month
   const filteredRecords = payrollRecords.filter(record => {
-    if (!selectedMonth) return true;
+    if (!selectedMonth || selectedMonth === "all") return true;
     return record.pay_period_start.startsWith(selectedMonth);
   });
 
@@ -559,7 +567,19 @@ export default function PayrollPage() {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={9} className="text-center py-8 text-gray-500">
-                          No payroll records found for the selected month
+                          {payrollRecords.length === 0 ? (
+                            <>
+                              <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                              <p>No payroll records found</p>
+                              <p className="text-sm text-gray-400 mt-2">Create your first payroll record to get started</p>
+                            </>
+                          ) : (
+                            <>
+                              <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                              <p>No payroll records found for the selected month</p>
+                              <p className="text-sm text-gray-400 mt-2">Try selecting a different month or create new records</p>
+                            </>
+                          )}
                         </TableCell>
                       </TableRow>
                     )}

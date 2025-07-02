@@ -277,6 +277,7 @@ class ApiClient {
   }
 
   async createPayroll(payrollData: any) {
+    console.log('API Client: Creating payroll with data:', payrollData);
     return this.request('/payroll', {
       method: 'POST',
       body: JSON.stringify(payrollData),
@@ -284,6 +285,7 @@ class ApiClient {
   }
 
   async updatePayroll(payrollId: number, payrollData: any) {
+    console.log('API Client: Updating payroll', payrollId, 'with data:', payrollData);
     return this.request(`/payroll/${payrollId}`, {
       method: 'PUT',
       body: JSON.stringify(payrollData),
@@ -298,6 +300,7 @@ class ApiClient {
 
   // NEW: Download payroll PDF
   async downloadPayrollPDF(payrollId: number): Promise<Blob> {
+    console.log('API Client: Downloading PDF for payroll', payrollId);
     const url = `${this.baseUrl}/payroll/${payrollId}/pdf`;
     const headers = new Headers();
     
@@ -308,6 +311,7 @@ class ApiClient {
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
+      console.error('PDF download failed:', response.status, response.statusText);
       const error = await response.json().catch(() => ({ error: 'Network error' }));
       throw new Error(error.error || 'Failed to download PDF');
     }
