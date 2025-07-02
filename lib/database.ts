@@ -321,40 +321,33 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       }
     }
 
-    // UPDATED: Handle leave request updates with comments
+    // FIXED: Handle leave request updates with correct parameter order
     if (q.includes('update leave_requests')) {
       console.log('=== UPDATING LEAVE REQUEST ===');
+      console.log('SQL Query:', q);
       console.log('Parameters:', params);
       
-      // Check if this includes admin comments (new format)
-      if (params.length >= 4) {
-        // New format: UPDATE leave_requests SET status = ?, approved_by = ?, approved_at = ?, admin_comments = ? WHERE id = ?
-        const { error } = await supabase
-          .from('leave_requests')
-          .update({
-            status: params[0],
-            approved_by: params[1],
-            approved_at: new Date().toISOString(),
-            admin_comments: params[3] || null, // Include admin comments
-          })
-          .eq('id', params[4] || params[2]); // Handle both old and new parameter positions
-        
-        if (error) throw error;
-        return { lastID: params[4] || params[2], changes: 1 };
-      } else {
-        // Old format: UPDATE leave_requests SET status = ?, approved_by = ?, approved_at = ? WHERE id = ?
-        const { error } = await supabase
-          .from('leave_requests')
-          .update({
-            status: params[0],
-            approved_by: params[1],
-            approved_at: new Date().toISOString(),
-          })
-          .eq('id', params[2]);
-        
-        if (error) throw error;
-        return { lastID: params[2], changes: 1 };
+      // The SQL query should be:
+      // UPDATE leave_requests SET status = ?, approved_by = ?, approved_at = CURRENT_TIMESTAMP, admin_comments = ? WHERE id = ?
+      // Parameters should be: [status, approved_by, admin_comments, leave_id]
+      
+      const { error } = await supabase
+        .from('leave_requests')
+        .update({
+          status: params[0],                    // status (approved/rejected)
+          approved_by: params[1],               // approved_by (employee ID or null)
+          approved_at: new Date().toISOString(), // approved_at (current timestamp)
+          admin_comments: params[2] || null,    // admin_comments (can be null)
+        })
+        .eq('id', params[3]);                   // WHERE id = leave_id
+      
+      if (error) {
+        console.error('Supabase leave update error:', error);
+        throw error;
       }
+      
+      console.log('✅ Leave request updated successfully');
+      return { lastID: params[3], changes: 1 };
     }
 
     // Handle DELETE queries
