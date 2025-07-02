@@ -77,7 +77,7 @@ const saveToStorage = <T>(key: string, value: T): void => {
   }
 };
 
-export default function EmployeeSettingsPage() {
+export function EmployeeSettingsPage()
   const { user } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const [loading, setLoading] = useState(true);
