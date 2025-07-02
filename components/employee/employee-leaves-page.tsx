@@ -31,7 +31,9 @@ import {
   FileText,
   CheckCircle,
   XCircle,
-  Loader2
+  Loader2,
+  MessageSquare,
+  Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -45,6 +47,7 @@ interface LeaveRequest {
   days: number;
   status: string;
   reason: string;
+  admin_comments?: string; // NEW: Admin comments field
   created_at: string;
   approver_first_name?: string;
   approver_last_name?: string;
@@ -55,6 +58,11 @@ export default function EmployeeLeavesPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // NEW: Comments dialog state
+  const [isCommentsDialogOpen, setIsCommentsDialogOpen] = useState(false);
+  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null);
+  
   const { t } = useLanguage();
 
   // Form state
@@ -122,6 +130,12 @@ export default function EmployeeLeavesPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // NEW: Handle viewing comments
+  const handleViewComments = (request: LeaveRequest) => {
+    setSelectedLeaveRequest(request);
+    setIsCommentsDialogOpen(true);
   };
 
   // Calculate stats
@@ -318,6 +332,7 @@ export default function EmployeeLeavesPage() {
                     <TableHead className="text-gray-900 font-semibold">Estado</TableHead>
                     <TableHead className="text-gray-900 font-semibold">Aprobado Por</TableHead>
                     <TableHead className="text-gray-900 font-semibold">Enviado</TableHead>
+                    <TableHead className="text-gray-900 font-semibold">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -336,16 +351,22 @@ export default function EmployeeLeavesPage() {
                       </TableCell>
                       <TableCell className="text-gray-800 font-medium">{request.days}</TableCell>
                       <TableCell>
-                        <Badge 
-                          className={
-                            request.status === 'approved' ? 'badge-approved' :
-                            request.status === 'rejected' ? 'badge-rejected' : 'badge-pending'
-                          }
-                        >
-                          {request.status === 'pending' ? 'Pendiente' :
-                           request.status === 'approved' ? 'Aprobado' :
-                           request.status === 'rejected' ? 'Rechazado' : request.status}
-                        </Badge>
+                        <div className="flex items-center space-x-2">
+                          <Badge 
+                            className={
+                              request.status === 'approved' ? 'badge-approved' :
+                              request.status === 'rejected' ? 'badge-rejected' : 'badge-pending'
+                            }
+                          >
+                            {request.status === 'pending' ? 'Pendiente' :
+                             request.status === 'approved' ? 'Aprobado' :
+                             request.status === 'rejected' ? 'Rechazado' : request.status}
+                          </Badge>
+                          {/* NEW: Show comment indicator */}
+                          {request.admin_comments && (
+                            <MessageSquare className="h-4 w-4 text-blue-600" title="Tiene comentarios del administrador" />
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-gray-800 font-medium">
                         {request.approver_first_name ? 
@@ -356,6 +377,20 @@ export default function EmployeeLeavesPage() {
                       <TableCell className="text-gray-800 font-medium">
                         {format(new Date(request.created_at), 'dd MMM, yyyy')}
                       </TableCell>
+                      <TableCell>
+                        {/* NEW: View comments button */}
+                        {request.admin_comments && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewComments(request)}
+                            className="hover:bg-blue-50 text-blue-600 hover:text-blue-700"
+                            title="Ver comentarios del administrador"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -363,6 +398,92 @@ export default function EmployeeLeavesPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* NEW: Comments Dialog */}
+        <Dialog open={isCommentsDialogOpen} onOpenChange={setIsCommentsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900">Comentarios del Administrador</DialogTitle>
+              <DialogDescription className="text-gray-800 font-medium">
+                {selectedLeaveRequest && (
+                  <>
+                    Comentarios sobre tu solicitud de{' '}
+                    <strong>
+                      {selectedLeaveRequest.type === 'vacation' ? 'vacaciones' :
+                       selectedLeaveRequest.type === 'sick' ? 'enfermedad' :
+                       selectedLeaveRequest.type === 'personal' ? 'permiso personal' :
+                       selectedLeaveRequest.type === 'emergency' ? 'emergencia' :
+                       selectedLeaveRequest.type === 'maternity' ? 'maternidad' :
+                       selectedLeaveRequest.type === 'paternity' ? 'paternidad' : selectedLeaveRequest.type}
+                    </strong>
+                    {' '}del {format(new Date(selectedLeaveRequest.start_date), 'dd MMM')} al{' '}
+                    {format(new Date(selectedLeaveRequest.end_date), 'dd MMM, yyyy')}
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              {selectedLeaveRequest && (
+                <div className="space-y-4">
+                  {/* Request Status */}
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-gray-700">Estado de la Solicitud:</span>
+                      <Badge 
+                        className={
+                          selectedLeaveRequest.status === 'approved' ? 'badge-approved' :
+                          selectedLeaveRequest.status === 'rejected' ? 'badge-rejected' : 'badge-pending'
+                        }
+                      >
+                        {selectedLeaveRequest.status === 'pending' ? 'Pendiente' :
+                         selectedLeaveRequest.status === 'approved' ? 'Aprobado' :
+                         selectedLeaveRequest.status === 'rejected' ? 'Rechazado' : selectedLeaveRequest.status}
+                      </Badge>
+                    </div>
+                    {selectedLeaveRequest.approver_first_name && (
+                      <p className="text-sm text-gray-600">
+                        Por: {selectedLeaveRequest.approver_first_name} {selectedLeaveRequest.approver_last_name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Admin Comments */}
+                  <div className="space-y-2">
+                    <Label className="text-gray-900 font-semibold">Comentarios:</Label>
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-start space-x-2">
+                        <MessageSquare className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-gray-800 font-medium leading-relaxed">
+                          {selectedLeaveRequest.admin_comments}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Request Details */}
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-2">Detalles de la Solicitud:</h4>
+                    <div className="space-y-1 text-sm">
+                      <div><strong>Días solicitados:</strong> {selectedLeaveRequest.days}</div>
+                      <div><strong>Motivo:</strong> {selectedLeaveRequest.reason}</div>
+                      <div><strong>Fecha de solicitud:</strong> {format(new Date(selectedLeaveRequest.created_at), 'dd MMM, yyyy')}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end">
+              <Button 
+                onClick={() => setIsCommentsDialogOpen(false)}
+                className="btn-primary"
+              >
+                Cerrar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

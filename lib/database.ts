@@ -60,6 +60,7 @@ export interface LeaveRequest {
   status: string;
   approved_by?: number;
   approved_at?: string;
+  admin_comments?: string; // NEW: Admin comments field
   created_at: string;
 }
 
@@ -320,17 +321,40 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       }
     }
 
+    // UPDATED: Handle leave request updates with comments
     if (q.includes('update leave_requests')) {
-      const { error } = await supabase
-        .from('leave_requests')
-        .update({
-          status: params[0],
-          approved_by: params[1],
-          approved_at: new Date().toISOString(),
-        })
-        .eq('id', params[2]);
-      if (error) throw error;
-      return { lastID: params[2], changes: 1 };
+      console.log('=== UPDATING LEAVE REQUEST ===');
+      console.log('Parameters:', params);
+      
+      // Check if this includes admin comments (new format)
+      if (params.length >= 4) {
+        // New format: UPDATE leave_requests SET status = ?, approved_by = ?, approved_at = ?, admin_comments = ? WHERE id = ?
+        const { error } = await supabase
+          .from('leave_requests')
+          .update({
+            status: params[0],
+            approved_by: params[1],
+            approved_at: new Date().toISOString(),
+            admin_comments: params[3] || null, // Include admin comments
+          })
+          .eq('id', params[4] || params[2]); // Handle both old and new parameter positions
+        
+        if (error) throw error;
+        return { lastID: params[4] || params[2], changes: 1 };
+      } else {
+        // Old format: UPDATE leave_requests SET status = ?, approved_by = ?, approved_at = ? WHERE id = ?
+        const { error } = await supabase
+          .from('leave_requests')
+          .update({
+            status: params[0],
+            approved_by: params[1],
+            approved_at: new Date().toISOString(),
+          })
+          .eq('id', params[2]);
+        
+        if (error) throw error;
+        return { lastID: params[2], changes: 1 };
+      }
     }
 
     // Handle DELETE queries
@@ -565,7 +589,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       return data;
     }
 
-    // CRITICAL FIX: Handle leave requests query for single employee
+    // UPDATED: Handle leave requests query for single employee - now includes admin_comments
     if (q.includes('select lr.*') && q.includes('from leave_requests lr') && q.includes('where lr.id = ?')) {
       console.log('=== SINGLE LEAVE REQUEST QUERY ===');
       console.log('Leave request ID:', params[0]);
@@ -888,7 +912,7 @@ export const dbAll = async (sql: string, params: any[] = []) => {
       return data || [];
     }
 
-    // CRITICAL FIX: Handle leave requests queries properly
+    // UPDATED: Handle leave requests queries properly - now includes admin_comments
     if (q.includes('select lr.*') && q.includes('from leave_requests lr')) {
       console.log('=== LEAVE REQUESTS QUERY (dbAll) ===');
       console.log('SQL Query:', q);

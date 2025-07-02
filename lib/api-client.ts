@@ -258,10 +258,11 @@ class ApiClient {
     });
   }
 
-  async approveLeave(leaveId: number, action: 'approve' | 'reject') {
+  // UPDATED: Include comments parameter
+  async approveLeave(leaveId: number, action: 'approve' | 'reject', comments?: string) {
     return this.request(`/leaves/${leaveId}/approve`, {
       method: 'POST',
-      body: JSON.stringify({ action }),
+      body: JSON.stringify({ action, comments }),
     });
   }
 

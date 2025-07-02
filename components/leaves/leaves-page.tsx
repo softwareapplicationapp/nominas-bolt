@@ -34,7 +34,8 @@ import {
   Plus, 
   User,
   FileText,
-  Loader2
+  Loader2,
+  MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
@@ -52,6 +53,7 @@ interface LeaveRequest {
   days: number;
   status: string;
   reason: string;
+  admin_comments?: string; // NEW: Admin comments field
   created_at: string;
   approver_first_name?: string;
   approver_last_name?: string;
@@ -71,6 +73,12 @@ export default function LeavesPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // NEW: Approval dialog state
+  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
+  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<LeaveRequest | null>(null);
+  const [approvalAction, setApprovalAction] = useState<'approve' | 'reject'>('approve');
+  const [adminComments, setAdminComments] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -101,23 +109,33 @@ export default function LeavesPage() {
     }
   };
 
-  const handleApprove = async (id: number) => {
-    try {
-      await apiClient.approveLeave(id, 'approve');
-      toast.success('Leave request approved successfully!');
-      loadData();
-    } catch (error: any) {
-      toast.error('Failed to approve leave: ' + error.message);
-    }
+  // NEW: Handle approval with comments
+  const handleApprovalAction = (request: LeaveRequest, action: 'approve' | 'reject') => {
+    setSelectedLeaveRequest(request);
+    setApprovalAction(action);
+    setAdminComments('');
+    setIsApprovalDialogOpen(true);
   };
 
-  const handleReject = async (id: number) => {
+  // NEW: Submit approval with comments
+  const handleSubmitApproval = async () => {
+    if (!selectedLeaveRequest) return;
+
+    setIsSubmitting(true);
     try {
-      await apiClient.approveLeave(id, 'reject');
-      toast.success('Leave request rejected.');
+      await apiClient.approveLeave(selectedLeaveRequest.id, approvalAction, adminComments);
+      
+      const actionText = approvalAction === 'approve' ? 'approved' : 'rejected';
+      toast.success(`Leave request ${actionText} successfully!`);
+      
+      setIsApprovalDialogOpen(false);
+      setSelectedLeaveRequest(null);
+      setAdminComments('');
       loadData();
     } catch (error: any) {
-      toast.error('Failed to reject leave: ' + error.message);
+      toast.error(`Failed to ${approvalAction} leave: ` + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -382,14 +400,20 @@ export default function LeavesPage() {
                         </TableCell>
                         <TableCell>{request.days}</TableCell>
                         <TableCell>
-                          <Badge 
-                            variant={
-                              request.status === 'approved' ? 'default' :
-                              request.status === 'rejected' ? 'destructive' : 'secondary'
-                            }
-                          >
-                            {request.status}
-                          </Badge>
+                          <div className="flex items-center space-x-2">
+                            <Badge 
+                              variant={
+                                request.status === 'approved' ? 'default' :
+                                request.status === 'rejected' ? 'destructive' : 'secondary'
+                              }
+                            >
+                              {request.status}
+                            </Badge>
+                            {/* NEW: Show comment indicator */}
+                            {request.admin_comments && (
+                              <MessageSquare className="h-4 w-4 text-blue-600" title="Has admin comments" />
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           {request.status === 'pending' && (
@@ -397,26 +421,34 @@ export default function LeavesPage() {
                               <Button 
                                 size="sm" 
                                 variant="default"
-                                onClick={() => handleApprove(request.id)}
+                                onClick={() => handleApprovalAction(request, 'approve')}
                               >
                                 <Check className="h-4 w-4" />
                               </Button>
                               <Button 
                                 size="sm" 
                                 variant="destructive"
-                                onClick={() => handleReject(request.id)}
+                                onClick={() => handleApprovalAction(request, 'reject')}
                               >
                                 <X className="h-4 w-4" />
                               </Button>
                             </div>
                           )}
                           {request.status !== 'pending' && (
-                            <span className="text-sm text-gray-500">
-                              {request.status === 'approved' ? 'Approved' : 'Rejected'}
-                              {request.approver_first_name && (
-                                <> by {request.approver_first_name} {request.approver_last_name}</>
+                            <div className="text-sm text-gray-500">
+                              <div>
+                                {request.status === 'approved' ? 'Approved' : 'Rejected'}
+                                {request.approver_first_name && (
+                                  <> by {request.approver_first_name} {request.approver_last_name}</>
+                                )}
+                              </div>
+                              {/* NEW: Show admin comments if available */}
+                              {request.admin_comments && (
+                                <div className="mt-1 p-2 bg-gray-50 rounded text-xs">
+                                  <strong>Comment:</strong> {request.admin_comments}
+                                </div>
                               )}
-                            </span>
+                            </div>
                           )}
                         </TableCell>
                       </TableRow>
@@ -493,6 +525,88 @@ export default function LeavesPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* NEW: Approval Dialog with Comments */}
+      <Dialog open={isApprovalDialogOpen} onOpenChange={setIsApprovalDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {approvalAction === 'approve' ? 'Approve' : 'Reject'} Leave Request
+            </DialogTitle>
+            <DialogDescription>
+              {selectedLeaveRequest && (
+                <>
+                  {approvalAction === 'approve' ? 'Approve' : 'Reject'} leave request for{' '}
+                  <strong>{selectedLeaveRequest.first_name} {selectedLeaveRequest.last_name}</strong>
+                  {' '}from {format(new Date(selectedLeaveRequest.start_date), 'MMM dd')} to{' '}
+                  {format(new Date(selectedLeaveRequest.end_date), 'MMM dd, yyyy')}
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {selectedLeaveRequest && (
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="space-y-2 text-sm">
+                  <div><strong>Type:</strong> <span className="capitalize">{selectedLeaveRequest.type}</span></div>
+                  <div><strong>Days:</strong> {selectedLeaveRequest.days}</div>
+                  <div><strong>Reason:</strong> {selectedLeaveRequest.reason}</div>
+                </div>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="adminComments">
+                Comments <span className="text-gray-500">(Optional)</span>
+              </Label>
+              <Textarea
+                id="adminComments"
+                placeholder={`Add a comment about this ${approvalAction === 'approve' ? 'approval' : 'rejection'}...`}
+                value={adminComments}
+                onChange={(e) => setAdminComments(e.target.value)}
+                rows={3}
+                className="resize-none"
+              />
+              <p className="text-xs text-gray-500">
+                This comment will be visible to the employee.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsApprovalDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmitApproval}
+              disabled={isSubmitting}
+              variant={approvalAction === 'approve' ? 'default' : 'destructive'}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {approvalAction === 'approve' ? 'Approving...' : 'Rejecting...'}
+                </>
+              ) : (
+                <>
+                  {approvalAction === 'approve' ? (
+                    <Check className="h-4 w-4 mr-2" />
+                  ) : (
+                    <X className="h-4 w-4 mr-2" />
+                  )}
+                  {approvalAction === 'approve' ? 'Approve' : 'Reject'}
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
