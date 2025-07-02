@@ -364,7 +364,9 @@ export default function EmployeeLeavesPage() {
                           </Badge>
                           {/* NEW: Show comment indicator */}
                           {request.admin_comments && (
-                            <MessageSquare className="h-4 w-4 text-blue-600" title="Tiene comentarios del administrador" />
+                            <span title="Tiene comentarios del administrador">
+                              <MessageSquare className="h-4 w-4 text-blue-600" />
+                            </span>
                           )}
                         </div>
                       </TableCell>
