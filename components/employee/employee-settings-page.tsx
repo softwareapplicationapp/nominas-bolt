@@ -77,7 +77,7 @@ const saveToStorage = <T>(key: string, value: T): void => {
   }
 };
 
-export default function EmployeeSettingsPage() {
+function EmployeeSettingsPage() {
   const { user } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -799,3 +799,6 @@ export default function EmployeeSettingsPage() {
     </div>
   );
 }
+
+// CRITICAL FIX: Add default export
+export default EmployeeSettingsPage;
