@@ -588,7 +588,7 @@ export default function EmployeeSettingsPage() {
                     onCheckedChange={(checked) => {
                       setNotificationSettings({...notificationSettings, mobileNotifications: checked});
                       markAsChanged();
-                    }}
+                    }} 
                   />
                 </div>
               </CardContent>
