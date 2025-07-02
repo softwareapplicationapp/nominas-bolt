@@ -28,6 +28,10 @@ import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
 import { languages, Language } from '@/lib/i18n';
 
+// page.tsx
+import { EmployeeSettingsPage } from '@/components/employee/employee-settings-page';
+
+
 interface PersonalSettings {
   theme: string;
   language: string;
@@ -799,3 +803,5 @@ export default function EmployeeSettingsPage() {
     </div>
   );
 }
+
+export default EmployeeSettingsPage;
