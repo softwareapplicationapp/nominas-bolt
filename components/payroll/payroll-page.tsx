@@ -451,7 +451,7 @@ export default function PayrollPage() {
                       <SelectValue placeholder="Select month" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Months</SelectItem>
+                      <SelectItem value="all">All Months</SelectItem>
                       {monthOptions.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
