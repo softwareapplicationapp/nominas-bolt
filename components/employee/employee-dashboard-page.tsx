@@ -21,7 +21,8 @@ import {
   CalendarDays,
   ClockIcon,
   Loader2,
-  Plus
+  Plus,
+  AlertCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -51,13 +52,24 @@ interface EmployeeProfile {
   location?: string;
 }
 
+interface AttendanceRecord {
+  id: number;
+  date: string;
+  check_in?: string;
+  check_out?: string;
+  total_hours: number;
+  status: string;
+  notes?: string;
+  created_at: string;
+}
+
 export default function EmployeeDashboardPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [profile, setProfile] = useState<EmployeeProfile | null>(null);
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
   const { t, language } = useLanguage();
 
@@ -78,25 +90,24 @@ export default function EmployeeDashboardPage() {
       console.log('=== DASHBOARD: Loading employee data ===');
       setLoading(true);
       
-      const [statsData, profileData] = await Promise.all([
+      const [statsData, profileData, attendanceData] = await Promise.all([
         apiClient.getMyStats(),
-        apiClient.getMyProfile()
+        apiClient.getMyProfile(),
+        apiClient.getMyAttendance() // Load attendance records to check for open check-ins
       ]);
 
       console.log('=== DASHBOARD: Stats data received ===');
       console.log('Stats data:', statsData);
-      console.log('Total hours today:', statsData?.totalHoursToday);
-      console.log('Weekly hours:', statsData?.weeklyHours);
-      console.log('Check in time:', statsData?.checkInTime);
-      console.log('Check out time:', statsData?.checkOutTime);
-      console.log('Attendance today:', statsData?.attendanceToday);
 
       console.log('=== DASHBOARD: Profile data received ===');
       console.log('Profile data:', profileData);
 
+      console.log('=== DASHBOARD: Attendance data received ===');
+      console.log('Attendance records:', attendanceData?.length || 0);
+
       setStats(statsData);
       setProfile(profileData);
-      setIsCheckedIn(statsData.attendanceToday && statsData.checkInTime && !statsData.checkOutTime);
+      setAttendanceRecords(attendanceData || []);
     } catch (error: any) {
       console.error('DASHBOARD: Error loading employee data:', error);
       toast.error('Error al cargar datos: ' + error.message);
@@ -110,7 +121,6 @@ export default function EmployeeDashboardPage() {
     try {
       console.log('=== DASHBOARD: Checking in ===');
       await apiClient.checkInOut('check_in');
-      setIsCheckedIn(true);
       toast.success('¡Nueva entrada registrada con éxito!');
       loadEmployeeData();
     } catch (error: any) {
@@ -126,7 +136,6 @@ export default function EmployeeDashboardPage() {
     try {
       console.log('=== DASHBOARD: Checking out ===');
       await apiClient.checkInOut('check_out');
-      setIsCheckedIn(false);
       toast.success('¡Salida registrada con éxito!');
       loadEmployeeData();
     } catch (error: any) {
@@ -136,6 +145,19 @@ export default function EmployeeDashboardPage() {
       setCheckingIn(false);
     }
   };
+
+  // CRITICAL FIX: Calculate button logic based on attendance records
+  const today = new Date().toISOString().split('T')[0];
+  const todayRecords = attendanceRecords.filter(record => record.date === today);
+  const openCheckIn = todayRecords.find(record => record.check_in && !record.check_out);
+  const hasOpenCheckIn = !!openCheckIn;
+  const canCheckIn = !hasOpenCheckIn; // Only allow check-in if there's no open check-in
+
+  console.log('=== DASHBOARD: Button Logic Debug ===');
+  console.log('Today records:', todayRecords.length);
+  console.log('Open check-in record:', openCheckIn);
+  console.log('Has open check-in:', hasOpenCheckIn);
+  console.log('Can check in:', canCheckIn);
 
   if (loading) {
     return (
@@ -175,26 +197,53 @@ export default function EmployeeDashboardPage() {
               </div>
               
               <div className="text-center lg:text-right">
-                <div className="flex flex-col sm:flex-row lg:flex-col items-center space-y-2 sm:space-y-0 sm:space-x-4 lg:space-x-0 lg:space-y-4">
-                  <Button 
-                    onClick={handleCheckIn}
-                    disabled={checkingIn}
-                    className="btn-success text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 animate-bounce-in w-full sm:w-auto"
-                  >
-                    {checkingIn ? (
-                      <>
-                        <Timer className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
-                        Registrando...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                        Nueva Entrada
-                      </>
-                    )}
-                  </Button>
+                {/* Status Message */}
+                <div className="mb-4">
+                  {hasOpenCheckIn ? (
+                    <div className="flex items-center justify-center lg:justify-end space-x-2 text-amber-600">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm font-semibold">
+                        Entrada abierta desde las {openCheckIn?.check_in}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center lg:justify-end space-x-2 text-gray-600">
+                      <CheckCircle className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        {todayRecords.length > 0 
+                          ? 'Todas las sesiones cerradas'
+                          : 'Listo para nueva entrada'
+                        }
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                  {isCheckedIn && (
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row lg:flex-col items-center space-y-2 sm:space-y-0 sm:space-x-4 lg:space-x-0 lg:space-y-4">
+                  {/* CRITICAL FIX: Only show "Nueva Entrada" if there's no open check-in */}
+                  {canCheckIn && (
+                    <Button 
+                      onClick={handleCheckIn}
+                      disabled={checkingIn}
+                      className="btn-success text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 animate-bounce-in w-full sm:w-auto"
+                    >
+                      {checkingIn ? (
+                        <>
+                          <Timer className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
+                          Registrando...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                          Nueva Entrada
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {/* Only show "Marcar Salida" if there's an open check-in */}
+                  {hasOpenCheckIn && (
                     <Button 
                       onClick={handleCheckOut}
                       disabled={checkingIn}
@@ -215,11 +264,6 @@ export default function EmployeeDashboardPage() {
                     </Button>
                   )}
                 </div>
-                {isCheckedIn && stats?.checkInTime && (
-                  <p className="text-xs sm:text-sm text-gray-700 mt-2 font-semibold">
-                    Entrada registrada a las {stats.checkInTime}
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -243,6 +287,9 @@ export default function EmployeeDashboardPage() {
               <div className="mt-4">
                 <Progress value={(stats?.totalHoursToday || 0) / 8 * 100} className="progress-animated" />
                 <p className="text-xs text-gray-700 mt-1 font-semibold">Objetivo: 8 horas</p>
+                {hasOpenCheckIn && (
+                  <p className="text-xs text-emerald-600 mt-1 font-medium">* Sesión en curso</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -358,14 +405,14 @@ export default function EmployeeDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats?.checkInTime && (
+                {hasOpenCheckIn && (
                   <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-emerald-50 rounded-lg hover-scale border border-emerald-200">
                     <div className="p-2 bg-emerald-100 rounded-full">
                       <CheckCircle className="h-4 w-4 text-emerald-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-emerald-800 text-sm sm:text-base">Entrada registrada con éxito</p>
-                      <p className="text-xs sm:text-sm text-emerald-700 font-medium">Hoy a las {stats.checkInTime}</p>
+                      <p className="text-xs sm:text-sm text-emerald-700 font-medium">Hoy a las {openCheckIn?.check_in}</p>
                     </div>
                   </div>
                 )}
