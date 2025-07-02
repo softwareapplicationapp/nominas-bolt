@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { EmployeeSettingsPage } from '@/components/employee/employee-settings-page';
+import EmployeeSettingsPage from '@/components/employee/employee-settings-page';
 
 export const metadata: Metadata = {
   title: 'Settings - ArcusHR Employee Portal',
