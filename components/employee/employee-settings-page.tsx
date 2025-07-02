@@ -6,80 +6,55 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { 
   Settings, 
   User, 
   Bell, 
   Shield, 
-  Palette,
+  Database,
+  Mail,
   Clock,
+  Calendar,
+  DollarSign,
   Save,
-  Eye,
-  EyeOff,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle,
   Loader2,
-  Globe
+  Globe,
+  Download,
+  Upload,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
 import { languages, Language } from '@/lib/i18n';
-
-interface PersonalSettings {
-  theme: string;
-  language: string;
-  timezone: string;
-  dateFormat: string;
-  timeFormat: string;
-}
-
-interface NotificationSettings {
-  emailNotifications: boolean;
-  leaveUpdates: boolean;
-  payrollNotifications: boolean;
-  reminderAlerts: boolean;
-  mobileNotifications: boolean;
-}
-
-interface PrivacySettings {
-  profileVisibility: string;
-  showEmail: boolean;
-  showPhone: boolean;
-  allowDirectMessages: boolean;
-}
+import { useEmployeeSettings, EmployeeSettingsManager } from '@/lib/employee-settings';
 
 export default function EmployeeSettingsPage() {
   const { user } = useAuth();
   const { t, language, setLanguage } = useLanguage();
-  const [loading, setLoading] = useState(true);
+  const { 
+    settings, 
+    updatePersonal, 
+    updateNotifications, 
+    updatePrivacy, 
+    resetToDefaults,
+    hasChanges 
+  } = useEmployeeSettings();
+
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-
-  const [personalSettings, setPersonalSettings] = useState<PersonalSettings>({
-    theme: 'light',
-    language: language,
-    timezone: 'America/New_York',
-    dateFormat: 'MM/DD/YYYY',
-    timeFormat: '12h'
-  });
-
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
-    emailNotifications: true,
-    leaveUpdates: true,
-    payrollNotifications: true,
-    reminderAlerts: false,
-    mobileNotifications: true
-  });
-
-  const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
-    profileVisibility: 'team',
-    showEmail: false,
-    showPhone: false,
-    allowDirectMessages: true
-  });
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -87,47 +62,101 @@ export default function EmployeeSettingsPage() {
     confirmPassword: ''
   });
 
+  // Track unsaved changes
   useEffect(() => {
-    loadSettings();
-  }, []);
+    setUnsavedChanges(hasChanges());
+  }, [settings, hasChanges]);
 
+  // Auto-save when language changes
   useEffect(() => {
-    setPersonalSettings(prev => ({ ...prev, language }));
-  }, [language]);
+    if (settings.personal.language !== language) {
+      updatePersonal({ language });
+    }
+  }, [language, settings.personal.language, updatePersonal]);
 
-  const loadSettings = async () => {
-    try {
-      setLoading(true);
-      // In a real app, this would fetch from API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-    } catch (error) {
-      toast.error(t('saveError'));
-    } finally {
-      setLoading(false);
+  const handleLanguageChange = (newLanguage: Language) => {
+    setLanguage(newLanguage);
+    updatePersonal({ language: newLanguage });
+    toast.success(newLanguage === 'es' ? '¡Idioma actualizado!' : 'Language updated!');
+  };
+
+  const handlePersonalSettingChange = (key: string, value: any) => {
+    updatePersonal({ [key]: value });
+    toast.success(t('saveSuccess'));
+  };
+
+  const handleNotificationChange = (key: string, value: boolean) => {
+    updateNotifications({ [key]: value });
+    toast.success(language === 'es' ? '¡Configuración de notificaciones actualizada!' : 'Notification settings updated!');
+  };
+
+  const handlePrivacyChange = (key: string, value: any) => {
+    updatePrivacy({ [key]: value });
+    toast.success(language === 'es' ? '¡Configuración de privacidad actualizada!' : 'Privacy settings updated!');
+  };
+
+  const handleResetToDefaults = () => {
+    if (confirm(language === 'es' ? '¿Estás seguro de que quieres restablecer todas las configuraciones?' : 'Are you sure you want to reset all settings to defaults?')) {
+      resetToDefaults();
+      toast.success(language === 'es' ? '¡Configuraciones restablecidas!' : 'Settings reset to defaults!');
     }
   };
 
-  const saveSettings = async () => {
-    setSaving(true);
+  const handleExportSettings = () => {
     try {
-      // In a real app, this would save to API
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      toast.success(t('saveSuccess'));
+      const manager = EmployeeSettingsManager.getInstance();
+      const settingsJson = manager.exportSettings();
+      const blob = new Blob([settingsJson], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `arcushr-settings-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(language === 'es' ? '¡Configuraciones exportadas!' : 'Settings exported successfully!');
     } catch (error) {
-      toast.error(t('saveError'));
-    } finally {
-      setSaving(false);
+      toast.error(language === 'es' ? 'Error al exportar configuraciones' : 'Error exporting settings');
     }
+  };
+
+  const handleImportSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const manager = EmployeeSettingsManager.getInstance();
+        const success = manager.importSettings(content);
+        
+        if (success) {
+          toast.success(language === 'es' ? '¡Configuraciones importadas!' : 'Settings imported successfully!');
+          // Refresh the page to apply all changes
+          window.location.reload();
+        } else {
+          toast.error(language === 'es' ? 'Archivo de configuraciones inválido' : 'Invalid settings file');
+        }
+      } catch (error) {
+        toast.error(language === 'es' ? 'Error al importar configuraciones' : 'Error importing settings');
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset the input
+    event.target.value = '';
   };
 
   const changePassword = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('Las contraseñas nuevas no coinciden');
+      toast.error(language === 'es' ? 'Las contraseñas nuevas no coinciden' : 'New passwords do not match');
       return;
     }
 
     if (passwordForm.newPassword.length < 8) {
-      toast.error('La contraseña debe tener al menos 8 caracteres');
+      toast.error(language === 'es' ? 'La contraseña debe tener al menos 8 caracteres' : 'Password must be at least 8 characters');
       return;
     }
 
@@ -135,59 +164,122 @@ export default function EmployeeSettingsPage() {
     try {
       // In a real app, this would call the change password API
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      toast.success('¡Contraseña cambiada con éxito!');
+      toast.success(language === 'es' ? '¡Contraseña cambiada con éxito!' : 'Password changed successfully!');
       setPasswordForm({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
     } catch (error) {
-      toast.error('Error al cambiar la contraseña');
+      toast.error(language === 'es' ? 'Error al cambiar la contraseña' : 'Error changing password');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        </div>
-      </div>
-    );
-  }
+  const lastUpdated = EmployeeSettingsManager.getInstance().getLastUpdated();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       <div className="space-y-8 p-6">
         <div className="flex justify-between items-center animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 text-gradient">Configuración</h1>
-            <p className="text-gray-800 mt-2 font-semibold">Gestiona tus preferencias personales y configuración de cuenta</p>
+            <h1 className="text-3xl font-bold text-gray-900 text-gradient">
+              {language === 'es' ? 'Configuración' : 'Settings'}
+            </h1>
+            <p className="text-gray-800 mt-2 font-semibold">
+              {language === 'es' 
+                ? 'Gestiona tus preferencias personales y configuración de cuenta'
+                : 'Manage your personal preferences and account settings'}
+            </p>
+            {unsavedChanges && (
+              <div className="mt-2 flex items-center space-x-2 text-amber-600">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {language === 'es' ? 'Configuraciones guardadas automáticamente' : 'Settings saved automatically'}
+                </span>
+              </div>
+            )}
           </div>
           
-          <Button onClick={saveSettings} disabled={saving} className="btn-primary">
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Guardar Cambios
-              </>
-            )}
-          </Button>
+          <div className="flex space-x-2">
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportSettings}
+              className="hidden"
+              id="import-settings"
+            />
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById('import-settings')?.click()}
+              className="hover:bg-blue-50 hover:border-blue-300"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {language === 'es' ? 'Importar' : 'Import'}
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={handleExportSettings}
+              className="hover:bg-green-50 hover:border-green-300"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {language === 'es' ? 'Exportar' : 'Export'}
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={handleResetToDefaults}
+              className="hover:bg-red-50 hover:border-red-300"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {language === 'es' ? 'Restablecer' : 'Reset'}
+            </Button>
+          </div>
         </div>
+
+        {/* Settings Status */}
+        <Card className="animate-scale-in border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-green-100 rounded-full">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {language === 'es' ? 'Configuraciones Sincronizadas' : 'Settings Synchronized'}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {language === 'es' 
+                      ? `Última actualización: ${lastUpdated.toLocaleString('es-ES')}`
+                      : `Last updated: ${lastUpdated.toLocaleString('en-US')}`
+                    }
+                  </p>
+                </div>
+              </div>
+              <Badge variant="default" className="bg-green-600 text-white">
+                {language === 'es' ? 'Guardado' : 'Saved'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 bg-gray-100">
-            <TabsTrigger value="personal" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Personal</TabsTrigger>
-            <TabsTrigger value="notifications" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Notificaciones</TabsTrigger>
-            <TabsTrigger value="privacy" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Privacidad</TabsTrigger>
-            <TabsTrigger value="security" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">Seguridad</TabsTrigger>
+            <TabsTrigger value="personal" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">
+              {language === 'es' ? 'Personal' : 'Personal'}
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">
+              {language === 'es' ? 'Notificaciones' : 'Notifications'}
+            </TabsTrigger>
+            <TabsTrigger value="privacy" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">
+              {language === 'es' ? 'Privacidad' : 'Privacy'}
+            </TabsTrigger>
+            <TabsTrigger value="security" className="text-gray-900 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm font-semibold">
+              {language === 'es' ? 'Seguridad' : 'Security'}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="personal" className="space-y-6">
@@ -196,16 +288,20 @@ export default function EmployeeSettingsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2 text-gray-900">
                     <Globe className="h-5 w-5 text-blue-600" />
-                    <span>Idioma y Localización</span>
+                    <span>{language === 'es' ? 'Idioma y Localización' : 'Language & Localization'}</span>
                   </CardTitle>
                   <CardDescription className="text-gray-800 font-medium">
-                    Elige tu idioma preferido y configuración regional
+                    {language === 'es' 
+                      ? 'Elige tu idioma preferido y configuración regional'
+                      : 'Choose your preferred language and regional settings'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="language" className="text-gray-900 font-semibold">Idioma</Label>
-                    <Select value={language} onValueChange={(value: Language) => setLanguage(value)}>
+                    <Label htmlFor="language" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Idioma' : 'Language'}
+                    </Label>
+                    <Select value={language} onValueChange={handleLanguageChange}>
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
@@ -226,13 +322,13 @@ export default function EmployeeSettingsPage() {
 
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <h4 className="font-semibold text-blue-900 mb-2">
-                      Vista Previa de Idioma
+                      {language === 'es' ? 'Vista Previa de Idioma' : 'Language Preview'}
                     </h4>
                     <div className="space-y-2 text-sm">
-                      <p><strong>Panel de Control:</strong> {t('dashboard')}</p>
-                      <p><strong>Mi Asistencia:</strong> {t('myAttendance')}</p>
-                      <p><strong>Mi Perfil:</strong> {t('myProfile')}</p>
-                      <p><strong>Configuración:</strong> {t('settings')}</p>
+                      <p><strong>{language === 'es' ? 'Panel de Control' : 'Dashboard'}:</strong> {t('dashboard')}</p>
+                      <p><strong>{language === 'es' ? 'Mi Asistencia' : 'My Attendance'}:</strong> {t('myAttendance')}</p>
+                      <p><strong>{language === 'es' ? 'Mi Perfil' : 'My Profile'}:</strong> {t('myProfile')}</p>
+                      <p><strong>{language === 'es' ? 'Configuración' : 'Settings'}:</strong> {t('settings')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -241,39 +337,51 @@ export default function EmployeeSettingsPage() {
               <Card className="animate-scale-in card-glow border-purple-200">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2 text-gray-900">
-                    <Palette className="h-5 w-5 text-purple-600" />
-                    <span>Apariencia y Formato</span>
+                    <Settings className="h-5 w-5 text-purple-600" />
+                    <span>{language === 'es' ? 'Apariencia y Formato' : 'Appearance & Format'}</span>
                   </CardTitle>
                   <CardDescription className="text-gray-800 font-medium">
-                    Personaliza cómo se ve y funciona ArcusHR para ti
+                    {language === 'es' 
+                      ? 'Personaliza cómo se ve y funciona ArcusHR para ti'
+                      : 'Customize how ArcusHR looks and works for you'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="theme" className="text-gray-900 font-semibold">Tema</Label>
-                    <Select value={personalSettings.theme} onValueChange={(value) => setPersonalSettings({...personalSettings, theme: value})}>
+                    <Label htmlFor="theme" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Tema' : 'Theme'}
+                    </Label>
+                    <Select 
+                      value={settings.personal.theme} 
+                      onValueChange={(value) => handlePersonalSettingChange('theme', value)}
+                    >
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="light">Claro</SelectItem>
-                        <SelectItem value="dark">Oscuro</SelectItem>
-                        <SelectItem value="auto">Auto (Sistema)</SelectItem>
+                        <SelectItem value="light">{language === 'es' ? 'Claro' : 'Light'}</SelectItem>
+                        <SelectItem value="dark">{language === 'es' ? 'Oscuro' : 'Dark'}</SelectItem>
+                        <SelectItem value="auto">{language === 'es' ? 'Auto (Sistema)' : 'Auto (System)'}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="timezone" className="text-gray-900 font-semibold">Zona Horaria</Label>
-                    <Select value={personalSettings.timezone} onValueChange={(value) => setPersonalSettings({...personalSettings, timezone: value})}>
+                    <Label htmlFor="timezone" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Zona Horaria' : 'Timezone'}
+                    </Label>
+                    <Select 
+                      value={settings.personal.timezone} 
+                      onValueChange={(value) => handlePersonalSettingChange('timezone', value)}
+                    >
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="America/New_York">Hora del Este</SelectItem>
-                        <SelectItem value="America/Chicago">Hora Central</SelectItem>
-                        <SelectItem value="America/Denver">Hora de Montaña</SelectItem>
-                        <SelectItem value="America/Los_Angeles">Hora del Pacífico</SelectItem>
+                        <SelectItem value="America/New_York">{language === 'es' ? 'Hora del Este' : 'Eastern Time'}</SelectItem>
+                        <SelectItem value="America/Chicago">{language === 'es' ? 'Hora Central' : 'Central Time'}</SelectItem>
+                        <SelectItem value="America/Denver">{language === 'es' ? 'Hora de Montaña' : 'Mountain Time'}</SelectItem>
+                        <SelectItem value="America/Los_Angeles">{language === 'es' ? 'Hora del Pacífico' : 'Pacific Time'}</SelectItem>
                         <SelectItem value="Europe/Madrid">España (CET)</SelectItem>
                         <SelectItem value="Europe/London">GMT</SelectItem>
                       </SelectContent>
@@ -281,8 +389,13 @@ export default function EmployeeSettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="dateFormat" className="text-gray-900 font-semibold">Formato de Fecha</Label>
-                    <Select value={personalSettings.dateFormat} onValueChange={(value) => setPersonalSettings({...personalSettings, dateFormat: value})}>
+                    <Label htmlFor="dateFormat" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Formato de Fecha' : 'Date Format'}
+                    </Label>
+                    <Select 
+                      value={settings.personal.dateFormat} 
+                      onValueChange={(value) => handlePersonalSettingChange('dateFormat', value)}
+                    >
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
@@ -295,14 +408,19 @@ export default function EmployeeSettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="timeFormat" className="text-gray-900 font-semibold">Formato de Hora</Label>
-                    <Select value={personalSettings.timeFormat} onValueChange={(value) => setPersonalSettings({...personalSettings, timeFormat: value})}>
+                    <Label htmlFor="timeFormat" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Formato de Hora' : 'Time Format'}
+                    </Label>
+                    <Select 
+                      value={settings.personal.timeFormat} 
+                      onValueChange={(value) => handlePersonalSettingChange('timeFormat', value)}
+                    >
                       <SelectTrigger className="border-gray-300 text-gray-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="12h">12 Horas (AM/PM)</SelectItem>
-                        <SelectItem value="24h">24 Horas</SelectItem>
+                        <SelectItem value="12h">12 {language === 'es' ? 'Horas (AM/PM)' : 'Hours (AM/PM)'}</SelectItem>
+                        <SelectItem value="24h">24 {language === 'es' ? 'Horas' : 'Hours'}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -316,65 +434,97 @@ export default function EmployeeSettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-gray-900">
                   <Bell className="h-5 w-5 text-amber-600" />
-                  <span>Preferencias de Notificación</span>
+                  <span>{language === 'es' ? 'Preferencias de Notificación' : 'Notification Preferences'}</span>
                 </CardTitle>
                 <CardDescription className="text-gray-800 font-medium">
-                  Elige cómo y cuándo quieres ser notificado
+                  {language === 'es' 
+                    ? 'Elige cómo y cuándo quieres ser notificado'
+                    : 'Choose how and when you want to be notified'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base text-gray-900 font-semibold">Notificaciones por Correo</Label>
-                    <p className="text-sm text-gray-700 font-medium">Recibir notificaciones por correo electrónico</p>
+                    <Label className="text-base text-gray-900 font-semibold">
+                      {language === 'es' ? 'Notificaciones por Correo' : 'Email Notifications'}
+                    </Label>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'es' 
+                        ? 'Recibir notificaciones por correo electrónico'
+                        : 'Receive notifications via email'}
+                    </p>
                   </div>
                   <Switch
-                    checked={notificationSettings.emailNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, emailNotifications: checked})}
+                    checked={settings.notifications.emailNotifications}
+                    onCheckedChange={(checked) => handleNotificationChange('emailNotifications', checked)}
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base text-gray-900 font-semibold">Actualizaciones de Permisos</Label>
-                    <p className="text-sm text-gray-700 font-medium">Notificar sobre cambios de estado en solicitudes de permisos</p>
+                    <Label className="text-base text-gray-900 font-semibold">
+                      {language === 'es' ? 'Actualizaciones de Permisos' : 'Leave Updates'}
+                    </Label>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'es' 
+                        ? 'Notificar sobre cambios de estado en solicitudes de permisos'
+                        : 'Notify about leave request status changes'}
+                    </p>
                   </div>
                   <Switch
-                    checked={notificationSettings.leaveUpdates}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, leaveUpdates: checked})}
+                    checked={settings.notifications.leaveUpdates}
+                    onCheckedChange={(checked) => handleNotificationChange('leaveUpdates', checked)}
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base text-gray-900 font-semibold">Notificaciones de Nómina</Label>
-                    <p className="text-sm text-gray-700 font-medium">Notificar sobre recibos de pago y actualizaciones salariales</p>
+                    <Label className="text-base text-gray-900 font-semibold">
+                      {language === 'es' ? 'Notificaciones de Nómina' : 'Payroll Notifications'}
+                    </Label>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'es' 
+                        ? 'Notificar sobre recibos de pago y actualizaciones salariales'
+                        : 'Notify about payslips and salary updates'}
+                    </p>
                   </div>
                   <Switch
-                    checked={notificationSettings.payrollNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, payrollNotifications: checked})}
+                    checked={settings.notifications.payrollNotifications}
+                    onCheckedChange={(checked) => handleNotificationChange('payrollNotifications', checked)}
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base text-gray-900 font-semibold">Alertas de Recordatorio</Label>
-                    <p className="text-sm text-gray-700 font-medium">Recordar fechas importantes y tareas</p>
+                    <Label className="text-base text-gray-900 font-semibold">
+                      {language === 'es' ? 'Alertas de Recordatorio' : 'Reminder Alerts'}
+                    </Label>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'es' 
+                        ? 'Recordar fechas importantes y tareas'
+                        : 'Remind about important dates and tasks'}
+                    </p>
                   </div>
                   <Switch
-                    checked={notificationSettings.reminderAlerts}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, reminderAlerts: checked})}
+                    checked={settings.notifications.reminderAlerts}
+                    onCheckedChange={(checked) => handleNotificationChange('reminderAlerts', checked)}
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base text-gray-900 font-semibold">Notificaciones Móviles</Label>
-                    <p className="text-sm text-gray-700 font-medium">Notificaciones push en dispositivos móviles</p>
+                    <Label className="text-base text-gray-900 font-semibold">
+                      {language === 'es' ? 'Notificaciones Móviles' : 'Mobile Notifications'}
+                    </Label>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'es' 
+                        ? 'Notificaciones push en dispositivos móviles'
+                        : 'Push notifications on mobile devices'}
+                    </p>
                   </div>
                   <Switch
-                    checked={notificationSettings.mobileNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, mobileNotifications: checked})}
+                    checked={settings.notifications.mobileNotifications}
+                    onCheckedChange={(checked) => handleNotificationChange('mobileNotifications', checked)}
                   />
                 </div>
               </CardContent>
@@ -386,58 +536,83 @@ export default function EmployeeSettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-gray-900">
                   <User className="h-5 w-5 text-emerald-600" />
-                  <span>Configuración de Privacidad</span>
+                  <span>{language === 'es' ? 'Configuración de Privacidad' : 'Privacy Settings'}</span>
                 </CardTitle>
                 <CardDescription className="text-gray-800 font-medium">
-                  Controla quién puede ver tu información y contactarte
+                  {language === 'es' 
+                    ? 'Controla quién puede ver tu información y contactarte'
+                    : 'Control who can see your information and contact you'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="profileVisibility" className="text-gray-900 font-semibold">Visibilidad del Perfil</Label>
-                  <Select value={privacySettings.profileVisibility} onValueChange={(value) => setPrivacySettings({...privacySettings, profileVisibility: value})}>
+                  <Label htmlFor="profileVisibility" className="text-gray-900 font-semibold">
+                    {language === 'es' ? 'Visibilidad del Perfil' : 'Profile Visibility'}
+                  </Label>
+                  <Select 
+                    value={settings.privacy.profileVisibility} 
+                    onValueChange={(value) => handlePrivacyChange('profileVisibility', value)}
+                  >
                     <SelectTrigger className="border-gray-300 text-gray-900">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="public">Todos en la Empresa</SelectItem>
-                      <SelectItem value="team">Solo Mi Equipo</SelectItem>
-                      <SelectItem value="managers">Solo Gerentes</SelectItem>
-                      <SelectItem value="private">Privado</SelectItem>
+                      <SelectItem value="public">{language === 'es' ? 'Todos en la Empresa' : 'Everyone in Company'}</SelectItem>
+                      <SelectItem value="team">{language === 'es' ? 'Solo Mi Equipo' : 'My Team Only'}</SelectItem>
+                      <SelectItem value="managers">{language === 'es' ? 'Solo Gerentes' : 'Managers Only'}</SelectItem>
+                      <SelectItem value="private">{language === 'es' ? 'Privado' : 'Private'}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base text-gray-900 font-semibold">Mostrar Correo Electrónico</Label>
-                    <p className="text-sm text-gray-700 font-medium">Permitir que otros vean tu correo electrónico</p>
+                    <Label className="text-base text-gray-900 font-semibold">
+                      {language === 'es' ? 'Mostrar Correo Electrónico' : 'Show Email Address'}
+                    </Label>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'es' 
+                        ? 'Permitir que otros vean tu correo electrónico'
+                        : 'Allow others to see your email address'}
+                    </p>
                   </div>
                   <Switch
-                    checked={privacySettings.showEmail}
-                    onCheckedChange={(checked) => setPrivacySettings({...privacySettings, showEmail: checked})}
+                    checked={settings.privacy.showEmail}
+                    onCheckedChange={(checked) => handlePrivacyChange('showEmail', checked)}
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base text-gray-900 font-semibold">Mostrar Número de Teléfono</Label>
-                    <p className="text-sm text-gray-700 font-medium">Permitir que otros vean tu número de teléfono</p>
+                    <Label className="text-base text-gray-900 font-semibold">
+                      {language === 'es' ? 'Mostrar Número de Teléfono' : 'Show Phone Number'}
+                    </Label>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'es' 
+                        ? 'Permitir que otros vean tu número de teléfono'
+                        : 'Allow others to see your phone number'}
+                    </p>
                   </div>
                   <Switch
-                    checked={privacySettings.showPhone}
-                    onCheckedChange={(checked) => setPrivacySettings({...privacySettings, showPhone: checked})}
+                    checked={settings.privacy.showPhone}
+                    onCheckedChange={(checked) => handlePrivacyChange('showPhone', checked)}
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base text-gray-900 font-semibold">Permitir Mensajes Directos</Label>
-                    <p className="text-sm text-gray-700 font-medium">Permitir que compañeros te envíen mensajes directos</p>
+                    <Label className="text-base text-gray-900 font-semibold">
+                      {language === 'es' ? 'Permitir Mensajes Directos' : 'Allow Direct Messages'}
+                    </Label>
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'es' 
+                        ? 'Permitir que compañeros te envíen mensajes directos'
+                        : 'Allow colleagues to send you direct messages'}
+                    </p>
                   </div>
                   <Switch
-                    checked={privacySettings.allowDirectMessages}
-                    onCheckedChange={(checked) => setPrivacySettings({...privacySettings, allowDirectMessages: checked})}
+                    checked={settings.privacy.allowDirectMessages}
+                    onCheckedChange={(checked) => handlePrivacyChange('allowDirectMessages', checked)}
                   />
                 </div>
               </CardContent>
@@ -449,23 +624,27 @@ export default function EmployeeSettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-gray-900">
                   <Shield className="h-5 w-5 text-red-600" />
-                  <span>Configuración de Seguridad</span>
+                  <span>{language === 'es' ? 'Configuración de Seguridad' : 'Security Settings'}</span>
                 </CardTitle>
                 <CardDescription className="text-gray-800 font-medium">
-                  Gestiona la seguridad de tu cuenta y contraseña
+                  {language === 'es' 
+                    ? 'Gestiona la seguridad de tu cuenta y contraseña'
+                    : 'Manage your account security and password'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword" className="text-gray-900 font-semibold">Contraseña Actual</Label>
+                    <Label htmlFor="currentPassword" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Contraseña Actual' : 'Current Password'}
+                    </Label>
                     <div className="relative">
                       <Input
                         id="currentPassword"
                         type={showCurrentPassword ? "text" : "password"}
                         value={passwordForm.currentPassword}
                         onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
-                        placeholder="Ingresa tu contraseña actual"
+                        placeholder={language === 'es' ? 'Ingresa tu contraseña actual' : 'Enter your current password'}
                         className="border-gray-300 text-gray-900 pr-10"
                       />
                       <Button
@@ -485,14 +664,16 @@ export default function EmployeeSettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="newPassword" className="text-gray-900 font-semibold">Nueva Contraseña</Label>
+                    <Label htmlFor="newPassword" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Nueva Contraseña' : 'New Password'}
+                    </Label>
                     <div className="relative">
                       <Input
                         id="newPassword"
                         type={showNewPassword ? "text" : "password"}
                         value={passwordForm.newPassword}
                         onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                        placeholder="Ingresa nueva contraseña"
+                        placeholder={language === 'es' ? 'Ingresa nueva contraseña' : 'Enter new password'}
                         className="border-gray-300 text-gray-900 pr-10"
                       />
                       <Button
@@ -512,13 +693,15 @@ export default function EmployeeSettingsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-gray-900 font-semibold">Confirmar Nueva Contraseña</Label>
+                    <Label htmlFor="confirmPassword" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Confirmar Nueva Contraseña' : 'Confirm New Password'}
+                    </Label>
                     <Input
                       id="confirmPassword"
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                      placeholder="Confirma nueva contraseña"
+                      placeholder={language === 'es' ? 'Confirma nueva contraseña' : 'Confirm new password'}
                       className="border-gray-300 text-gray-900"
                     />
                   </div>
@@ -531,33 +714,49 @@ export default function EmployeeSettingsPage() {
                     {saving ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Cambiando Contraseña...
+                        {language === 'es' ? 'Cambiando Contraseña...' : 'Changing Password...'}
                       </>
                     ) : (
-                      'Cambiar Contraseña'
+                      language === 'es' ? 'Cambiar Contraseña' : 'Change Password'
                     )}
                   </Button>
                 </div>
                 
                 <div className="pt-6 border-t border-gray-200">
                   <div className="space-y-4">
-                    <h4 className="font-semibold text-gray-900">Información de Cuenta</h4>
+                    <h4 className="font-semibold text-gray-900">
+                      {language === 'es' ? 'Información de Cuenta' : 'Account Information'}
+                    </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-sm text-gray-700 font-semibold">Correo</p>
+                        <p className="text-sm text-gray-700 font-semibold">
+                          {language === 'es' ? 'Correo' : 'Email'}
+                        </p>
                         <p className="font-medium text-gray-900">{user?.email}</p>
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-sm text-gray-700 font-semibold">Rol</p>
-                        <p className="font-medium text-gray-900 capitalize">{user?.role === 'employee' ? 'Empleado' : user?.role}</p>
+                        <p className="text-sm text-gray-700 font-semibold">
+                          {language === 'es' ? 'Rol' : 'Role'}
+                        </p>
+                        <p className="font-medium text-gray-900 capitalize">
+                          {user?.role === 'employee' ? (language === 'es' ? 'Empleado' : 'Employee') : user?.role}
+                        </p>
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-sm text-gray-700 font-semibold">Último Acceso</p>
-                        <p className="font-medium text-gray-900">Hoy, 9:30 AM</p>
+                        <p className="text-sm text-gray-700 font-semibold">
+                          {language === 'es' ? 'Último Acceso' : 'Last Access'}
+                        </p>
+                        <p className="font-medium text-gray-900">
+                          {language === 'es' ? 'Hoy, 9:30 AM' : 'Today, 9:30 AM'}
+                        </p>
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-sm text-gray-700 font-semibold">Estado de Cuenta</p>
-                        <p className="font-medium text-emerald-600">Activo</p>
+                        <p className="text-sm text-gray-700 font-semibold">
+                          {language === 'es' ? 'Estado de Cuenta' : 'Account Status'}
+                        </p>
+                        <p className="font-medium text-emerald-600">
+                          {language === 'es' ? 'Activo' : 'Active'}
+                        </p>
                       </div>
                     </div>
                   </div>
