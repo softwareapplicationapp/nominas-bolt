@@ -40,6 +40,7 @@ export class PayrollPDFGenerator {
   private margin: number;
 
   constructor() {
+    console.log('PDF Generator: Initializing PDF generator');
     this.doc = new jsPDF();
     this.pageWidth = this.doc.internal.pageSize.getWidth();
     this.pageHeight = this.doc.internal.pageSize.getHeight();
@@ -47,16 +48,25 @@ export class PayrollPDFGenerator {
   }
 
   generatePayrollPDF(data: PayrollData): Uint8Array {
-    this.addHeader(data);
-    this.addEmployeeInfo(data);
-    this.addPayrollDetails(data);
-    this.addPayrollBreakdown(data);
-    this.addFooter(data);
+    console.log('PDF Generator: Starting PDF generation for payroll ID:', data.id);
+    
+    try {
+      this.addHeader(data);
+      this.addEmployeeInfo(data);
+      this.addPayrollDetails(data);
+      this.addPayrollBreakdown(data);
+      this.addFooter(data);
 
-    return this.doc.output('arraybuffer') as Uint8Array;
+      console.log('PDF Generator: PDF generation completed successfully');
+      return this.doc.output('arraybuffer') as Uint8Array;
+    } catch (error) {
+      console.error('PDF Generator: Error generating PDF:', error);
+      throw error;
+    }
   }
 
   private addHeader(data: PayrollData): void {
+    console.log('PDF Generator: Adding header section');
     // Company header
     this.doc.setFontSize(20);
     this.doc.setFont('helvetica', 'bold');
@@ -99,6 +109,7 @@ export class PayrollPDFGenerator {
   }
 
   private addEmployeeInfo(data: PayrollData): void {
+    console.log('PDF Generator: Adding employee information section');
     let yPos = 105;
 
     // Employee Information Section
@@ -173,6 +184,7 @@ export class PayrollPDFGenerator {
   }
 
   private addPayrollDetails(data: PayrollData): void {
+    console.log('PDF Generator: Adding payroll details section');
     let yPos = 185;
 
     // Payroll Details Section
@@ -249,6 +261,7 @@ export class PayrollPDFGenerator {
   }
 
   private addPayrollBreakdown(data: PayrollData): void {
+    console.log('PDF Generator: Adding payroll breakdown section');
     let yPos = 280;
 
     // Additional Information
@@ -298,6 +311,7 @@ export class PayrollPDFGenerator {
   }
 
   private addFooter(data: PayrollData): void {
+    console.log('PDF Generator: Adding footer section');
     const footerY = this.pageHeight - 30;
 
     // Footer line
@@ -315,13 +329,15 @@ export class PayrollPDFGenerator {
     // Page number
     this.doc.text('Página 1 de 1', this.pageWidth - this.margin, footerY, { align: 'right' });
     
-    // Document ID - FIXED: Use data.id instead of data.payroll.id
+    // Document ID - Use data.id instead of data.payroll.id
+    console.log('PDF Generator: Using document ID:', data.id);
     this.doc.text(`ID Documento: PAY-${data.id}-${new Date().getFullYear()}`, this.pageWidth - this.margin, footerY + 5, { align: 'right' });
   }
 }
 
 // Utility function to generate filename
 export function generatePayrollFilename(employeeName: string, payPeriodStart: string): string {
+  console.log('PDF Generator: Generating filename for employee:', employeeName, 'period:', payPeriodStart);
   const date = new Date(payPeriodStart);
   const monthYear = date.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit' });
   const cleanName = employeeName.replace(/\s+/g, '_').toLowerCase();

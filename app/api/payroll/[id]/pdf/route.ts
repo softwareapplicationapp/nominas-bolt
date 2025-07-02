@@ -5,14 +5,20 @@ import { PayrollPDFGenerator, generatePayrollFilename, PayrollData } from '@/lib
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    console.log('API Route: /api/payroll/[id]/pdf GET called');
+    
     const user = await getUserFromRequest(request);
+    console.log('API Route: User from request:', user ? user.email : 'Unauthorized');
+    
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const payrollId = parseInt(params.id);
+    console.log('API Route: Payroll ID:', payrollId);
 
     // Get payroll record with employee and company details
+    console.log('API Route: Querying payroll record for ID:', payrollId, 'and company ID:', user.company_id);
     const payrollRecord = await dbGet(`
       SELECT 
         p.*,
@@ -33,22 +39,28 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       WHERE p.id = ? AND e.company_id = ?
     `, [payrollId, user.company_id]) as any;
 
+    console.log('API Route: Payroll record found:', payrollRecord ? payrollRecord.id : 'Not found');
+
     if (!payrollRecord) {
+      console.log('API Route: Payroll record not found for ID:', payrollId);
       return NextResponse.json({ error: 'Payroll record not found' }, { status: 404 });
     }
 
     // Check authorization - admin/hr can access all, employees can only access their own
+    console.log('API Route: User role:', user.role);
     if (user.role === 'employee') {
       const employeeRecord = await dbGet(`
         SELECT id FROM employees WHERE user_id = ?
       `, [user.id]) as any;
 
       if (!employeeRecord || employeeRecord.id !== payrollRecord.employee_id) {
+        console.log('API Route: Unauthorized access attempt for payroll ID:', payrollId, 'by user ID:', user.id);
         return NextResponse.json({ error: 'Unauthorized to access this payroll record' }, { status: 403 });
       }
     }
 
     // Prepare data for PDF generation
+    console.log('API Route: Preparing data for PDF generation...');
     const payrollData: PayrollData = {
       id: payrollRecord.id,
       employee: {
@@ -81,16 +93,19 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       },
     };
 
+    console.log('API Route: Generating PDF...');
     // Generate PDF
     const generator = new PayrollPDFGenerator();
     const pdfBuffer = generator.generatePayrollPDF(payrollData);
 
+    console.log('API Route: Generating filename...');
     // Generate filename
     const filename = generatePayrollFilename(
       `${payrollRecord.first_name} ${payrollRecord.last_name}`,
       payrollRecord.pay_period_start
     );
 
+    console.log('API Route: Returning PDF response for filename:', filename);
     // Return PDF as response
     return new NextResponse(pdfBuffer, {
       status: 200,
