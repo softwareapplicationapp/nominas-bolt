@@ -1338,7 +1338,7 @@ export const dbAll = async (sql: string, params: any[] = []) => {
         
         console.log('=== STEP 3: Getting payroll records ===');
         // Step 3: Get all payroll records for these employees
-        let payrollRecords = [];
+        let payrollRecords: Payroll[] = [];
         let payrollError = null;
         
         // CRITICAL FIX: Query each employee's payroll records individually to avoid IN clause issues
