@@ -272,8 +272,9 @@ class ApiClient {
   }
 
   // Reporting methods
-  async getReports() {
-    return this.request('/reports');
+  async getReports(query?: string) {
+    const qs = query ? `?${query}` : '';
+    return this.request(`/reports${qs}`);
   }
 
   // FIXED: Payroll methods with better error handling

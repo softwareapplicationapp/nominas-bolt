@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth';
-import { dbAll, dbGet } from '@/lib/database';
 import { supabase } from '@/lib/supabaseClient';
 
 export const dynamic = 'force-dynamic';
@@ -12,10 +11,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const employees = (await dbAll(
-      `SELECT id, department FROM employees WHERE company_id = ? AND status = 'active'`,
-      [user.company_id]
-    )) as Array<{ id: number; department: string }>;
+    const { searchParams } = new URL(request.url);
+    const year = parseInt(searchParams.get('year') || `${new Date().getFullYear()}`);
+    const startDateParam = searchParams.get('startDate') || `${year}-01-01`;
+    const endDateParam = searchParams.get('endDate') || `${year}-12-31`;
+    const employeeIdParam = searchParams.get('employeeId');
+    const department = searchParams.get('department');
+
+    let employeeQuery = supabase
+      .from('employees')
+      .select('id, department')
+      .eq('company_id', user.company_id)
+      .eq('status', 'active');
+
+    if (department) {
+      employeeQuery = employeeQuery.eq('department', department);
+    }
+    if (employeeIdParam) {
+      employeeQuery = employeeQuery.eq('id', Number(employeeIdParam));
+    }
+
+    const { data: employees } = await employeeQuery;
 
     if (!employees || employees.length === 0) {
       return NextResponse.json({
@@ -32,14 +48,14 @@ export async function GET(request: NextRequest) {
     }
 
     const employeeIds = employees.map(e => e.id);
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonth = endDateParam.slice(0, 7);
 
-    // Attendance for current month
     const { data: monthAttendance } = await supabase
       .from('attendance')
       .select('status')
       .in('employee_id', employeeIds)
-      .like('date', `${currentMonth}%`);
+      .gte('date', startDateParam)
+      .lte('date', endDateParam);
 
     let present = 0;
     let absent = 0;
@@ -53,12 +69,12 @@ export async function GET(request: NextRequest) {
     const avgAttendance = totalRecords > 0 ? Math.round(((present + late) / totalRecords) * 100) : 0;
     const monthBreakdown = { present, late, absent };
 
-    // Monthly payroll
     const { data: monthPayroll } = await supabase
       .from('payroll')
       .select('base_salary, bonus, deductions, net_pay')
       .in('employee_id', employeeIds)
-      .like('pay_period_start', `${currentMonth}%`);
+      .gte('pay_period_start', startDateParam)
+      .lte('pay_period_end', endDateParam);
     const monthlyPayroll = (monthPayroll || []).reduce((sum, p) => sum + (p.net_pay || 0), 0);
     const payrollBreakdown = (monthPayroll || []).reduce(
       (acc, p) => {
@@ -78,14 +94,12 @@ export async function GET(request: NextRequest) {
       goalAchievement: avgAttendance,
     };
 
-    // Attendance trends last 6 months
     const attendanceData: Array<{ month: string; present: number; absent: number; late: number }> = [];
-    const start = new Date();
-    start.setMonth(start.getMonth() - 5);
-    start.setDate(1);
-    for (let i = 0; i < 6; i++) {
-      const monthDate = new Date(start.getFullYear(), start.getMonth() + i, 1);
-      const monthStr = monthDate.toISOString().slice(0, 7);
+    const start = new Date(startDateParam);
+    const end = new Date(endDateParam);
+    const iter = new Date(start.getFullYear(), start.getMonth(), 1);
+    while (iter <= end && attendanceData.length < 12) {
+      const monthStr = iter.toISOString().slice(0, 7);
       const { data } = await supabase
         .from('attendance')
         .select('status')
@@ -100,18 +114,18 @@ export async function GET(request: NextRequest) {
         else if (r.status === 'late') l++;
       });
       attendanceData.push({
-        month: monthDate.toLocaleString('default', { month: 'short' }),
+        month: iter.toLocaleString('default', { month: 'short' }),
         present: p,
         absent: a,
         late: l,
       });
+      iter.setMonth(iter.getMonth() + 1);
     }
 
-    // Payroll trends last 6 months
     const payrollTrends: Array<{ month: string; amount: number; employees: number }> = [];
-    for (let i = 0; i < 6; i++) {
-      const monthDate = new Date(start.getFullYear(), start.getMonth() + i, 1);
-      const monthStr = monthDate.toISOString().slice(0, 7);
+    const iter2 = new Date(start.getFullYear(), start.getMonth(), 1);
+    while (iter2 <= end && payrollTrends.length < 12) {
+      const monthStr = iter2.toISOString().slice(0, 7);
       const { data } = await supabase
         .from('payroll')
         .select('net_pay, employee_id')
@@ -120,13 +134,13 @@ export async function GET(request: NextRequest) {
       const amount = (data || []).reduce((sum, p) => sum + (p.net_pay || 0), 0);
       const uniqueEmployees = new Set((data || []).map(r => r.employee_id));
       payrollTrends.push({
-        month: monthDate.toLocaleString('default', { month: 'short' }),
+        month: iter2.toLocaleString('default', { month: 'short' }),
         amount,
         employees: uniqueEmployees.size,
       });
+      iter2.setMonth(iter2.getMonth() + 1);
     }
 
-    // Department metrics
     const departmentMap: Record<string, number[]> = {};
     employees.forEach(e => {
       if (!departmentMap[e.department]) departmentMap[e.department] = [];
@@ -158,10 +172,8 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Leave analysis current year
-    const now = new Date();
-    const startOfYear = `${now.getFullYear()}-01-01`;
-    const endOfYear = `${now.getFullYear()}-12-31`;
+    const startOfYear = `${year}-01-01`;
+    const endOfYear = `${year}-12-31`;
     const { data: leaves } = await supabase
       .from('leave_requests')
       .select('type,status,days')
@@ -194,12 +206,11 @@ export async function GET(request: NextRequest) {
       approvalRate: totalRequests > 0 ? Math.round((approved / totalRequests) * 100) : 0,
     };
 
-    // Performance data by quarter (attendance rate)
     const performanceData: Array<{ quarter: string; goals: number; achieved: number }> = [];
     for (let q = 0; q < 4; q++) {
       const startMonth = q * 3;
-      const quarterStart = new Date(now.getFullYear(), startMonth, 1);
-      const quarterEnd = new Date(now.getFullYear(), startMonth + 3, 0);
+      const quarterStart = new Date(year, startMonth, 1);
+      const quarterEnd = new Date(year, startMonth + 3, 0);
       const { data } = await supabase
         .from('attendance')
         .select('status')

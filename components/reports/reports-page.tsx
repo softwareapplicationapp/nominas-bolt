@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface ReportData {
   keyMetrics: {
@@ -55,11 +56,41 @@ interface ReportData {
 export default function ReportsPage() {
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [year, setYear] = useState(String(new Date().getFullYear()));
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
+  const [department, setDepartment] = useState('');
+  const [employees, setEmployees] = useState<Array<{ id: number; name: string; department: string }>>([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const result = await apiClient.getEmployees();
+        setEmployees(
+          (result || []).map((e: any) => ({
+            id: e.id,
+            name: `${e.first_name} ${e.last_name}`,
+            department: e.department,
+          }))
+        );
+      } catch (e) {
+        console.error('Failed to load employees', e);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const result = await apiClient.getReports();
+        const params = new URLSearchParams();
+        if (year) params.append('year', year);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (employeeId) params.append('employeeId', employeeId);
+        if (department) params.append('department', department);
+        const result = await apiClient.getReports(params.toString());
         setData(result);
       } catch (e: any) {
         console.error('Failed to load reports:', e);
@@ -68,7 +99,7 @@ export default function ReportsPage() {
       }
     };
     load();
-  }, []);
+  }, [year, startDate, endDate, employeeId, department]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -93,15 +124,35 @@ export default function ReportsPage() {
           <p className="text-gray-600 mt-2">Comprehensive insights and data analysis</p>
         </div>
         
-        <div className="flex space-x-2">
-          <Select defaultValue="2024">
-            <SelectTrigger className="w-32">
-              <SelectValue />
+        <div className="flex space-x-2 flex-wrap justify-end">
+          <Select value={year} onValueChange={setYear}>
+            <SelectTrigger className="w-28">
+              <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2023">2023</SelectItem>
-              <SelectItem value="2022">2022</SelectItem>
+              {[2022, 2023, 2024, 2025, 2026].map(y => (
+                <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-36" />
+          <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-36" />
+          <Select value={department} onValueChange={setDepartment}>
+            <SelectTrigger className="w-40"><SelectValue placeholder="Department" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All</SelectItem>
+              {Array.from(new Set(employees.map(e => e.department))).map(dep => (
+                <SelectItem key={dep} value={dep}>{dep}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={employeeId} onValueChange={setEmployeeId}>
+            <SelectTrigger className="w-40"><SelectValue placeholder="Employee" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All</SelectItem>
+              {employees.map(emp => (
+                <SelectItem key={emp.id} value={String(emp.id)}>{emp.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Button variant="outline">
