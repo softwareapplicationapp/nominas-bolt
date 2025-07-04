@@ -257,7 +257,7 @@ export async function POST(request: NextRequest) {
             first_name: employeeCheck.first_name,
             last_name: employeeCheck.last_name,
             department: 'Unknown', // employeeCheck doesn't have department property
-            employee_id: employeeCheck.employee_id || `EMP${employeeId.toString().padStart(3, '0')}`
+            employee_id: `EMP${employeeId.toString().padStart(3, '0')}` // Generate employee_id since it's not in employeeCheck
           };
           console.log('Manual response:', manualResponse);
           return NextResponse.json(manualResponse);
