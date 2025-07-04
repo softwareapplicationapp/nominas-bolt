@@ -140,7 +140,7 @@ export default function ReportsPage() {
           <Select value={department} onValueChange={setDepartment}>
             <SelectTrigger className="w-40"><SelectValue placeholder="Department" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               {Array.from(new Set(employees.map(e => e.department))).map(dep => (
                 <SelectItem key={dep} value={dep}>{dep}</SelectItem>
               ))}
@@ -149,7 +149,7 @@ export default function ReportsPage() {
           <Select value={employeeId} onValueChange={setEmployeeId}>
             <SelectTrigger className="w-40"><SelectValue placeholder="Employee" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               {employees.map(emp => (
                 <SelectItem key={emp.id} value={String(emp.id)}>{emp.name}</SelectItem>
               ))}
