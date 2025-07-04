@@ -319,7 +319,7 @@ export async function POST(request: NextRequest) {
             pay_period_end: payPeriodEnd,
             base_salary: baseSalary,
             bonus: bonus,
-            deductions: deductions,
+            deductions: deductions, 
             net_pay: netPay,
             status: status,
             created_at: new Date().toISOString(),
