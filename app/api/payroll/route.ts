@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
             ...directPayroll,
             first_name: employeeCheck.first_name,
             last_name: employeeCheck.last_name,
-            department: employeeCheck.department || 'Unknown',
+            department: 'Unknown', // employeeCheck doesn't have department property
             employee_id: employeeCheck.employee_id || `EMP${employeeId.toString().padStart(3, '0')}`
           };
           console.log('Manual response:', manualResponse);
@@ -277,7 +277,7 @@ export async function POST(request: NextRequest) {
           created_at: new Date().toISOString(),
           first_name: employeeCheck.first_name,
           last_name: employeeCheck.last_name,
-          department: employeeCheck.department || 'Unknown'
+          department: 'Unknown' // employeeCheck doesn't have department property
         });
       }
     } catch (error) {
@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
         first_name: employeeCheck.first_name,
         last_name: employeeCheck.last_name,
-        department: employeeCheck.department || 'Unknown'
+        department: 'Unknown' // employeeCheck doesn't have department property
       });
     }
   } catch (error: any) {
