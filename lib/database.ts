@@ -214,7 +214,7 @@ export const dbRun = async (sql: string, params: any[] = []) => {
     // FIXED: Handle payroll insertions with better logging
     if (q.startsWith('insert into payroll')) {
       console.log('=== INSERTING PAYROLL RECORD ===');
-      console.log('Parameters:', params);
+      console.log('Parameters:', JSON.stringify(params));
       
       // Create the payroll data object
       const payrollData = {
@@ -229,7 +229,7 @@ export const dbRun = async (sql: string, params: any[] = []) => {
         processed_at: params[7] === 'processed' ? new Date().toISOString() : null
       };
       
-      console.log('Payroll data to insert:', payrollData);
+      console.log('Payroll data to insert:', JSON.stringify(payrollData));
       
       const { data, error } = await supabase
         .from('payroll')
@@ -242,7 +242,7 @@ export const dbRun = async (sql: string, params: any[] = []) => {
         throw error;
       }
       
-      console.log('Payroll record created with ID:', data!.id);
+      console.log('Payroll record created with ID:', data?.id);
       return { lastID: data!.id, changes: 1 };
     }
 
@@ -1300,17 +1300,27 @@ export const dbAll = async (sql: string, params: any[] = []) => {
     if (q.includes('select p.*, e.first_name') && q.includes('from payroll p join employees e')) {
       console.log('=== PAYROLL QUERY (dbAll) ===');
       console.log('SQL Query:', q);
-      console.log('Parameters:', params);
+      console.log('Parameters:', JSON.stringify(params));
       
       // CRITICAL FIX: Simplify the query to avoid join issues
       try {
+        console.log('=== STEP 1: Getting employees for company ===');
         // Step 1: Get all employees for the company
         const { data: employees, error: employeesError } = await supabase
           .from('employees')
           .select('id, first_name, last_name, department, employee_id')
           .eq('company_id', params[0]);
         
-        console.log('Found employees:', employees?.length || 0);
+        console.log('Found employees:', employees?.length || 0, 'for company_id:', params[0]);
+        if (employees && employees.length > 0) {
+          console.log('Employee details:', employees.map(e => ({
+            id: e.id,
+            name: `${e.first_name} ${e.last_name}`,
+            department: e.department,
+            employee_id: e.employee_id
+          })));
+        }
+        
         if (employeesError) {
           console.error('Employees query failed:', employeesError);
           throw employeesError;
@@ -1321,30 +1331,63 @@ export const dbAll = async (sql: string, params: any[] = []) => {
           return [];
         }
 
+        console.log('=== STEP 2: Getting employee IDs ===');
         // Step 2: Get employee IDs
         const employeeIds = employees.map(e => e.id);
-        console.log('Employee IDs for payroll query:', employeeIds);
+        console.log('Employee IDs for payroll query:', JSON.stringify(employeeIds));
         
+        console.log('=== STEP 3: Getting payroll records ===');
         // Step 3: Get all payroll records for these employees
-        const { data: payrollRecords, error: payrollError } = await supabase
-          .from('payroll')
-          .select('*')
-          .in('employee_id', employeeIds)
-          .order('pay_period_start', { ascending: false });
+        let payrollRecords = [];
+        let payrollError = null;
         
-        console.log('Payroll records found:', payrollRecords?.length || 0);
+        // CRITICAL FIX: Query each employee's payroll records individually to avoid IN clause issues
+        for (const empId of employeeIds) {
+          console.log(`Querying payroll records for employee_id: ${empId}`);
+          
+          const { data: records, error } = await supabase
+            .from('payroll')
+            .select('*')
+            .eq('employee_id', empId)
+            .order('pay_period_start', { ascending: false });
+          
+          if (error) {
+            console.error(`Error querying payroll for employee ${empId}:`, error);
+            payrollError = error;
+            continue;
+          }
+          
+          console.log(`Found ${records?.length || 0} payroll records for employee ${empId}`);
+          if (records && records.length > 0) {
+            payrollRecords = [...payrollRecords, ...records];
+          }
+        }
+        
+        console.log('Total payroll records found:', payrollRecords?.length || 0);
+        if (payrollRecords.length > 0) {
+          console.log('First few payroll records:', payrollRecords.slice(0, 3).map(r => ({
+            id: r.id,
+            employee_id: r.employee_id,
+            period: `${r.pay_period_start} to ${r.pay_period_end}`,
+            net_pay: r.net_pay
+          })));
+        }
+        
         if (payrollError) {
           console.error('Payroll query failed:', payrollError);
           throw payrollError;
         }
         
+        console.log('=== STEP 4: Joining data manually ===');
         // Step 4: Manually join the data
         const result = (payrollRecords || []).map(record => {
           const employee = employees.find(e => e.id === record.employee_id);
           if (!employee) {
-            console.log('No matching employee found for payroll record:', record.id);
+            console.log(`No matching employee found for payroll record ${record.id} with employee_id ${record.employee_id}`);
             return null;
           }
+          
+          console.log(`Joining payroll ${record.id} with employee ${employee.id} (${employee.first_name} ${employee.last_name})`);
           
           return {
             ...record,
@@ -1356,8 +1399,16 @@ export const dbAll = async (sql: string, params: any[] = []) => {
         }).filter(Boolean); // Remove any null entries
         
         console.log('Final payroll result with employee data:', result.length, 'records');
-        if (result.length > 0) {
-          console.log('Sample result:', result[0]);
+        if (result.length > 0 && result[0]) {
+          console.log('Sample result:', {
+            id: result[0].id,
+            employee_id: result[0].employee_id,
+            employee_name: `${result[0].first_name} ${result[0].last_name}`,
+            department: result[0].department,
+            period: `${result[0].pay_period_start} to ${result[0].pay_period_end}`,
+            net_pay: result[0].net_pay,
+            status: result[0].status
+          });
         }
         
         return result;
