@@ -705,7 +705,11 @@ export const dbGet = async (sql: string, params: any[] = []) => {
     }
 
     // FIXED: Handle payroll queries - this was the main issue
-    if (q.includes('select p.*, e.') && q.includes('from payroll p join employees e')) {
+    if (
+      q.includes('select p.*, e.') &&
+      q.includes('from payroll p') &&
+      q.includes('join employees e')
+    ) {
       console.log('=== PAYROLL QUERY (dbGet) ===');
       console.log('SQL Query:', q);
       console.log('Parameters:', params);
@@ -856,7 +860,12 @@ export const dbGet = async (sql: string, params: any[] = []) => {
     }
 
     // FIXED: Handle simple payroll query by ID
-    if (q.includes('select p.*, e.first_name, e.last_name, e.department, e.employee_id from payroll p join employees e') && q.includes('where p.id = ?')) {
+    if (
+      q.includes('select p.*, e.first_name') &&
+      q.includes('from payroll p') &&
+      q.includes('join employees e') &&
+      q.includes('where p.id = ?')
+    ) {
       console.log('=== SIMPLE PAYROLL QUERY BY ID ===');
       console.log('Payroll ID:', params[0]);
       
@@ -1297,7 +1306,11 @@ export const dbAll = async (sql: string, params: any[] = []) => {
     }
 
     // FIXED: Handle payroll queries - this was the main issue causing 0 records
-    if (q.includes('select p.*, e.first_name') && q.includes('from payroll p join employees e')) {
+    if (
+      q.includes('select p.*, e.first_name') &&
+      q.includes('from payroll p') &&
+      q.includes('join employees e')
+    ) {
       console.log('=== PAYROLL QUERY (dbAll) ===');
       console.log('SQL Query:', q);
       console.log('Parameters:', JSON.stringify(params));
