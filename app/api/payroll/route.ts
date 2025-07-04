@@ -391,9 +391,11 @@ export async function POST(request: NextRequest) {
         last_name: employeeCheck.last_name,
         department: 'Unknown' // employeeCheck doesn't have department property
         employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
-    }
-  } catch (error: any) {
+          }
+      )
+      } catch (error: any) {
     console.error('Create payroll error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
   }
 }
