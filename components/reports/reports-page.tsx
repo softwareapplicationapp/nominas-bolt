@@ -69,8 +69,6 @@ export default function ReportsPage() {
     };
     load();
   }, []);
-
-export default function ReportsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
