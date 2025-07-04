@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
     // CRITICAL FIX: First check if the employee exists
     const { data: employeeCheck, error: employeeError } = await supabase
       .from('employees')
-      .select('id, first_name, last_name')
+      .select('id, first_name, last_name, employee_id')
       .eq('id', employeeId)
       .maybeSingle();
       
