@@ -34,6 +34,7 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
+import EmployeePageContainer from '@/components/layout/employee-page-container';
 import { languages, Language } from '@/lib/i18n';
 import { useEmployeeSettings, EmployeeSettingsManager } from '@/lib/employee-settings';
 
@@ -180,8 +181,8 @@ export default function EmployeeSettingsPage() {
   const lastUpdated = EmployeeSettingsManager.getInstance().getLastUpdated();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="space-y-8 p-6">
+    <EmployeePageContainer>
+      <div className="space-y-8">
         <div className="flex justify-between items-center animate-fade-in">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 text-gradient">
@@ -766,6 +767,6 @@ export default function EmployeeSettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </EmployeePageContainer>
   );
 }
