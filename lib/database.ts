@@ -394,7 +394,7 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       const updateData: any = {};
       
       // Check if this is a status update (for processing payroll)
-      if (q.includes('status = ?') && q.includes('processed_at')) {
+      if (q.includes('status = ?') && q.includes('processed_at') && params.length <= 3) {
         updateData.status = params[0];
         if (params[1]) {
           updateData.processed_at = params[1];
@@ -406,19 +406,17 @@ export const dbRun = async (sql: string, params: any[] = []) => {
         console.log('Updating payroll status to:', updateData.status);
         console.log('Setting processed_at to:', updateData.processed_at);
         
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('payroll')
           .update(updateData)
-          .eq('id', params[2])
-          .select()
-          .single();
+          .eq('id', params[2]);
         
         if (error) {
           console.error('Payroll update error:', error);
           throw error;
         }
         
-        console.log('Payroll record updated successfully:', data);
+        console.log('Payroll record updated successfully');
         return { lastID: params[2], changes: 1 };
       } else {
         // Full payroll update
@@ -712,6 +710,7 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       console.log('SQL Query:', q);
       console.log('Parameters:', params);
       
+      // Single payroll record with employee details
       if (q.includes('where p.id = ?')) {
         // Single payroll record with employee details
         console.log('Getting single payroll record with ID:', params[0]);
@@ -756,6 +755,67 @@ export const dbGet = async (sql: string, params: any[] = []) => {
         }
         
         return data;
+      } else if (q.includes('where e.company_id = ?')) {
+        // Multiple payroll records for a company
+        console.log('Getting payroll records for company ID:', params[0]);
+        
+        // First get all employees for this company
+        const { data: employees, error: employeesError } = await supabase
+          .from('employees')
+          .select('id, first_name, last_name, department, employee_id')
+          .eq('company_id', params[0]);
+        
+        console.log('Found employees for company:', employees?.length || 0);
+        if (employeesError) {
+          console.error('Employees query error:', employeesError);
+          throw employeesError;
+        }
+        
+        if (!employees || employees.length === 0) {
+          console.log('No employees found for company:', params[0]);
+          return [];
+        }
+        
+        // Get employee IDs
+        const employeeIds = employees.map(e => e.id);
+        console.log('Employee IDs for payroll query:', employeeIds);
+        
+        // Get all payroll records for these employees
+        const { data: payrollRecords, error: payrollError } = await supabase
+          .from('payroll')
+          .select('*')
+          .in('employee_id', employeeIds)
+          .order('pay_period_start', { ascending: false });
+        
+        console.log('Payroll records found:', payrollRecords?.length || 0);
+        if (payrollError) {
+          console.error('Payroll query error:', payrollError);
+          throw payrollError;
+        }
+        
+        // Map the results to include employee details
+        const result = (payrollRecords || []).map(record => {
+          const employee = employees.find(e => e.id === record.employee_id);
+          if (!employee) {
+            console.log('No employee found for payroll record:', record.id);
+            return null;
+          }
+          
+          return {
+            ...record,
+            first_name: employee.first_name,
+            last_name: employee.last_name,
+            department: employee.department,
+            employee_id: employee.employee_id
+          };
+        }).filter(Boolean); // Remove any null entries
+        
+        console.log('Final mapped payroll records:', result.length);
+        if (result.length > 0) {
+          console.log('Sample record:', result[0]);
+        }
+        
+        return result;
       }
     }
 
@@ -764,34 +824,56 @@ export const dbGet = async (sql: string, params: any[] = []) => {
       console.log('=== SIMPLE PAYROLL QUERY BY ID ===');
       console.log('Payroll ID:', params[0]);
       
-      const { data, error } = await supabase
+      // First get the payroll record
+      const { data: payrollRecord, error: payrollError } = await supabase
         .from('payroll')
-        .select(`
-          *,
-          employees!inner(first_name, last_name, department, employee_id)
-        `)
+        .select('*')
         .eq('id', params[0])
         .maybeSingle();
       
-      if (error) {
-        console.error('Simple payroll query error:', error);
-        throw error;
+      if (payrollError) {
+        console.error('Payroll record query error:', payrollError);
+        throw payrollError;
       }
       
-      console.log('Simple payroll query result:', data);
-      
-      if (data) {
-        const employee = (data as any).employees;
-        return {
-          ...data,
-          first_name: employee.first_name,
-          last_name: employee.last_name,
-          department: employee.department,
-          employee_id: employee.employee_id
-        };
+      if (!payrollRecord) {
+        console.log('No payroll record found with ID:', params[0]);
+        return null;
       }
       
-      return data;
+      console.log('Found payroll record:', payrollRecord);
+      
+      // Now get the employee details
+      const { data: employee, error: employeeError } = await supabase
+        .from('employees')
+        .select('first_name, last_name, department, employee_id')
+        .eq('id', payrollRecord.employee_id)
+        .maybeSingle();
+      
+      if (employeeError) {
+        console.error('Employee query error:', employeeError);
+        // Don't throw, return the payroll record without employee details
+        return payrollRecord;
+      }
+      
+      if (!employee) {
+        console.log('No employee found for employee_id:', payrollRecord.employee_id);
+        return payrollRecord;
+      }
+      
+      console.log('Found employee:', employee);
+      
+      // Combine the results
+      const result = {
+        ...payrollRecord,
+        first_name: employee.first_name,
+        last_name: employee.last_name,
+        department: employee.department,
+        employee_id: employee.employee_id
+      }
+      
+      console.log('Combined result:', result);
+      return result;
     }
 
     // ADDED: Direct payroll query without joins

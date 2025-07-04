@@ -209,67 +209,97 @@ export async function POST(request: NextRequest) {
     console.log('=== GETTING NEW PAYROLL RECORD ===');
     console.log('Looking for payroll record with ID:', result.lastID);
     
-    // CRITICAL FIX: First try a direct query to confirm the record exists
-    const { data: directCheck, error: directError } = await supabase
-      .from('payroll')
-      .select('*')
-      .eq('id', result.lastID)
-      .maybeSingle();
-      
-    console.log('Direct payroll check result:', directCheck);
-    if (directError) {
-      console.error('Direct payroll check error:', directError);
-    }
-    
-    if (!directCheck) {
-      console.log('❌ CRITICAL ERROR: Payroll record not found in direct check');
-    } else {
-      console.log('✅ Payroll record exists in database');
-    }
-    
-    // Now try to get the record with employee details
-    const newPayroll = await dbGet(`
-      SELECT p.*, e.first_name, e.last_name, e.department, e.employee_id
-      FROM payroll p
-      JOIN employees e ON p.employee_id = e.id
-      WHERE p.id = ?
-    `, [result.lastID]);
-
-    console.log('New payroll record retrieved:', newPayroll);
-    
-    if (!newPayroll) {
-      console.log('❌ Failed to retrieve new payroll record');
-      console.log('=== DIRECT PAYROLL CHECK ===');
-      const directCheck = await dbGet(`SELECT * FROM payroll WHERE id = ?`, [result.lastID]);
+    try {
+      // CRITICAL FIX: First try a direct query to confirm the record exists
+      const { data: directCheck, error: directError } = await supabase
+        .from('payroll')
+        .select('*')
+        .eq('id', result.lastID)
+        .maybeSingle();
+        
       console.log('Direct payroll check result:', directCheck);
+      if (directError) {
+        console.error('Direct payroll check error:', directError);
+      }
       
-      // If direct check succeeds but join fails, create a manual response
-      if (directCheck) {
-        console.log('Creating manual response with employee data');
-        const manualResponse = {
-          ...directCheck,
+      if (!directCheck) {
+        console.log('❌ CRITICAL ERROR: Payroll record not found in direct check');
+        throw new Error('Payroll record not found after creation');
+      } else {
+        console.log('✅ Payroll record exists in database');
+      }
+      
+      // Now try to get the record with employee details
+      const newPayroll = await dbGet(`
+        SELECT p.*, e.first_name, e.last_name, e.department, e.employee_id
+        FROM payroll p
+        JOIN employees e ON p.employee_id = e.id
+        WHERE p.id = ?
+      `, [result.lastID]);
+
+      console.log('New payroll record retrieved:', newPayroll);
+      
+      if (newPayroll) {
+        return NextResponse.json(newPayroll);
+      } else {
+        console.log('❌ Failed to retrieve new payroll record with join');
+        console.log('=== DIRECT PAYROLL CHECK ===');
+        
+        // Try a direct query without joins as fallback
+        const directPayroll = await dbGet(`SELECT * FROM payroll WHERE id = ?`, [result.lastID]);
+        console.log('Direct payroll check result:', directPayroll);
+        
+        // If direct check succeeds but join fails, create a manual response
+        if (directPayroll) {
+          console.log('Creating manual response with employee data');
+          const manualResponse = {
+            ...directPayroll,
+            first_name: employeeCheck.first_name,
+            last_name: employeeCheck.last_name,
+            department: employeeCheck.department || 'Unknown',
+            employee_id: employeeCheck.employee_id || `EMP${employeeId.toString().padStart(3, '0')}`
+          };
+          console.log('Manual response:', manualResponse);
+          return NextResponse.json(manualResponse);
+        }
+        
+        // If all else fails, return a basic response with the data we have
+        return NextResponse.json({
+          id: result.lastID,
+          employee_id: employeeId,
+          pay_period_start: payPeriodStart,
+          pay_period_end: payPeriodEnd,
+          base_salary: baseSalary,
+          bonus: bonus,
+          deductions: deductions,
+          net_pay: netPay,
+          status: status,
+          created_at: new Date().toISOString(),
           first_name: employeeCheck.first_name,
           last_name: employeeCheck.last_name,
-          department: 'Unknown', // We don't have this from the direct check
-          employee_id: `EMP${employeeId.toString().padStart(3, '0')}` // Generate a placeholder
-        };
-        console.log('Manual response:', manualResponse);
-        return NextResponse.json(manualResponse);
+          department: employeeCheck.department || 'Unknown'
+        });
       }
+    } catch (error) {
+      console.error('Error retrieving created payroll record:', error);
+      
+      // Fallback response with basic information
+      return NextResponse.json({
+        id: result.lastID,
+        employee_id: employeeId,
+        pay_period_start: payPeriodStart,
+        pay_period_end: payPeriodEnd,
+        base_salary: baseSalary,
+        bonus: bonus,
+        deductions: deductions,
+        net_pay: netPay,
+        status: status,
+        created_at: new Date().toISOString(),
+        first_name: employeeCheck.first_name,
+        last_name: employeeCheck.last_name,
+        department: employeeCheck.department || 'Unknown'
+      });
     }
-    
-    return NextResponse.json(newPayroll || {
-      id: result.lastID,
-      employee_id: employeeId,
-      pay_period_start: payPeriodStart,
-      pay_period_end: payPeriodEnd,
-      base_salary: baseSalary,
-      bonus: bonus,
-      deductions: deductions,
-      net_pay: netPay,
-      status: status,
-      created_at: new Date().toISOString()
-    });
   } catch (error: any) {
     console.error('Create payroll error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
