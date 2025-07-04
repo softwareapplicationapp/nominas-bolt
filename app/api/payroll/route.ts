@@ -390,7 +390,7 @@ export async function POST(request: NextRequest) {
         first_name: employeeCheck.first_name,
         last_name: employeeCheck.last_name,
         department: 'Unknown' // employeeCheck doesn't have department property
-      });
+        employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
     }
   } catch (error: any) {
     console.error('Create payroll error:', error);
