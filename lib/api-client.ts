@@ -284,6 +284,19 @@ class ApiClient {
     }
   }
 
+  // Get payroll records for the logged in employee
+  async getMyPayroll() {
+    try {
+      console.log('API Client: Fetching my payroll records');
+      const data = await this.request('/employees/payroll');
+      console.log('API Client: My payroll records fetched:', data?.length || 0);
+      return data;
+    } catch (error) {
+      console.error('API Client: Error fetching my payroll:', error);
+      throw error;
+    }
+  }
+
   async createPayroll(payrollData: any) {
     try {
       console.log('API Client: Creating payroll with data:', payrollData);
