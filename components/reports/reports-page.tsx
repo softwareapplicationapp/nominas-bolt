@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,48 +32,61 @@ import {
   Clock,
   Target
 } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
+import { Loader2 } from 'lucide-react';
 
-const attendanceData = [
-  { month: 'Jan', present: 85, absent: 15, late: 8 },
-  { month: 'Feb', present: 88, absent: 12, late: 6 },
-  { month: 'Mar', present: 92, absent: 8, late: 4 },
-  { month: 'Apr', present: 87, absent: 13, late: 7 },
-  { month: 'May', present: 90, absent: 10, late: 5 },
-  { month: 'Jun', present: 89, absent: 11, late: 6 },
-];
-
-const payrollTrends = [
-  { month: 'Jan', amount: 425680, employees: 124 },
-  { month: 'Feb', amount: 432150, employees: 126 },
-  { month: 'Mar', amount: 438920, employees: 128 },
-  { month: 'Apr', amount: 445200, employees: 130 },
-  { month: 'May', amount: 451800, employees: 132 },
-  { month: 'Jun', amount: 459200, employees: 134 },
-];
-
-const departmentMetrics = [
-  { name: 'Engineering', employees: 45, productivity: 92, satisfaction: 88 },
-  { name: 'Marketing', employees: 20, productivity: 85, satisfaction: 90 },
-  { name: 'Sales', employees: 30, productivity: 78, satisfaction: 82 },
-  { name: 'Design', employees: 15, productivity: 95, satisfaction: 94 },
-  { name: 'HR', employees: 8, productivity: 88, satisfaction: 86 },
-];
-
-const leaveAnalysis = [
-  { type: 'Vacation', count: 45, color: '#3b82f6' },
-  { type: 'Sick Leave', count: 28, color: '#ef4444' },
-  { type: 'Personal', count: 15, color: '#10b981' },
-  { type: 'Emergency', count: 8, color: '#f59e0b' },
-];
-
-const performanceData = [
-  { quarter: 'Q1', goals: 85, achieved: 78 },
-  { quarter: 'Q2', goals: 90, achieved: 86 },
-  { quarter: 'Q3', goals: 88, achieved: 84 },
-  { quarter: 'Q4', goals: 92, achieved: 89 },
-];
+interface ReportData {
+  keyMetrics: {
+    totalEmployees: number;
+    avgAttendance: number;
+    monthlyPayroll: number;
+    goalAchievement: number;
+  };
+  attendanceData: Array<{ month: string; present: number; absent: number; late: number }>;
+  monthBreakdown: { present: number; late: number; absent: number };
+  payrollTrends: Array<{ month: string; amount: number; employees: number }>;
+  payrollBreakdown: { base: number; bonus: number; deductions: number; net: number };
+  departmentMetrics: Array<{ name: string; employees: number; productivity: number; satisfaction: number }>;
+  leaveAnalysis: Array<{ type: string; count: number; color: string }>;
+  leaveStats: { totalLeaveDays: number; averagePerEmployee: number; pending: number; approvalRate: number };
+  performanceData: Array<{ quarter: string; goals: number; achieved: number }>;
+}
 
 export default function ReportsPage() {
+  const [data, setData] = useState<ReportData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const result = await apiClient.getReports();
+        setData(result);
+      } catch (e: any) {
+        console.error('Failed to load reports:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+export default function ReportsPage() {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="text-center py-8">Failed to load reports.</div>
+    );
+  }
+
+  const { keyMetrics, attendanceData, monthBreakdown, payrollTrends, payrollBreakdown, departmentMetrics, leaveAnalysis, leaveStats, performanceData } = data;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -105,17 +119,11 @@ export default function ReportsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-blue-600">134</div>
+                <div className="text-2xl font-bold text-blue-600">{keyMetrics.totalEmployees}</div>
                 <p className="text-sm text-gray-600">Total Employees</p>
               </div>
               <Users className="h-8 w-8 text-blue-600" />
             </div>
-            <div className="mt-2">
-              <Badge variant="outline" className="text-green-600">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +8.1%
-              </Badge>
-            </div>
           </CardContent>
         </Card>
         
@@ -123,17 +131,11 @@ export default function ReportsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-green-600">89%</div>
+                <div className="text-2xl font-bold text-green-600">{keyMetrics.avgAttendance}%</div>
                 <p className="text-sm text-gray-600">Avg Attendance</p>
               </div>
               <Clock className="h-8 w-8 text-green-600" />
             </div>
-            <div className="mt-2">
-              <Badge variant="outline" className="text-green-600">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +2.3%
-              </Badge>
-            </div>
           </CardContent>
         </Card>
         
@@ -141,17 +143,11 @@ export default function ReportsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-purple-600">$459K</div>
+                <div className="text-2xl font-bold text-purple-600">${keyMetrics.monthlyPayroll.toLocaleString()}</div>
                 <p className="text-sm text-gray-600">Monthly Payroll</p>
               </div>
               <DollarSign className="h-8 w-8 text-purple-600" />
             </div>
-            <div className="mt-2">
-              <Badge variant="outline" className="text-green-600">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +6.2%
-              </Badge>
-            </div>
           </CardContent>
         </Card>
         
@@ -159,16 +155,10 @@ export default function ReportsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-orange-600">87%</div>
+                <div className="text-2xl font-bold text-orange-600">{keyMetrics.goalAchievement}%</div>
                 <p className="text-sm text-gray-600">Goal Achievement</p>
               </div>
               <Target className="h-8 w-8 text-orange-600" />
-            </div>
-            <div className="mt-2">
-              <Badge variant="outline" className="text-green-600">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +4.5%
-              </Badge>
             </div>
           </CardContent>
         </Card>
@@ -219,7 +209,7 @@ export default function ReportsPage() {
                   <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
                     <div>
                       <p className="font-medium text-green-800">Present Days</p>
-                      <p className="text-2xl font-bold text-green-600">89%</p>
+                      <p className="text-2xl font-bold text-green-600">{monthBreakdown.present}</p>
                     </div>
                     <div className="text-green-600">
                       <Calendar className="h-8 w-8" />
@@ -229,7 +219,7 @@ export default function ReportsPage() {
                   <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
                     <div>
                       <p className="font-medium text-orange-800">Late Arrivals</p>
-                      <p className="text-2xl font-bold text-orange-600">6%</p>
+                      <p className="text-2xl font-bold text-orange-600">{monthBreakdown.late}</p>
                     </div>
                     <div className="text-orange-600">
                       <Clock className="h-8 w-8" />
@@ -239,7 +229,7 @@ export default function ReportsPage() {
                   <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
                     <div>
                       <p className="font-medium text-red-800">Absent Days</p>
-                      <p className="text-2xl font-bold text-red-600">5%</p>
+                      <p className="text-2xl font-bold text-red-600">{monthBreakdown.absent}</p>
                     </div>
                     <div className="text-red-600">
                       <Users className="h-8 w-8" />
@@ -290,28 +280,28 @@ export default function ReportsPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-600">Base Salaries</p>
-                      <p className="text-xl font-bold text-blue-800">$380K</p>
+                      <p className="text-xl font-bold text-blue-800">${payrollBreakdown.base.toLocaleString()}</p>
                     </div>
                     <div className="text-center p-4 bg-green-50 rounded-lg">
                       <p className="text-sm text-green-600">Bonuses</p>
-                      <p className="text-xl font-bold text-green-800">$45K</p>
+                      <p className="text-xl font-bold text-green-800">${payrollBreakdown.bonus.toLocaleString()}</p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-4 bg-orange-50 rounded-lg">
-                      <p className="text-sm text-orange-600">Benefits</p>
-                      <p className="text-xl font-bold text-orange-800">$28K</p>
+                      <p className="text-sm text-orange-600">Deductions</p>
+                      <p className="text-xl font-bold text-orange-800">${payrollBreakdown.deductions.toLocaleString()}</p>
                     </div>
                     <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <p className="text-sm text-red-600">Deductions</p>
-                      <p className="text-xl font-bold text-red-800">$34K</p>
+                      <p className="text-sm text-red-600">Net</p>
+                      <p className="text-xl font-bold text-red-800">${payrollBreakdown.net.toLocaleString()}</p>
                     </div>
                   </div>
-                  
+
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <p className="text-sm text-purple-600">Net Payroll</p>
-                    <p className="text-2xl font-bold text-purple-800">$459K</p>
+                    <p className="text-2xl font-bold text-purple-800">${payrollBreakdown.net.toLocaleString()}</p>
                   </div>
                 </div>
               </CardContent>
@@ -396,22 +386,22 @@ export default function ReportsPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="font-medium">Total Leave Days</span>
-                    <Badge variant="outline">96 days</Badge>
+                    <Badge variant="outline">{leaveStats.totalLeaveDays} days</Badge>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="font-medium">Average per Employee</span>
-                    <Badge variant="outline">8.2 days</Badge>
+                    <Badge variant="outline">{leaveStats.averagePerEmployee} days</Badge>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="font-medium">Pending Requests</span>
-                    <Badge variant="secondary">12</Badge>
+                    <Badge variant="secondary">{leaveStats.pending}</Badge>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <span className="font-medium">Approval Rate</span>
-                    <Badge variant="default">94%</Badge>
+                    <Badge variant="default">{leaveStats.approvalRate}%</Badge>
                   </div>
                 </div>
               </CardContent>

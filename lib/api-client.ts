@@ -271,6 +271,11 @@ class ApiClient {
     return this.request('/dashboard/stats');
   }
 
+  // Reporting methods
+  async getReports() {
+    return this.request('/reports');
+  }
+
   // FIXED: Payroll methods with better error handling
   async getPayroll() {
     try {
