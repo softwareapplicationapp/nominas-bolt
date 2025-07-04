@@ -347,8 +347,8 @@ export async function POST(request: NextRequest) {
             ...directPayroll,
             first_name: employeeCheck.first_name,
             last_name: employeeCheck.last_name,
-            department: 'Unknown', // employeeCheck doesn't have department property
-            employee_id: employeeCheck.employee_id || `EMP${employeeId.toString().padStart(3, '0')}`
+            department: 'Unknown',
+            employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
           };
           console.log('Manual response:', manualResponse);
           return NextResponse.json(manualResponse);
@@ -368,8 +368,8 @@ export async function POST(request: NextRequest) {
           created_at: new Date().toISOString(),
           first_name: employeeCheck.first_name,
           last_name: employeeCheck.last_name,
-          department: employeeCheck.department || 'Unknown',
-          employee_code: employeeCheck.employee_id || `EMP${employeeId.toString().padStart(3, '0')}`
+          department: 'Unknown',
+          employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
         });
       }
     } catch (error) {
