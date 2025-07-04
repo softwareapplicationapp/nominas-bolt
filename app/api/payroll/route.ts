@@ -319,100 +319,16 @@ export async function POST(request: NextRequest) {
             pay_period_end: payPeriodEnd,
             base_salary: baseSalary,
             bonus: bonus,
-            deductions: deductions, 
+            deductions: deductions,
             net_pay: netPay,
             status: status,
             created_at: new Date().toISOString(),
             first_name: employeeCheck.first_name,
             last_name: employeeCheck.last_name,
-            department: employeeCheck.department || 'Unknown',
-            employee_code: employeeCheck.employee_id || `EMP${employeeId.toString().padStart(3, '0')}`
+            department: 'Unknown',
+            employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
           });
         }
-      } catch (joinError) {
-        console.error('Join query failed:', joinError);
-        
-        // Try a direct query without joins as fallback
-        const directPayroll = await dbGet(`SELECT * FROM payroll WHERE id = ?`, [result.lastID]);
-        console.log('Direct payroll check result:', directPayroll);
-        
-        // If direct check succeeds but join fails, create a manual response
-        if (directPayroll) {
-          console.log('Creating manual response with employee data');
-          
-          // CRITICAL FIX: Check if employeeCheck has the required properties
-          console.log('Employee check data for manual response:', employeeCheck);
-          
-          const manualResponse = {
-            ...directPayroll,
-            first_name: employeeCheck.first_name,
-            last_name: employeeCheck.last_name,
-            department: 'Unknown',
-            employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
-          };
-          console.log('Manual response:', manualResponse);
-          return NextResponse.json(manualResponse);
-        }
-        
-        // If all else fails, return a basic response with the data we have
-        return NextResponse.json({
-          id: result.lastID,
-          employee_id: employeeCheck.id,
-          pay_period_start: payPeriodStart,
-          pay_period_end: payPeriodEnd,
-          base_salary: baseSalary,
-          bonus: bonus,
-          deductions: deductions,
-          net_pay: netPay,
-          status: status,
-          created_at: new Date().toISOString(),
-          first_name: employeeCheck.first_name,
-          last_name: employeeCheck.last_name,
-          department: 'Unknown',
-          employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
-        });
-      }
-    } catch (error) {
-      console.error('Error retrieving created payroll record:', error);
-      
-      // Fallback response with basic information
-      return NextResponse.json({
-        id: result.lastID,
-        employee_id: employeeId,
-        pay_period_start: payPeriodStart,
-        pay_period_end: payPeriodEnd,
-        base_salary: baseSalary,
-        bonus: bonus,
-        deductions: deductions,
-        net_pay: netPay,
-        status: status,
-        created_at: new Date().toISOString(),
-        first_name: employeeCheck.first_name,
-        last_name: employeeCheck.last_name,
-            department: 'Unknown', // employeeCheck doesn't have department property
-            employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
-          };
-          console.log('Manual response:', manualResponse);
-          return NextResponse.json(manualResponse);
-        }
-        
-        // If all else fails, return a basic response with the data we have
-        return NextResponse.json({
-          id: result.lastID,
-          employee_id: employeeId,
-          pay_period_start: payPeriodStart,
-          pay_period_end: payPeriodEnd,
-          base_salary: baseSalary,
-          bonus: bonus,
-          deductions: deductions,
-          net_pay: netPay,
-          status: status,
-          created_at: new Date().toISOString(),
-          first_name: employeeCheck.first_name,
-          last_name: employeeCheck.last_name,
-          department: 'Unknown',
-          employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
-        });
       } catch (joinError) {
         console.error('Join query failed:', joinError);
         
