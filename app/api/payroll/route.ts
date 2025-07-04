@@ -373,22 +373,22 @@ export async function POST(request: NextRequest) {
       console.error('Error retrieving created payroll record:', error);
       
       // Fallback response with basic information
-      return NextResponse.json({
-        id: result.lastID,
-        employee_id: employeeId,
-        pay_period_start: payPeriodStart,
-        pay_period_end: payPeriodEnd,
-        base_salary: baseSalary,
-        bonus: bonus,
-        deductions: deductions,
-        net_pay: netPay,
-        status: status,
-        created_at: new Date().toISOString(),
-        first_name: employeeCheck.first_name,
-        last_name: employeeCheck.last_name,
-        department: 'Unknown',
-        employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
-      });
+        return NextResponse.json({
+          id: result.lastID,
+          employee_id: employeeId,
+          pay_period_start: payPeriodStart,
+          pay_period_end: payPeriodEnd,
+          base_salary: baseSalary,
+          bonus: bonus,
+          deductions: deductions,
+          net_pay: netPay,
+          status: status,
+          created_at: new Date().toISOString(),
+          first_name: employeeCheck.first_name,
+          last_name: employeeCheck.last_name,
+          department: 'Unknown',
+          employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
+        });
     }
   } catch (error: any) {
     console.error('Create payroll error:', error);
