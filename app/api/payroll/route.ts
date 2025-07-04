@@ -297,15 +297,12 @@ export async function POST(request: NextRequest) {
           if (directPayroll) {
             console.log('Creating manual response with employee data');
             
-            // CRITICAL FIX: Check if employeeCheck has the required properties
-            console.log('Employee check data for manual response:', employeeCheck);
-            
             const manualResponse = {
               ...directPayroll,
               first_name: employeeCheck.first_name,
               last_name: employeeCheck.last_name,
-              department: 'Unknown', // employeeCheck doesn't have department property
-              employee_id: employeeCheck.employee_id || `EMP${employeeId.toString().padStart(3, '0')}`
+              department: 'Unknown',
+              employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
             };
             console.log('Manual response:', manualResponse);
             return NextResponse.json(manualResponse);
@@ -319,14 +316,14 @@ export async function POST(request: NextRequest) {
             pay_period_end: payPeriodEnd,
             base_salary: baseSalary,
             bonus: bonus,
-            deductions: deductions,
+            deductions: deductions, 
             net_pay: netPay,
             status: status,
             created_at: new Date().toISOString(),
             first_name: employeeCheck.first_name,
             last_name: employeeCheck.last_name,
-            department: 'Unknown',
-            employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
+            department: employeeCheck.department || 'Unknown',
+            employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
           });
         }
       } catch (joinError) {
@@ -345,7 +342,7 @@ export async function POST(request: NextRequest) {
             first_name: employeeCheck.first_name,
             last_name: employeeCheck.last_name,
             department: 'Unknown',
-            employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
+            employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
           };
           console.log('Manual response:', manualResponse);
           return NextResponse.json(manualResponse);
@@ -366,7 +363,7 @@ export async function POST(request: NextRequest) {
           first_name: employeeCheck.first_name,
           last_name: employeeCheck.last_name,
           department: 'Unknown',
-          employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
+          employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
         });
       }
     } catch (error) {
@@ -387,7 +384,7 @@ export async function POST(request: NextRequest) {
         first_name: employeeCheck.first_name,
         last_name: employeeCheck.last_name,
         department: 'Unknown',
-        employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
+        employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
       });
     }
   } catch (error: any) {
