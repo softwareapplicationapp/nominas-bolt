@@ -68,7 +68,7 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
           </Button>
 
           {/* Quick Actions - Removed Coffee Break */}
-          <Button variant="ghost" size="sm" className="hover-scale text-blue-600 p-2 hidden sm:flex">
+          <Button variant="ghost" size="sm" className="hover-scale text-primary p-2 hidden sm:flex">
             <Clock className="h-5 w-5" />
           </Button>
 
@@ -107,7 +107,7 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
               <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full hover-scale p-0">
                 <Avatar className="animate-pulse-glow h-8 w-8 sm:h-10 sm:w-10">
                   <AvatarImage src="/employee-avatar.jpg" alt="Empleado" />
-                  <AvatarFallback className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-xs sm:text-sm">
+                  <AvatarFallback className="bg-gradient-to-r from-primary to-primary text-white text-xs sm:text-sm">
                     {user?.email?.[0]?.toUpperCase() || 'E'}
                   </AvatarFallback>
                 </Avatar>

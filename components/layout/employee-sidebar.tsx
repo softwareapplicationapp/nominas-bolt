@@ -61,18 +61,18 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex flex-col bg-gradient-to-b from-emerald-800 via-emerald-700 to-emerald-800 text-white transition-all duration-300 ease-in-out lg:relative lg:z-0 shadow-2xl',
+          'fixed inset-y-0 left-0 z-30 flex flex-col bg-primary text-primary-foreground transition-all duration-300 ease-in-out lg:relative lg:z-0 shadow-2xl',
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           collapsed ? 'w-16' : 'w-64 sm:w-72'
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-emerald-600/50">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-[hsl(var(--primary)/0.5)]">
           <div className={cn('flex items-center', collapsed && 'justify-center')}>
             {settings.logo ? (
               <img src={settings.logo} alt="Logo" className="h-6 w-6" />
             ) : (
-              <div className="bg-emerald-600 p-2 rounded-lg shadow-lg">
+              <div className="bg-primary p-2 rounded-lg shadow-lg">
                 <Target className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
             )}
@@ -85,7 +85,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
           <Button
             variant="ghost"
             size="sm"
-            className="hidden lg:flex text-emerald-300 hover:text-white hover:bg-emerald-600/50 p-1"
+            className="hidden lg:flex text-primary-foreground/80 hover:text-white hover:bg-primary/50 p-1"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
@@ -107,8 +107,8 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
                 className={cn(
                   'group flex items-center px-2 sm:px-3 py-2 sm:py-3 text-sm font-semibold rounded-xl transition-all duration-200',
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-lg'
-                    : 'text-emerald-200 hover:bg-emerald-600/50 hover:text-white',
+                    ? 'bg-primary text-white shadow-lg'
+                    : 'text-primary-foreground/70 hover:bg-primary/50 hover:text-white',
                   collapsed && 'justify-center px-2'
                 )}
                 onClick={() => setOpen(false)}
@@ -116,7 +116,7 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
                 <item.icon
                   className={cn(
                     'h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 transition-colors duration-200',
-                    isActive ? 'text-white' : 'text-emerald-300 group-hover:text-white',
+                    isActive ? 'text-white' : 'text-primary-foreground/80 group-hover:text-white',
                     !collapsed && 'mr-2 sm:mr-3'
                   )}
                 />
@@ -133,13 +133,13 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
 
         {/* Quick Actions - Removed Coffee Break */}
         {!collapsed && (
-          <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-emerald-600/50">
-            <p className="text-xs text-emerald-300 mb-2 sm:mb-3 font-semibold">{t('quickActions')}</p>
+          <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-[hsl(var(--primary)/0.5)]">
+            <p className="text-xs text-primary-foreground/80 mb-2 sm:mb-3 font-semibold">{t('quickActions')}</p>
             <div className="space-y-1 sm:space-y-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-emerald-200 hover:bg-emerald-600/50 hover:text-white font-medium text-xs sm:text-sm"
+                className="w-full justify-start text-primary-foreground/70 hover:bg-primary/50 hover:text-white font-medium text-xs sm:text-sm"
               >
                 <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Verificar Estado
@@ -149,19 +149,19 @@ export default function EmployeeSidebar({ open, setOpen }: EmployeeSidebarProps)
         )}
 
         {/* Footer */}
-        <div className="p-3 sm:p-4 border-t border-emerald-600/50">
+        <div className="p-3 sm:p-4 border-t border-[hsl(var(--primary)/0.5)]">
           {!collapsed && (
             <div className="mb-3 sm:mb-4">
-              <p className="text-xs text-emerald-300 mb-1 font-medium">Conectado como</p>
+              <p className="text-xs text-primary-foreground/80 mb-1 font-medium">Conectado como</p>
               <p className="text-sm font-semibold text-white">Empleado</p>
-              <p className="text-xs text-emerald-300 font-medium truncate">{user?.email || 'employee@company.com'}</p>
+              <p className="text-xs text-primary-foreground/80 font-medium truncate">{user?.email || 'employee@company.com'}</p>
             </div>
           )}
           <Button
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              'w-full text-emerald-200 hover:bg-red-600/20 hover:text-red-300 transition-all duration-200 font-semibold text-sm',
+              'w-full text-primary-foreground/70 hover:bg-red-600/20 hover:text-red-300 transition-all duration-200 font-semibold text-sm',
               collapsed ? 'px-2' : 'justify-start'
             )}
           >
