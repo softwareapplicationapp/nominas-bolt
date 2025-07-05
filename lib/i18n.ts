@@ -191,6 +191,14 @@ export const translations = {
     today: 'Today',
     thisWeek: 'This Week',
     thisMonth: 'This Month',
+    monday: 'Monday',
+    tuesday: 'Tuesday',
+    wednesday: 'Wednesday',
+    thursday: 'Thursday',
+    friday: 'Friday',
+    saturday: 'Saturday',
+    sunday: 'Sunday',
+    preview: 'Preview',
     
     // Company
     companyName: 'Company Name',
@@ -210,6 +218,8 @@ export const translations = {
     pleaseSelect: 'Please select',
     selectOption: 'Select an option',
     enterValue: 'Enter value',
+    startTime: 'Start Time',
+    endTime: 'End Time',
     
     // Notifications
     emailNotifications: 'Email Notifications',
@@ -220,6 +230,16 @@ export const translations = {
     notifyPayslipsSalary: 'Notify about payslips and salary updates',
     reminderAlerts: 'Reminder Alerts',
     remindImportantDeadlines: 'Remind about important deadlines and tasks',
+    notificationPreferences: 'Notification Preferences',
+    configureNotifications: 'Configure when and how you receive notifications',
+    attendanceAlerts: 'Attendance Alerts',
+    attendanceAlertsDescription: 'Alert for late arrivals and absences',
+    payrollReminders: 'Payroll Reminders',
+    payrollRemindersDescription: 'Remind about payroll processing dates',
+    systemUpdates: 'System Updates',
+    systemUpdatesDescription: 'Notify about system maintenance and updates',
+    languageSelectDescription: 'Select your preferred language for the interface',
+    languageAutoSave: 'Language settings will be saved automatically',
     
     // Security
     passwordPolicy: 'Password Policy',
@@ -232,6 +252,7 @@ export const translations = {
     maxLoginAttempts: 'Max Login Attempts',
     twoFactorAuth: 'Two-Factor Authentication',
     require2FA: 'Require 2FA for all admin users',
+    additionalSecurityConfigurations: 'Additional security configurations',
     
     // System
     systemInformation: 'System Information',
@@ -433,6 +454,14 @@ export const translations = {
     today: 'Hoy',
     thisWeek: 'Esta Semana',
     thisMonth: 'Este Mes',
+    monday: 'Lunes',
+    tuesday: 'Martes',
+    wednesday: 'Miércoles',
+    thursday: 'Jueves',
+    friday: 'Viernes',
+    saturday: 'Sábado',
+    sunday: 'Domingo',
+    preview: 'Vista Previa',
     
     // Company
     companyName: 'Nombre de la Empresa',
@@ -452,6 +481,8 @@ export const translations = {
     pleaseSelect: 'Por favor selecciona',
     selectOption: 'Selecciona una opción',
     enterValue: 'Ingresa un valor',
+    startTime: 'Hora de Inicio',
+    endTime: 'Hora de Fin',
     
     // Notifications
     emailNotifications: 'Notificaciones por Correo',
@@ -462,6 +493,16 @@ export const translations = {
     notifyPayslipsSalary: 'Notificar sobre recibos de pago y actualizaciones salariales',
     reminderAlerts: 'Alertas de Recordatorio',
     remindImportantDeadlines: 'Recordar fechas límite importantes y tareas',
+    notificationPreferences: 'Preferencias de Notificación',
+    configureNotifications: 'Configura cuándo y cómo recibes notificaciones',
+    attendanceAlerts: 'Alertas de Asistencia',
+    attendanceAlertsDescription: 'Avisar por llegadas tardías y ausencias',
+    payrollReminders: 'Recordatorios de Nómina',
+    payrollRemindersDescription: 'Recordar las fechas de procesamiento de nómina',
+    systemUpdates: 'Actualizaciones del Sistema',
+    systemUpdatesDescription: 'Notificar sobre mantenimiento y actualizaciones',
+    languageSelectDescription: 'Selecciona tu idioma preferido para la interfaz',
+    languageAutoSave: 'La configuración de idioma se guardará automáticamente',
     
     // Security
     passwordPolicy: 'Política de Contraseñas',
@@ -474,6 +515,7 @@ export const translations = {
     maxLoginAttempts: 'Máximo de Intentos de Inicio de Sesión',
     twoFactorAuth: 'Autenticación de Dos Factores',
     require2FA: 'Requerir 2FA para todos los usuarios administradores',
+    additionalSecurityConfigurations: 'Configuraciones de seguridad adicionales',
     
     // System
     systemInformation: 'Información del Sistema',

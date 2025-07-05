@@ -705,7 +705,11 @@ export const dbGet = async (sql: string, params: any[] = []) => {
     }
 
     // FIXED: Handle payroll queries - this was the main issue
-    if (q.includes('select p.*, e.') && q.includes('from payroll p join employees e')) {
+    if (
+      q.includes('select p.*, e.') &&
+      q.includes('from payroll p') &&
+      q.includes('join employees e')
+    ) {
       console.log('=== PAYROLL QUERY (dbGet) ===');
       console.log('SQL Query:', q);
       console.log('Parameters:', params);
@@ -856,7 +860,12 @@ export const dbGet = async (sql: string, params: any[] = []) => {
     }
 
     // FIXED: Handle simple payroll query by ID
-    if (q.includes('select p.*, e.first_name, e.last_name, e.department, e.employee_id from payroll p join employees e') && q.includes('where p.id = ?')) {
+    if (
+      q.includes('select p.*, e.first_name') &&
+      q.includes('from payroll p') &&
+      q.includes('join employees e') &&
+      q.includes('where p.id = ?')
+    ) {
       console.log('=== SIMPLE PAYROLL QUERY BY ID ===');
       console.log('Payroll ID:', params[0]);
       
@@ -1297,12 +1306,53 @@ export const dbAll = async (sql: string, params: any[] = []) => {
     }
 
     // FIXED: Handle payroll queries - this was the main issue causing 0 records
-    if (q.includes('select p.*, e.first_name') && q.includes('from payroll p join employees e')) {
+    if (
+      q.includes('select p.*, e.first_name') &&
+      q.includes('from payroll p') &&
+      q.includes('join employees e')
+    ) {
       console.log('=== PAYROLL QUERY (dbAll) ===');
       console.log('SQL Query:', q);
       console.log('Parameters:', JSON.stringify(params));
-      
-      // CRITICAL FIX: Simplify the query to avoid join issues
+
+      // If the query is for a specific employee, handle it separately
+      if (q.includes('where p.employee_id')) {
+        const employeeId = params[0];
+        console.log('Fetching payroll for employee_id:', employeeId);
+
+        const { data, error } = await supabase
+          .from('payroll')
+          .select('*, employees(id, first_name, last_name, department, employee_id)')
+          .eq('employee_id', employeeId)
+          .order('pay_period_start', { ascending: false });
+
+        if (error) {
+          console.error('Payroll query failed:', error);
+          throw error;
+        }
+
+        const result = (data || []).map(r => ({
+          ...r,
+          first_name: (r as any).employees?.first_name,
+          last_name: (r as any).employees?.last_name,
+          department: (r as any).employees?.department,
+          employee_id: (r as any).employees?.employee_id,
+        }));
+
+        console.log('Payroll records retrieved:', result.length);
+        if (result.length > 0) {
+          console.log('Sample record:', {
+            id: result[0].id,
+            employee_id: result[0].employee_id,
+            period: `${result[0].pay_period_start} to ${result[0].pay_period_end}`,
+            net_pay: result[0].net_pay,
+          });
+        }
+
+        return result;
+      }
+
+      // Otherwise fetch payroll for all employees in the company
       try {
         console.log('=== STEP 1: Getting employees for company ===');
         // Step 1: Get all employees for the company
@@ -1338,7 +1388,7 @@ export const dbAll = async (sql: string, params: any[] = []) => {
         
         console.log('=== STEP 3: Getting payroll records ===');
         // Step 3: Get all payroll records for these employees
-        let payrollRecords = [];
+        let payrollRecords: Payroll[] = [];
         let payrollError = null;
         
         // CRITICAL FIX: Query each employee's payroll records individually to avoid IN clause issues

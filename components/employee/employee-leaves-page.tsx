@@ -38,6 +38,7 @@ import {
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/language-context';
+import EmployeePageContainer from '@/components/layout/employee-page-container';
 
 interface LeaveRequest {
   id: number;
@@ -146,17 +147,17 @@ export default function EmployeeLeavesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+      <EmployeePageContainer>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
-      </div>
+      </EmployeePageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="space-y-8 p-6">
+    <EmployeePageContainer>
+      <div className="space-y-8">
         {/* Header */}
         <div className="flex justify-between items-center animate-fade-in">
           <div>
@@ -485,6 +486,6 @@ export default function EmployeeLeavesPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </EmployeePageContainer>
   );
 }

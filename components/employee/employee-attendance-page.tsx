@@ -31,6 +31,7 @@ import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useLanguage } from '@/contexts/language-context';
+import EmployeePageContainer from '@/components/layout/employee-page-container';
 
 interface AttendanceRecord {
   id: number;
@@ -137,17 +138,17 @@ export default function EmployeeAttendancePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+      <EmployeePageContainer>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
-      </div>
+      </EmployeePageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="space-y-8 p-6">
+    <EmployeePageContainer>
+      <div className="space-y-8">
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="text-3xl font-bold text-gray-900 text-gradient">Mi Asistencia</h1>
@@ -506,6 +507,6 @@ export default function EmployeeAttendancePage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </EmployeePageContainer>
   );
 }

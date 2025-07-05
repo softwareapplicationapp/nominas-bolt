@@ -28,6 +28,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/language-context';
+import EmployeePageContainer from '@/components/layout/employee-page-container';
 import { apiClient } from '@/lib/api-client';
 
 interface Payslip {
@@ -55,55 +56,14 @@ export default function EmployeePayslipsPage() {
   const loadPayslips = async () => {
     try {
       setLoading(true);
-      // For now, we'll use mock data since payroll isn't fully implemented
-      const mockPayslips: Payslip[] = [
-        {
-          id: 1,
-          pay_period_start: '2024-01-01',
-          pay_period_end: '2024-01-31',
-          base_salary: 6250,
-          bonus: 500,
-          deductions: 1250,
-          net_pay: 5500,
-          status: 'processed',
-          processed_at: '2024-02-01T10:00:00Z'
-        },
-        {
-          id: 2,
-          pay_period_start: '2024-02-01',
-          pay_period_end: '2024-02-29',
-          base_salary: 6250,
-          bonus: 0,
-          deductions: 1250,
-          net_pay: 5000,
-          status: 'processed',
-          processed_at: '2024-03-01T10:00:00Z'
-        },
-        {
-          id: 3,
-          pay_period_start: '2024-03-01',
-          pay_period_end: '2024-03-31',
-          base_salary: 6250,
-          bonus: 750,
-          deductions: 1250,
-          net_pay: 5750,
-          status: 'processed',
-          processed_at: '2024-04-01T10:00:00Z'
-        },
-        {
-          id: 4,
-          pay_period_start: '2024-04-01',
-          pay_period_end: '2024-04-30',
-          base_salary: 6250,
-          bonus: 0,
-          deductions: 1250,
-          net_pay: 5000,
-          status: 'pending'
-        }
-      ];
-      
-      setPayslips(mockPayslips);
+
+      console.log('Loading employee payroll records');
+      const data = await apiClient.getMyPayroll();
+      console.log('Payroll records loaded:', data?.length || 0);
+
+      setPayslips(data || []);
     } catch (error: any) {
+      console.error('Failed to load employee payroll:', error);
       toast.error('Error al cargar recibos de pago: ' + error.message);
     } finally {
       setLoading(false);
@@ -156,17 +116,17 @@ export default function EmployeePayslipsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+      <EmployeePageContainer>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
-      </div>
+      </EmployeePageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="space-y-8 p-6">
+    <EmployeePageContainer>
+      <div className="space-y-8">
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="text-3xl font-bold text-gray-900 text-gradient">Mis Recibos de Pago</h1>
@@ -405,6 +365,6 @@ export default function EmployeePayslipsPage() {
           </Card>
         )}
       </div>
-    </div>
+    </EmployeePageContainer>
   );
 }

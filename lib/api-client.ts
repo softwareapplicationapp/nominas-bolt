@@ -271,6 +271,12 @@ class ApiClient {
     return this.request('/dashboard/stats');
   }
 
+  // Reporting methods
+  async getReports(query?: string) {
+    const qs = query ? `?${query}` : '';
+    return this.request(`/reports${qs}`);
+  }
+
   // FIXED: Payroll methods with better error handling
   async getPayroll() {
     try {
@@ -280,6 +286,19 @@ class ApiClient {
       return data;
     } catch (error) {
       console.error('API Client: Error fetching payroll:', error);
+      throw error;
+    }
+  }
+
+  // Get payroll records for the logged in employee
+  async getMyPayroll() {
+    try {
+      console.log('API Client: Fetching my payroll records');
+      const data = await this.request('/employees/payroll');
+      console.log('API Client: My payroll records fetched:', data?.length || 0);
+      return data;
+    } catch (error) {
+      console.error('API Client: Error fetching my payroll:', error);
       throw error;
     }
   }

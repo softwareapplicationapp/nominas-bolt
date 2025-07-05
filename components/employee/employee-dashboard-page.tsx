@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import { apiClient } from '@/lib/api-client';
 import { useLanguage } from '@/contexts/language-context';
+import EmployeePageContainer from '@/components/layout/employee-page-container';
 
 interface EmployeeStats {
   attendanceToday: boolean;
@@ -161,17 +162,17 @@ export default function EmployeeDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+      <EmployeePageContainer>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-12 w-12 animate-spin text-emerald-600" />
         </div>
-      </div>
+      </EmployeePageContainer>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="space-y-6 sm:space-y-8 p-4 sm:p-6">
+    <EmployeePageContainer>
+      <div className="space-y-6 sm:space-y-8">
         {/* Welcome Header */}
         <div className="animate-fade-in">
           <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 hover-lift border border-emerald-200">
@@ -536,6 +537,6 @@ export default function EmployeeDashboardPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </EmployeePageContainer>
   );
 }

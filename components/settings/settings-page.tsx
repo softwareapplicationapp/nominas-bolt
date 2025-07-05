@@ -197,13 +197,13 @@ export default function SettingsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{t('settings')}</h1>
-          <p className="text-gray-600 mt-2">Manage your system preferences and configurations</p>
+          <p className="text-gray-600 mt-2">{t('manageSystemSettings')}</p>
         </div>
         
         <div className="flex space-x-2">
           <Button variant="outline" onClick={resetToDefaults}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            Reset to Defaults
+            {t('resetToDefaults')}
           </Button>
           <Button onClick={saveSettings} disabled={saving}>
             {saving ? (
@@ -225,9 +225,9 @@ export default function SettingsPage() {
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="company">{t('companySettings')}</TabsTrigger>
           <TabsTrigger value="language">{t('language')}</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="notifications">{t('notificationSettings')}</TabsTrigger>
+          <TabsTrigger value="security">{t('securitySettings')}</TabsTrigger>
+          <TabsTrigger value="system">{t('systemInformation')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="company" className="space-y-6">
@@ -239,7 +239,7 @@ export default function SettingsPage() {
                   <span>{t('companySettings')}</span>
                 </CardTitle>
                 <CardDescription>
-                  Basic company details and contact information
+                  {t('basicCompanyDetails')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -317,7 +317,7 @@ export default function SettingsPage() {
                   <span>{t('workingHours')} & Schedule</span>
                 </CardTitle>
                 <CardDescription>
-                  Configure working hours and business days
+                  {t('configureWorkingHours')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -357,7 +357,7 @@ export default function SettingsPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="startTime">Start Time</Label>
+                    <Label htmlFor="startTime">{t('startTime')}</Label>
                     <Input
                       id="startTime"
                       type="time"
@@ -369,7 +369,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="endTime">End Time</Label>
+                    <Label htmlFor="endTime">{t('endTime')}</Label>
                     <Input
                       id="endTime"
                       type="time"
@@ -397,7 +397,7 @@ export default function SettingsPage() {
                           setCompanySettings({...companySettings, workingDays: newDays});
                         }}
                       >
-                        {day}
+                        {t(day.toLowerCase() as any)}
                       </Badge>
                     ))}
                   </div>
@@ -439,17 +439,12 @@ export default function SettingsPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-gray-500">
-                    {language === 'en' 
-                      ? 'Select your preferred language for the interface'
-                      : 'Selecciona tu idioma preferido para la interfaz'
-                    }
-                  </p>
+                  <p className="text-sm text-gray-500">{t('languageSelectDescription')}</p>
                 </div>
 
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <h4 className="font-medium text-blue-900 mb-2">
-                    {t('language')} Preview
+                    {t('language')} {t('preview')}
                   </h4>
                   <div className="space-y-2 text-sm">
                     <p><strong>{t('dashboard')}:</strong> {t('dashboard')}</p>
@@ -463,10 +458,7 @@ export default function SettingsPage() {
                   <div className="flex items-center space-x-2 text-green-800">
                     <CheckCircle className="h-5 w-5" />
                     <span className="font-medium">
-                      {language === 'en' 
-                        ? 'Language settings will be saved automatically'
-                        : 'La configuración de idioma se guardará automáticamente'
-                      }
+                      {t('languageAutoSave')}
                     </span>
                   </div>
                 </div>
@@ -480,17 +472,17 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Bell className="h-5 w-5 text-orange-600" />
-                <span>Notification Preferences</span>
+                <span>{t('notificationPreferences')}</span>
               </CardTitle>
               <CardDescription>
-                Configure when and how you receive notifications
+                {t('configureNotifications')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-base">Email Notifications</Label>
-                  <p className="text-sm text-gray-500">Receive notifications via email</p>
+                  <Label className="text-base">{t('emailNotifications')}</Label>
+                  <p className="text-sm text-gray-500">{t('receiveNotificationsEmail')}</p>
                 </div>
                 <Switch
                   checked={notificationSettings.emailNotifications}
@@ -500,8 +492,8 @@ export default function SettingsPage() {
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-base">Leave Requests</Label>
-                  <p className="text-sm text-gray-500">Notify when employees request leave</p>
+                  <Label className="text-base">{t('leaveRequests')}</Label>
+                  <p className="text-sm text-gray-500">{t('notifyLeaveRequestStatus')}</p>
                 </div>
                 <Switch
                   checked={notificationSettings.leaveRequests}
@@ -511,8 +503,8 @@ export default function SettingsPage() {
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-base">Attendance Alerts</Label>
-                  <p className="text-sm text-gray-500">Alert for late arrivals and absences</p>
+                  <Label className="text-base">{t('attendanceAlerts')}</Label>
+                  <p className="text-sm text-gray-500">{t('attendanceAlertsDescription')}</p>
                 </div>
                 <Switch
                   checked={notificationSettings.attendanceAlerts}
@@ -522,8 +514,8 @@ export default function SettingsPage() {
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-base">Payroll Reminders</Label>
-                  <p className="text-sm text-gray-500">Remind about payroll processing dates</p>
+                  <Label className="text-base">{t('payrollReminders')}</Label>
+                  <p className="text-sm text-gray-500">{t('payrollRemindersDescription')}</p>
                 </div>
                 <Switch
                   checked={notificationSettings.payrollReminders}
@@ -533,8 +525,8 @@ export default function SettingsPage() {
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-base">System Updates</Label>
-                  <p className="text-sm text-gray-500">Notify about system maintenance and updates</p>
+                  <Label className="text-base">{t('systemUpdates')}</Label>
+                  <p className="text-sm text-gray-500">{t('systemUpdatesDescription')}</p>
                 </div>
                 <Switch
                   checked={notificationSettings.systemUpdates}
@@ -551,15 +543,15 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Shield className="h-5 w-5 text-red-600" />
-                  <span>Password Policy</span>
+                  <span>{t('passwordPolicy')}</span>
                 </CardTitle>
                 <CardDescription>
-                  Configure password requirements for all users
+                  {t('configurePasswordRequirements')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="minLength">Minimum Length</Label>
+                  <Label htmlFor="minLength">{t('minimumLength')}</Label>
                   <Input
                     id="minLength"
                     type="number"
@@ -575,7 +567,7 @@ export default function SettingsPage() {
                 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label>Require Uppercase Letters</Label>
+                    <Label>{t('requireUppercase')}</Label>
                     <Switch
                       checked={securitySettings.passwordPolicy.requireUppercase}
                       onCheckedChange={(checked) => setSecuritySettings({
@@ -586,7 +578,7 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <Label>Require Numbers</Label>
+                    <Label>{t('requireNumbers')}</Label>
                     <Switch
                       checked={securitySettings.passwordPolicy.requireNumbers}
                       onCheckedChange={(checked) => setSecuritySettings({
@@ -597,7 +589,7 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <Label>Require Symbols</Label>
+                    <Label>{t('requireSymbols')}</Label>
                     <Switch
                       checked={securitySettings.passwordPolicy.requireSymbols}
                       onCheckedChange={(checked) => setSecuritySettings({
@@ -614,15 +606,15 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Settings className="h-5 w-5 text-purple-600" />
-                  <span>Security Settings</span>
+                  <span>{t('securitySettings')}</span>
                 </CardTitle>
                 <CardDescription>
-                  Additional security configurations
+                  {t('additionalSecurityConfigurations')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="sessionTimeout">Session Timeout (hours)</Label>
+                  <Label htmlFor="sessionTimeout">{t('sessionTimeout')}</Label>
                   <Input
                     id="sessionTimeout"
                     type="number"
@@ -634,7 +626,7 @@ export default function SettingsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="loginAttempts">Max Login Attempts</Label>
+                  <Label htmlFor="loginAttempts">{t('maxLoginAttempts')}</Label>
                   <Input
                     id="loginAttempts"
                     type="number"
@@ -647,8 +639,8 @@ export default function SettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Two-Factor Authentication</Label>
-                    <p className="text-sm text-gray-500">Require 2FA for all admin users</p>
+                    <Label className="text-base">{t('twoFactorAuth')}</Label>
+                    <p className="text-sm text-gray-500">{t('require2FA')}</p>
                   </div>
                   <Switch
                     checked={securitySettings.twoFactorAuth}
@@ -666,33 +658,33 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Database className="h-5 w-5 text-blue-600" />
-                  <span>System Information</span>
+                  <span>{t('systemInformation')}</span>
                 </CardTitle>
                 <CardDescription>
-                  Current system status and information
+                  {t('currentSystemStatus')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="font-medium">System Status</span>
+                    <span className="font-medium">{t('systemStatus')}</span>
                   </div>
-                  <Badge variant="default">Online</Badge>
+                  <Badge variant="default">{t('online')}</Badge>
                 </div>
                 
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">Version</span>
+                  <span className="font-medium">{t('version')}</span>
                   <Badge variant="outline">v1.0.0</Badge>
                 </div>
                 
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">Database</span>
+                  <span className="font-medium">{t('database')}</span>
                   <Badge variant="outline">Supabase</Badge>
                 </div>
                 
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">Last Backup</span>
+                  <span className="font-medium">{t('lastBackup')}</span>
                   <Badge variant="outline">{t('today')}, 3:00 AM</Badge>
                 </div>
               </CardContent>
@@ -702,31 +694,31 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <AlertTriangle className="h-5 w-5 text-orange-600" />
-                  <span>Maintenance</span>
+                  <span>{t('maintenance')}</span>
                 </CardTitle>
                 <CardDescription>
-                  System maintenance and backup options
+                  {t('systemMaintenance')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button variant="outline" className="w-full justify-start">
                   <Database className="h-4 w-4 mr-2" />
-                  Backup Database
+                  {t('backupDatabase')}
                 </Button>
                 
                 <Button variant="outline" className="w-full justify-start">
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Clear Cache
+                  {t('clearCache')}
                 </Button>
                 
                 <Button variant="outline" className="w-full justify-start">
                   <Mail className="h-4 w-4 mr-2" />
-                  Test Email Configuration
+                  {t('testEmailConfig')}
                 </Button>
                 
                 <Button variant="destructive" className="w-full justify-start">
                   <AlertTriangle className="h-4 w-4 mr-2" />
-                  Reset All Data
+                  {t('resetAllData')}
                 </Button>
               </CardContent>
             </Card>
