@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
+import { useAppSettings } from '@/contexts/app-settings-context';
 
 interface SidebarProps {
   open: boolean;
@@ -33,6 +34,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuth();
   const { t } = useLanguage();
+  const { settings } = useAppSettings();
 
   const navigation = [
     { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
@@ -71,11 +73,15 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b border-blue-700/50">
           <div className={cn('flex items-center', collapsed && 'justify-center')}>
-            <div className="bg-blue-700 p-2 rounded-lg shadow-lg">
-              <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
-            </div>
+            {settings.logo ? (
+              <img src={settings.logo} alt="Logo" className="h-6 w-6" />
+            ) : (
+              <div className="bg-blue-700 p-2 rounded-lg shadow-lg">
+                <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+            )}
             {!collapsed && (
-              <span className="ml-2 sm:ml-3 text-lg sm:text-xl font-bold">ArcusHR</span>
+              <span className="ml-2 sm:ml-3 text-lg sm:text-xl font-bold">{settings.companyName}</span>
             )}
           </div>
           <Button

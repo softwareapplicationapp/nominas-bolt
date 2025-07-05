@@ -411,8 +411,8 @@ export default function EmployeeSettingsPage() {
                     <Label htmlFor="timeFormat" className="text-gray-900 font-semibold">
                       {language === 'es' ? 'Formato de Hora' : 'Time Format'}
                     </Label>
-                    <Select 
-                      value={settings.personal.timeFormat} 
+                    <Select
+                      value={settings.personal.timeFormat}
                       onValueChange={(value) => handlePersonalSettingChange('timeFormat', value)}
                     >
                       <SelectTrigger className="border-gray-300 text-gray-900">
@@ -423,6 +423,31 @@ export default function EmployeeSettingsPage() {
                         <SelectItem value="24h">24 {language === 'es' ? 'Horas' : 'Hours'}</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="profilePhoto" className="text-gray-900 font-semibold">
+                      {language === 'es' ? 'Foto de Perfil' : 'Profile Photo'}
+                    </Label>
+                    <Input
+                      id="profilePhoto"
+                      type="file"
+                      accept="image/png, image/jpeg"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file && file.size <= 500 * 1024) {
+                          const reader = new FileReader();
+                          reader.onload = () =>
+                            handlePersonalSettingChange('profilePhoto', reader.result as string);
+                          reader.readAsDataURL(file);
+                        } else if (file) {
+                          toast.error('Imagen demasiado grande (máx 500KB)');
+                        }
+                      }}
+                    />
+                    {settings.personal.profilePhoto && (
+                      <img src={settings.personal.profilePhoto} alt="Preview" className="h-16 mt-2 rounded-full" />
+                    )}
                   </div>
                 </CardContent>
               </Card>

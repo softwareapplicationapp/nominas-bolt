@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
+import { useAppSettings } from '@/contexts/app-settings-context';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -23,6 +24,7 @@ interface HeaderProps {
 export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { settings } = useAppSettings();
 
   const handleLogout = () => {
     logout();
@@ -52,6 +54,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
+          {settings.logo && (
+            <img src={settings.logo} alt="Logo" className="h-6 w-6 rounded" />
+          )}
+          <span className="hidden sm:block font-semibold text-gray-700">
+            {settings.companyName}
+          </span>
           {/* Mobile Search */}
           <Button variant="ghost" size="sm" className="sm:hidden p-2">
             <Search className="h-5 w-5" />
