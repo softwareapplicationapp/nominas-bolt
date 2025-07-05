@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
     // CRITICAL FIX: First check if the employee exists
     const { data: employeeCheck, error: employeeError } = await supabase
       .from('employees')
-      .select('id, first_name, last_name')
+      .select('id, first_name, last_name, employee_id')
       .eq('id', employeeId)
       .maybeSingle();
       
@@ -387,7 +387,7 @@ export async function POST(request: NextRequest) {
         first_name: employeeCheck.first_name,
         last_name: employeeCheck.last_name,
         department: 'Unknown',
-        employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
+        employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
       });
     }
   } catch (error: any) {

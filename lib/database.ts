@@ -32,6 +32,8 @@ export interface Employee {
   status: string;
   salary?: number;
   location?: string;
+  weekly_hours?: number;
+  working_days?: string[];
   company_id: number;
   created_at: string;
   updated_at: string;
@@ -128,15 +130,18 @@ export const dbRun = async (sql: string, params: any[] = []) => {
       // For the more complex employee creation from employees API
       if (params.length > 9) {
         // This is from the employees API with more fields
-        // INSERT INTO employees (user_id, employee_id, first_name, last_name, email, phone, department, position, start_date, salary, location, company_id)
+        // INSERT INTO employees (user_id, employee_id, first_name, last_name, email, phone,
+        //   department, position, start_date, salary, location, weekly_hours, working_days, company_id)
         employeeData.phone = params[5];
         employeeData.department = params[6];
         employeeData.position = params[7];
         employeeData.start_date = params[8];
         employeeData.salary = params[9];
         employeeData.location = params[10];
-        employeeData.company_id = params[11];
-        employeeData.status = params[12] || 'active';
+        employeeData.weekly_hours = params[11];
+        employeeData.working_days = params[12];
+        employeeData.company_id = params[13];
+        employeeData.status = 'active';
       } else {
         // Simple employee creation from registration
         // Set default values for missing fields
@@ -262,14 +267,16 @@ export const dbRun = async (sql: string, params: any[] = []) => {
         if (params[3]) updateData.phone = params[3];
         if (params[7]) updateData.salary = params[7];
         if (params[8]) updateData.location = params[8];
+        if (params[9]) updateData.weekly_hours = params[9];
+        if (params[10]) updateData.working_days = params[10];
 
         const { error } = await supabase
           .from('employees')
           .update(updateData)
-          .eq('id', params[9])
-          .eq('company_id', params[10]);
+          .eq('id', params[11])
+          .eq('company_id', params[12]);
         if (error) throw error;
-        return { lastID: params[9], changes: 1 };
+        return { lastID: params[11], changes: 1 };
       } else if (q.includes('where user_id = ?')) {
         const updateData: any = {
           first_name: params[0],
@@ -1338,8 +1345,8 @@ export const dbAll = async (sql: string, params: any[] = []) => {
         
         console.log('=== STEP 3: Getting payroll records ===');
         // Step 3: Get all payroll records for these employees
-        let payrollRecords = [];
-        let payrollError = null;
+        let payrollRecords: Payroll[] = [];
+        let payrollError: any = null;
         
         // CRITICAL FIX: Query each employee's payroll records individually to avoid IN clause issues
         for (const empId of employeeIds) {
