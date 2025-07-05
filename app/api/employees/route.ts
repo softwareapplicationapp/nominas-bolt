@@ -61,6 +61,8 @@ export async function POST(request: NextRequest) {
       startDate,
       salary,
       location,
+      weeklyHours,
+      workingDays,
       password // New field for employee password
     } = await request.json();
 
@@ -91,12 +93,14 @@ export async function POST(request: NextRequest) {
     // Create employee record
     const result = await dbRun(`
       INSERT INTO employees (
-        user_id, employee_id, first_name, last_name, email, phone, 
-        department, position, start_date, salary, location, company_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        user_id, employee_id, first_name, last_name, email, phone,
+        department, position, start_date, salary, location,
+        weekly_hours, working_days, company_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       newUser.id, employeeId, firstName, lastName, email, phone,
-      department, position, startDate, salary, location, user.company_id
+      department, position, startDate, salary, location,
+      weeklyHours, workingDays, user.company_id
     ]) as any;
 
     const newEmployee = await dbGet(`

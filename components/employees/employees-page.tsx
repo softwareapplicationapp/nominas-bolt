@@ -47,6 +47,8 @@ interface Employee {
   start_date: string;
   location?: string;
   salary?: number;
+  weekly_hours?: number;
+  working_days?: string[];
   role?: string;
   user_id?: number;
 }
@@ -73,6 +75,8 @@ export default function EmployeesPage() {
     startDate: '',
     salary: '',
     location: '',
+    weeklyHours: '',
+    workingDays: ['Monday','Tuesday','Wednesday','Thursday','Friday'],
     password: ''
   });
 
@@ -120,6 +124,8 @@ export default function EmployeesPage() {
       startDate: '',
       salary: '',
       location: '',
+      weeklyHours: '',
+      workingDays: ['Monday','Tuesday','Wednesday','Thursday','Friday'],
       password: ''
     });
     setEditingEmployee(null);
@@ -141,6 +147,8 @@ export default function EmployeesPage() {
         startDate: formData.startDate,
         salary: formData.salary ? parseFloat(formData.salary) : undefined,
         location: formData.location,
+        weeklyHours: formData.weeklyHours ? parseFloat(formData.weeklyHours) : undefined,
+        workingDays: formData.workingDays,
         password: formData.password || 'employee123' // Default password if not provided
       };
 
@@ -177,6 +185,8 @@ export default function EmployeesPage() {
       startDate: employee.start_date,
       salary: employee.salary?.toString() || '',
       location: employee.location || '',
+      weeklyHours: employee.weekly_hours?.toString() || '',
+      workingDays: employee.working_days || ['Monday','Tuesday','Wednesday','Thursday','Friday'],
       password: ''
     });
     setIsDialogOpen(true);
@@ -328,18 +338,48 @@ export default function EmployeesPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="salary">{t('salary')}</Label>
-                <Input 
-                  id="salary" 
-                  type="number" 
+                <Input
+                  id="salary"
+                  type="number"
                   value={formData.salary}
                   onChange={(e) => setFormData({...formData, salary: e.target.value})}
-                  placeholder="75000" 
+                  placeholder="75000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="weeklyHours">{t('weeklyHours')}</Label>
+                <Input
+                  id="weeklyHours"
+                  type="number"
+                  value={formData.weeklyHours}
+                  onChange={(e) => setFormData({...formData, weeklyHours: e.target.value})}
+                  placeholder="40"
                 />
               </div>
               <div className="col-span-2 space-y-2">
+                <Label>{t('workingDays')}</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(day => (
+                    <Badge
+                      key={day}
+                      variant={formData.workingDays.includes(day) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const newDays = formData.workingDays.includes(day)
+                          ? formData.workingDays.filter(d => d !== day)
+                          : [...formData.workingDays, day];
+                        setFormData({...formData, workingDays: newDays});
+                      }}
+                    >
+                      {day}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="col-span-2 space-y-2">
                 <Label htmlFor="location">{t('location')}</Label>
-                <Input 
-                  id="location" 
+                <Input
+                  id="location"
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                   placeholder="New York, NY" 
