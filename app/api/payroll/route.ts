@@ -57,14 +57,25 @@ export async function GET(request: NextRequest) {
       console.error('Direct payroll check error:', directPayrollError);
     }
     
-    // Now use our database abstraction to get the full records with employee details
-    const payrollRecords = await dbAll(`
-      SELECT p.*, e.first_name, e.last_name, e.department, e.employee_id
-      FROM payroll p
-      JOIN employees e ON p.employee_id = e.id
-      WHERE e.company_id = ?
-      ORDER BY p.pay_period_start DESC
-    `, [user.company_id]);
+    // Now fetch the payroll records directly using Supabase with a join
+    const { data: payrollData, error: payrollError } = await supabase
+      .from('payroll')
+      .select('*, employees!inner(first_name, last_name, department, employee_id)')
+      .eq('employees.company_id', user.company_id)
+      .order('pay_period_start', { ascending: false });
+
+    if (payrollError) {
+      console.error('Payroll query error:', payrollError);
+      throw payrollError;
+    }
+
+    const payrollRecords = (payrollData || []).map((record: any) => ({
+      ...record,
+      first_name: record.employees.first_name,
+      last_name: record.employees.last_name,
+      department: record.employees.department,
+      employee_id: record.employees.employee_id,
+    }));
 
     console.log('Payroll records fetched:', payrollRecords?.length || 0);
     if (payrollRecords?.length > 0) {
@@ -181,7 +192,7 @@ export async function POST(request: NextRequest) {
     // CRITICAL FIX: First check if the employee exists
     const { data: employeeCheck, error: employeeError } = await supabase
       .from('employees')
-      .select('id, first_name, last_name')
+      .select('id, first_name, last_name, employee_id')
       .eq('id', employeeId)
       .maybeSingle();
       
@@ -387,7 +398,7 @@ export async function POST(request: NextRequest) {
         first_name: employeeCheck.first_name,
         last_name: employeeCheck.last_name,
         department: 'Unknown',
-        employee_id: `EMP${employeeId.toString().padStart(3, '0')}`
+        employee_code: `EMP${employeeId.toString().padStart(3, '0')}`
       });
     }
   } catch (error: any) {

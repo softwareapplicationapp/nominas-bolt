@@ -19,18 +19,22 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       position,
       startDate,
       salary,
-      location
+      location,
+      weeklyHours,
+      workingDays
     } = await request.json();
 
     await dbRun(`
-      UPDATE employees 
-      SET first_name = ?, last_name = ?, email = ?, phone = ?, 
+      UPDATE employees
+      SET first_name = ?, last_name = ?, email = ?, phone = ?,
           department = ?, position = ?, start_date = ?, salary = ?, location = ?,
+          weekly_hours = ?, working_days = ?,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND company_id = ?
     `, [
       firstName, lastName, email, phone,
       department, position, startDate, salary, location,
+      weeklyHours, workingDays,
       employeeId, user.company_id
     ]);
 

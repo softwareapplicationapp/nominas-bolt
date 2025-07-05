@@ -137,31 +137,29 @@ export default function EmployeeAttendancePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+    <div className="min-h-screen bg-white">
       <div className="space-y-8 p-6">
         {/* Header */}
-        <div className="animate-fade-in">
-          <h1 className="text-3xl font-bold text-gray-900 text-gradient">Mi Asistencia</h1>
-          <p className="text-gray-800 mt-2 font-semibold">Controla tus horas de trabajo y registros de asistencia</p>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Mi Asistencia</h1>
+          <p className="text-gray-700 mt-2">Controla tus horas de trabajo y registros de asistencia</p>
         </div>
 
         {/* Check In/Out Card */}
-        <Card className="animate-scale-in hover-glow border-blue-200">
+        <Card className="border">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900">
-              <Clock className="h-5 w-5 text-blue-600" />
+              <Clock className="h-5 w-5 text-gray-500" />
               <span>Asistencia de Hoy</span>
             </CardTitle>
-            <CardDescription className="text-gray-800 font-medium">
+            <CardDescription className="text-gray-700">
               {format(new Date(), 'EEEE, d MMMM yyyy', { locale: language === 'es' ? es : undefined })}
             </CardDescription>
           </CardHeader>
@@ -169,29 +167,29 @@ export default function EmployeeAttendancePage() {
             <div className="space-y-4">
               {/* Today's Records Summary */}
               {todayRecords.length > 0 && (
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-900 mb-2">Registros de Hoy ({todayRecords.length})</h4>
+                <div className="bg-gray-50 p-4 rounded-md border">
+                  <h4 className="font-semibold text-gray-900 mb-2">Registros de Hoy ({todayRecords.length})</h4>
                   <div className="space-y-2">
                     {todayRecords.map((record, index) => (
                       <div key={record.id} className="flex items-center justify-between text-sm">
-                        <span className="text-blue-800">Sesión {index + 1}:</span>
+                        <span className="text-gray-700">Sesión {index + 1}:</span>
                         <div className="flex items-center space-x-2">
                           {record.check_in && (
-                            <span className="text-emerald-600 font-medium">
+                            <span className="text-gray-800">
                               Entrada: {record.check_in}
                             </span>
                           )}
                           {record.check_out ? (
-                            <span className="text-red-600 font-medium">
+                            <span className="text-gray-800">
                               Salida: {record.check_out}
                             </span>
                           ) : (
-                            <span className="text-amber-600 font-medium">
+                            <span className="text-gray-600">
                               (En curso)
                             </span>
                           )}
                           {record.total_hours > 0 && (
-                            <span className="text-blue-600 font-medium">
+                            <span className="text-gray-800">
                               {record.total_hours.toFixed(2)}h
                             </span>
                           )}
@@ -207,16 +205,16 @@ export default function EmployeeAttendancePage() {
                 <div className="space-y-2">
                   {hasOpenCheckIn ? (
                     <div className="flex items-center space-x-2">
-                      <AlertCircle className="h-4 w-4 text-amber-600" />
-                      <span className="text-sm text-amber-800 font-semibold">
+                      <AlertCircle className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-700">
                         Tienes una entrada abierta desde las {openCheckIn?.check_in}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600 font-medium">
-                        {todayRecords.length > 0 
+                      <span className="text-sm text-gray-600">
+                        {todayRecords.length > 0
                           ? 'Todas las sesiones están cerradas. Puedes registrar una nueva entrada'
                           : 'Puedes registrar una nueva entrada'
                         }
@@ -249,11 +247,10 @@ export default function EmployeeAttendancePage() {
 
                   {/* Only show "Marcar Salida" if there's an open check-in */}
                   {hasOpenCheckIn && (
-                    <Button 
+                    <Button
                       onClick={handleCheckOut}
                       disabled={actionLoading}
                       variant="outline"
-                      className="hover-glow border-gray-300 text-gray-800 hover:text-gray-900 font-semibold"
                     >
                       {actionLoading ? (
                         <>
@@ -273,15 +270,15 @@ export default function EmployeeAttendancePage() {
 
               {/* Today's Total */}
               {todayRecords.length > 0 && (
-                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                <div className="bg-gray-50 p-4 rounded-md border">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-emerald-800">Total de Horas Hoy:</span>
-                    <span className="text-2xl font-bold text-emerald-600">
+                    <span className="font-semibold text-gray-700">Total de Horas Hoy:</span>
+                    <span className="text-2xl font-bold text-gray-900">
                       {todayRecords.reduce((sum, record) => sum + (record.total_hours || 0), 0).toFixed(2)}h
                     </span>
                   </div>
                   {hasOpenCheckIn && (
-                    <div className="mt-2 text-xs text-emerald-700 font-medium">
+                    <div className="mt-2 text-xs text-gray-500">
                       * Sesión en curso no incluida en el total
                     </div>
                   )}
@@ -293,50 +290,44 @@ export default function EmployeeAttendancePage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="card-interactive animate-scale-in stagger-1 hover-glow border-blue-200">
+          <Card className="border">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">
                     {totalHours.toFixed(1)}h
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Horas Totales</p>
+                  <p className="text-sm text-gray-700">Horas Totales</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full animate-float">
-                  <Clock className="h-6 w-6 text-blue-600" />
-                </div>
+                <Clock className="h-6 w-6 text-gray-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-2 hover-glow border-emerald-200">
+          <Card className="border">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">
                     {averageHours.toFixed(1)}h
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Promedio Diario</p>
+                  <p className="text-sm text-gray-700">Promedio Diario</p>
                 </div>
-                <div className="p-3 bg-emerald-100 rounded-full animate-float">
-                  <TrendingUp className="h-6 w-6 text-emerald-600" />
-                </div>
+                <TrendingUp className="h-6 w-6 text-gray-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-interactive animate-scale-in stagger-3 hover-glow border-purple-200">
+          <Card className="border">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-900">
                     {presentDays}
                   </div>
-                  <p className="text-sm text-gray-800 font-semibold">Días Presentes</p>
+                  <p className="text-sm text-gray-700">Días Presentes</p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-full animate-float">
-                  <Award className="h-6 w-6 text-purple-600" />
-                </div>
+                <Award className="h-6 w-6 text-gray-500" />
               </div>
             </CardContent>
           </Card>
@@ -349,7 +340,7 @@ export default function EmployeeAttendancePage() {
           </TabsList>
 
           <TabsContent value="records" className="space-y-6">
-            <Card className="animate-slide-in-up card-glow border-gray-200">
+            <Card className="border">
               <CardHeader>
                 <CardTitle className="text-gray-900">Mi Historial de Asistencia</CardTitle>
                 <CardDescription className="text-gray-800 font-medium">
@@ -378,7 +369,7 @@ export default function EmployeeAttendancePage() {
                             <TableCell className="text-gray-800 font-medium">{record.check_in || '-'}</TableCell>
                             <TableCell className="text-gray-800 font-medium">
                               {record.check_out || (
-                                <span className="text-amber-600 font-medium">En curso</span>
+                                <span className="text-gray-600">En curso</span>
                               )}
                             </TableCell>
                             <TableCell className="text-gray-800 font-medium">
@@ -414,7 +405,7 @@ export default function EmployeeAttendancePage() {
 
           <TabsContent value="calendar" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="animate-slide-in-left card-glow border-gray-200">
+              <Card className="border">
                 <CardHeader>
                   <CardTitle className="text-gray-900">Seleccionar Fecha</CardTitle>
                   <CardDescription className="text-gray-800 font-medium">
@@ -432,7 +423,7 @@ export default function EmployeeAttendancePage() {
                 </CardContent>
               </Card>
 
-              <Card className="animate-slide-in-right card-glow border-gray-200">
+              <Card className="border">
                 <CardHeader>
                   <CardTitle className="text-gray-900">
                     Asistencia para {selectedDate ? format(selectedDate, 'd MMMM yyyy', { locale: language === 'es' ? es : undefined }) : 'Selecciona una fecha'}
@@ -449,35 +440,35 @@ export default function EmployeeAttendancePage() {
                           return (
                             <div className="space-y-3">
                               {dayRecords.map((record, index) => (
-                                <div key={record.id} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                  <h4 className="font-semibold text-blue-900 mb-2">Sesión {index + 1}</h4>
+                                <div key={record.id} className="p-4 bg-gray-50 rounded-md border space-y-2">
+                                  <h4 className="font-semibold text-gray-900">Sesión {index + 1}</h4>
                                   <div className="grid grid-cols-2 gap-4">
-                                    <div className="flex items-center justify-between p-2 bg-emerald-50 rounded border border-emerald-200">
-                                      <span className="font-semibold text-emerald-800">Entrada</span>
-                                      <Badge variant="outline" className="border-emerald-300 text-emerald-800 font-semibold">
+                                    <div className="flex items-center justify-between p-2 border rounded">
+                                      <span className="font-semibold text-gray-700">Entrada</span>
+                                      <Badge variant="outline" className="text-gray-700">
                                         {record.check_in || 'No registrada'}
                                       </Badge>
                                     </div>
-                                    <div className="flex items-center justify-between p-2 bg-red-50 rounded border border-red-200">
-                                      <span className="font-semibold text-red-800">Salida</span>
-                                      <Badge variant="outline" className="border-red-300 text-red-800 font-semibold">
+                                    <div className="flex items-center justify-between p-2 border rounded">
+                                      <span className="font-semibold text-gray-700">Salida</span>
+                                      <Badge variant="outline" className="text-gray-700">
                                         {record.check_out || 'En curso'}
                                       </Badge>
                                     </div>
                                   </div>
-                                  <div className="mt-2 flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-200">
-                                    <span className="font-semibold text-purple-800">Horas</span>
-                                    <Badge variant="default" className="bg-purple-600 text-white font-semibold">
+                                  <div className="mt-2 flex items-center justify-between p-2 border rounded">
+                                    <span className="font-semibold text-gray-700">Horas</span>
+                                    <Badge variant="secondary" className="text-gray-900">
                                       {record.total_hours ? `${record.total_hours.toFixed(2)}h` : '0h'}
                                     </Badge>
                                   </div>
                                 </div>
                               ))}
                               
-                              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <div className="p-4 bg-gray-50 rounded-md border">
                                 <div className="flex items-center justify-between">
                                   <span className="font-semibold text-gray-800">Total del Día</span>
-                                  <Badge variant="default" className="bg-blue-600 text-white font-semibold text-lg">
+                                  <Badge variant="secondary" className="text-gray-900">
                                     {dayRecords.reduce((sum, r) => sum + (r.total_hours || 0), 0).toFixed(2)}h
                                   </Badge>
                                 </div>
