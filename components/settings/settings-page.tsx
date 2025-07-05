@@ -32,9 +32,12 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
 import { languages, Language } from '@/lib/i18n';
+import { useAppSettings } from '@/contexts/app-settings-context';
 
 interface CompanySettings {
   name: string;
+  logo?: string;
+  primaryColor: string;
   industry: string;
   address: string;
   phone: string;
@@ -72,12 +75,15 @@ interface SecuritySettings {
 export default function SettingsPage() {
   const { user } = useAuth();
   const { t, language, setLanguage } = useLanguage();
+  const { settings: appSettings, updateSettings } = useAppSettings();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('company');
 
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
-    name: 'Acme Corporation',
+    name: appSettings.companyName || 'Acme Corporation',
+    logo: appSettings.logo || '',
+    primaryColor: appSettings.primaryColor,
     industry: 'Technology',
     address: '123 Business St, City, State 12345',
     phone: '+1 (555) 123-4567',
@@ -134,6 +140,11 @@ export default function SettingsPage() {
     try {
       // In a real app, this would save to API
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+      updateSettings({
+        companyName: companySettings.name,
+        logo: companySettings.logo,
+        primaryColor: companySettings.primaryColor,
+      });
       toast.success(t('saveSuccess'));
     } catch (error) {
       toast.error(t('saveError'));
@@ -146,6 +157,8 @@ export default function SettingsPage() {
     if (confirm(t('deleteConfirm'))) {
       setCompanySettings({
         name: 'Acme Corporation',
+        logo: '',
+        primaryColor: '#2563eb',
         industry: 'Technology',
         address: '123 Business St, City, State 12345',
         phone: '+1 (555) 123-4567',
@@ -179,6 +192,8 @@ export default function SettingsPage() {
         twoFactorAuth: false,
         loginAttempts: 5
       });
+
+      updateSettings({ companyName: 'Acme Corporation', logo: '', primaryColor: '#2563eb' });
       
       toast.success('Settings reset to defaults');
     }
@@ -249,6 +264,40 @@ export default function SettingsPage() {
                     id="companyName"
                     value={companySettings.name}
                     onChange={(e) => setCompanySettings({...companySettings, name: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="companyLogo">Logo</Label>
+                  <Input
+                    id="companyLogo"
+                    type="file"
+                    accept="image/png, image/jpeg"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file && file.size <= 500 * 1024) {
+                        const reader = new FileReader();
+                        reader.onload = () =>
+                          setCompanySettings({ ...companySettings, logo: reader.result as string });
+                        reader.readAsDataURL(file);
+                      } else if (file) {
+                        toast.error('Logo must be under 500KB');
+                      }
+                    }}
+                  />
+                  {companySettings.logo && (
+                    <img src={companySettings.logo} alt="Logo preview" className="h-12 mt-2" />
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="primaryColor">Primary Color</Label>
+                  <input
+                    id="primaryColor"
+                    type="color"
+                    value={companySettings.primaryColor}
+                    onChange={(e) => setCompanySettings({ ...companySettings, primaryColor: e.target.value })}
+                    className="h-10 w-20 p-0 border border-gray-300 rounded"
                   />
                 </div>
                 

@@ -38,6 +38,7 @@ export class PayrollPDFGenerator {
   private pageWidth: number;
   private pageHeight: number;
   private margin: number;
+  private currentY: number;
 
   constructor() {
     console.log('PDF Generator: Initializing PDF generator');
@@ -45,6 +46,7 @@ export class PayrollPDFGenerator {
     this.pageWidth = this.doc.internal.pageSize.getWidth();
     this.pageHeight = this.doc.internal.pageSize.getHeight();
     this.margin = 20;
+    this.currentY = this.margin;
   }
 
   generatePayrollPDF(data: PayrollData): Uint8Array {
@@ -71,50 +73,51 @@ export class PayrollPDFGenerator {
 
   private addHeader(data: PayrollData): void {
     console.log('PDF Generator: Adding header section');
-    // Company header
-    this.doc.setFontSize(20);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.text(data.company.name, this.margin, 30);
+    let y = this.margin;
 
-    // Company details
+    this.doc.setFontSize(18);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(data.company.name, this.margin, y);
+
     this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'normal');
-    let yPos = 40;
-    
+    y += 6;
     if (data.company.address) {
-      this.doc.text(data.company.address, this.margin, yPos);
-      yPos += 5;
+      this.doc.text(data.company.address, this.margin, y);
+      y += 5;
     }
-    
     if (data.company.phone) {
-      this.doc.text(`Tel: ${data.company.phone}`, this.margin, yPos);
-      yPos += 5;
+      this.doc.text(`Tel: ${data.company.phone}`, this.margin, y);
+      y += 5;
     }
-    
     if (data.company.email) {
-      this.doc.text(`Email: ${data.company.email}`, this.margin, yPos);
+      this.doc.text(`Email: ${data.company.email}`, this.margin, y);
+      y += 5;
     }
 
-    // Document title
+    y += 10;
     this.doc.setFontSize(16);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('RECIBO DE NÓMINA', this.pageWidth / 2, 70, { align: 'center' });
+    this.doc.text('RECIBO DE NÓMINA', this.pageWidth / 2, y, { align: 'center' });
 
-    // Pay period
+    y += 8;
     this.doc.setFontSize(12);
     this.doc.setFont('helvetica', 'normal');
     const startDate = new Date(data.payroll.pay_period_start).toLocaleDateString('es-ES');
     const endDate = new Date(data.payroll.pay_period_end).toLocaleDateString('es-ES');
-    this.doc.text(`Período: ${startDate} - ${endDate}`, this.pageWidth / 2, 80, { align: 'center' });
+    this.doc.text(`Período: ${startDate} - ${endDate}`, this.pageWidth / 2, y, { align: 'center' });
 
-    // Line separator
+    y += 8;
     this.doc.setLineWidth(0.5);
-    this.doc.line(this.margin, 90, this.pageWidth - this.margin, 90);
+    this.doc.line(this.margin, y, this.pageWidth - this.margin, y);
+
+    // store end position for next sections
+    this.currentY = y + 10;
   }
 
   private addEmployeeInfo(data: PayrollData): void {
     console.log('PDF Generator: Adding employee information section');
-    let yPos = 105;
+    let yPos = this.currentY;
 
     // Employee Information Section
     this.doc.setFontSize(14);
@@ -154,42 +157,44 @@ export class PayrollPDFGenerator {
     this.doc.text(data.employee.position, leftCol + 25, yPos);
 
     // Right column
-    yPos = 120;
+    let rightY = yPos - (4 * 8); // align roughly with top of left column
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('Email:', rightCol, yPos);
+    this.doc.text('Email:', rightCol, rightY);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(data.employee.email, rightCol + 20, yPos);
+    this.doc.text(data.employee.email, rightCol + 20, rightY);
 
     if (data.employee.phone) {
-      yPos += 8;
+      rightY += 8;
       this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Teléfono:', rightCol, yPos);
+      this.doc.text('Teléfono:', rightCol, rightY);
       this.doc.setFont('helvetica', 'normal');
-      this.doc.text(data.employee.phone, rightCol + 20, yPos);
+      this.doc.text(data.employee.phone, rightCol + 20, rightY);
     }
 
     if (data.employee.location) {
-      yPos += 8;
+      rightY += 8;
       this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Ubicación:', rightCol, yPos);
+      this.doc.text('Ubicación:', rightCol, rightY);
       this.doc.setFont('helvetica', 'normal');
-      this.doc.text(data.employee.location, rightCol + 20, yPos);
+      this.doc.text(data.employee.location, rightCol + 20, rightY);
     }
 
-    yPos += 8;
+    rightY += 8;
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('Fecha Inicio:', rightCol, yPos);
+    this.doc.text('Fecha Inicio:', rightCol, rightY);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(new Date(data.employee.start_date).toLocaleDateString('es-ES'), rightCol + 20, yPos);
+    this.doc.text(new Date(data.employee.start_date).toLocaleDateString('es-ES'), rightCol + 20, rightY);
 
     // Line separator
     this.doc.setLineWidth(0.5);
-    this.doc.line(this.margin, yPos + 15, this.pageWidth - this.margin, yPos + 15);
+    this.doc.line(this.margin, Math.max(yPos, rightY) + 15, this.pageWidth - this.margin, Math.max(yPos, rightY) + 15);
+
+    this.currentY = Math.max(yPos, rightY) + 25;
   }
 
   private addPayrollDetails(data: PayrollData): void {
     console.log('PDF Generator: Adding payroll details section');
-    let yPos = 185;
+    let yPos = this.currentY;
 
     // Payroll Details Section
     this.doc.setFontSize(14);
@@ -262,11 +267,13 @@ export class PayrollPDFGenerator {
     this.doc.rect(col2X - 5, yPos - 8, textWidth + 10, 12, 'F');
     this.doc.text(netPayText, col2X, yPos);
     this.doc.setTextColor(0, 0, 0); // Reset color
+
+    this.currentY = yPos + 20;
   }
 
   private addPayrollBreakdown(data: PayrollData): void {
     console.log('PDF Generator: Adding payroll breakdown section');
-    let yPos = 280;
+    let yPos = this.currentY;
 
     // Additional Information
     this.doc.setFontSize(12);
@@ -312,6 +319,8 @@ export class PayrollPDFGenerator {
     this.doc.setFont('helvetica', 'normal');
     this.doc.text('Este documento es un recibo oficial de nómina. Conserve este documento', this.margin + 5, yPos + 10);
     this.doc.text('para sus registros personales y efectos fiscales.', this.margin + 5, yPos + 17);
+
+    this.currentY = yPos + 30;
   }
 
   private addFooter(data: PayrollData): void {

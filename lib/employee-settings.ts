@@ -4,6 +4,7 @@ export interface PersonalSettings {
   timezone: string;
   dateFormat: string;
   timeFormat: '12h' | '24h';
+  profilePhoto?: string;
 }
 
 export interface NotificationSettings {
@@ -34,7 +35,8 @@ const DEFAULT_SETTINGS: EmployeeSettingsData = {
     language: 'es',
     timezone: 'America/New_York',
     dateFormat: 'DD/MM/YYYY',
-    timeFormat: '24h'
+    timeFormat: '24h',
+    profilePhoto: ''
   },
   notifications: {
     emailNotifications: true,

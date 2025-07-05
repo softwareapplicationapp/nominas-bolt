@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/auth-context';
 import { LanguageProvider } from '@/contexts/language-context';
+import { AppSettingsProvider } from '@/contexts/app-settings-context';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,12 +21,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <LanguageProvider>
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
-        </LanguageProvider>
+        <AppSettingsProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
+          </LanguageProvider>
+        </AppSettingsProvider>
       </body>
     </html>
   );

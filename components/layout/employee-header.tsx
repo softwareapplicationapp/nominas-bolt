@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/language-context';
+import { useAppSettings } from '@/contexts/app-settings-context';
 
 interface EmployeeHeaderProps {
   onMenuClick: () => void;
@@ -25,6 +26,7 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const { t } = useLanguage();
+  const { settings } = useAppSettings();
 
   const handleLogout = () => {
     logout();
@@ -54,13 +56,19 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
+          {settings.logo && (
+            <img src={settings.logo} alt="Logo" className="h-6 w-6 rounded" />
+          )}
+          <span className="hidden sm:block font-semibold text-gray-700">
+            {settings.companyName}
+          </span>
           {/* Mobile Search */}
           <Button variant="ghost" size="sm" className="md:hidden p-2">
             <Search className="h-5 w-5" />
           </Button>
 
           {/* Quick Actions - Removed Coffee Break */}
-          <Button variant="ghost" size="sm" className="hover-scale text-blue-600 p-2 hidden sm:flex">
+          <Button variant="ghost" size="sm" className="hover-scale text-primary p-2 hidden sm:flex">
             <Clock className="h-5 w-5" />
           </Button>
 
@@ -99,7 +107,7 @@ export default function EmployeeHeader({ onMenuClick }: EmployeeHeaderProps) {
               <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full hover-scale p-0">
                 <Avatar className="animate-pulse-glow h-8 w-8 sm:h-10 sm:w-10">
                   <AvatarImage src="/employee-avatar.jpg" alt="Empleado" />
-                  <AvatarFallback className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-xs sm:text-sm">
+                  <AvatarFallback className="bg-gradient-to-r from-primary to-primary text-white text-xs sm:text-sm">
                     {user?.email?.[0]?.toUpperCase() || 'E'}
                   </AvatarFallback>
                 </Avatar>

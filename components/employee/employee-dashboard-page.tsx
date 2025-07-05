@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import { apiClient } from '@/lib/api-client';
 import { useLanguage } from '@/contexts/language-context';
+import { useEmployeeSettings } from '@/lib/employee-settings';
 
 interface EmployeeStats {
   attendanceToday: boolean;
@@ -65,6 +66,7 @@ interface AttendanceRecord {
 
 export default function EmployeeDashboardPage() {
   const { user } = useAuth();
+  const { settings } = useEmployeeSettings();
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [profile, setProfile] = useState<EmployeeProfile | null>(null);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
@@ -178,9 +180,17 @@ export default function EmployeeDashboardPage() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
               <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 lg:space-x-6">
                 <div className="relative mx-auto sm:mx-0">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
-                    {profile ? `${profile.first_name[0]}${profile.last_name[0]}` : user?.email?.[0]?.toUpperCase() || 'E'}
-                  </div>
+                  {settings.personal.profilePhoto ? (
+                    <img
+                      src={settings.personal.profilePhoto}
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-lg"
+                      alt="Profile"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
+                      {profile ? `${profile.first_name[0]}${profile.last_name[0]}` : user?.email?.[0]?.toUpperCase() || 'E'}
+                    </div>
+                  )}
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-emerald-500 rounded-full border-2 border-white animate-bounce-in"></div>
                 </div>
                 <div className="text-center sm:text-left">
