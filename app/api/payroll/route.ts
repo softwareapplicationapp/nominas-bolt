@@ -5,71 +5,57 @@ import { supabase } from '@/lib/supabaseClient';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('=== GET /api/payroll called ===');
-    
     const user = await getUserFromRequest(request);
-    console.log('User from request:', user ? {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      company_id: user.company_id
-    } : 'null');
-    
     if (!user) {
-      console.log('No user found - unauthorized');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get payroll records for the company
-    console.log('Fetching payroll records for company:', user.company_id);
-    
-    // CRITICAL FIX: First check if there are any employees for this company
-    const { data: employeeCheck, error: employeeError } = await supabase
-      .from('employees')
-      .select('id')
-      .eq('company_id', user.company_id);
-      
-    console.log('Employee check result:', employeeCheck?.length || 0, 'employees found');
-    if (employeeError) {
-      console.error('Employee check error:', employeeError);
+    // Employees only see their own payroll records
+    if (user.role === 'employee') {
+      const employeeRecord = await dbGet(
+        `SELECT id FROM employees WHERE user_id = ?`,
+        [user.id]
+      ) as any;
+
+      if (!employeeRecord) {
+        return NextResponse.json([]);
+      }
+
+      const { data, error } = await supabase
+        .from('payroll')
+        .select('*, employees!inner(first_name, last_name, department, employee_id)')
+        .eq('employee_id', employeeRecord.id)
+        .order('pay_period_start', { ascending: false });
+
+      if (error) {
+        console.error('Payroll query error:', error);
+        return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
+      }
+
+      const records = (data || []).map((record: any) => ({
+        ...record,
+        first_name: record.employees.first_name,
+        last_name: record.employees.last_name,
+        department: record.employees.department,
+        employee_id: record.employees.employee_id,
+      }));
+
+      return NextResponse.json(records);
     }
-    
-    if (!employeeCheck || employeeCheck.length === 0) {
-      console.log('No employees found for company:', user.company_id);
-      return NextResponse.json([]);
-    }
-    
-    // CRITICAL FIX: Direct Supabase query to check payroll records
-    const employeeIds = employeeCheck.map(e => e.id);
-    console.log('Employee IDs for payroll query:', employeeIds);
-    
-    const { data: directPayrollCheck, error: directPayrollError } = await supabase
-      .from('payroll')
-      .select('*')
-      .in('employee_id', employeeIds)
-      .limit(5);
-      
-    console.log('Direct payroll check result:', directPayrollCheck?.length || 0, 'records found');
-    if (directPayrollCheck && directPayrollCheck.length > 0) {
-      console.log('Sample payroll record:', directPayrollCheck[0]);
-    }
-    if (directPayrollError) {
-      console.error('Direct payroll check error:', directPayrollError);
-    }
-    
-    // Now fetch the payroll records directly using Supabase with a join
-    const { data: payrollData, error: payrollError } = await supabase
+
+    // Admins and managers see all company payroll records
+    const { data, error } = await supabase
       .from('payroll')
       .select('*, employees!inner(first_name, last_name, department, employee_id)')
       .eq('employees.company_id', user.company_id)
       .order('pay_period_start', { ascending: false });
 
-    if (payrollError) {
-      console.error('Payroll query error:', payrollError);
-      throw payrollError;
+    if (error) {
+      console.error('Payroll query error:', error);
+      return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
     }
 
-    const payrollRecords = (payrollData || []).map((record: any) => ({
+    const payrollRecords = (data || []).map((record: any) => ({
       ...record,
       first_name: record.employees.first_name,
       last_name: record.employees.last_name,
@@ -77,67 +63,7 @@ export async function GET(request: NextRequest) {
       employee_id: record.employees.employee_id,
     }));
 
-    console.log('Payroll records fetched:', payrollRecords?.length || 0);
-    if (payrollRecords?.length > 0) {
-      console.log('First record:', payrollRecords[0]);
-      console.log('Sample records:', payrollRecords.slice(0, 3).map(r => ({
-        id: r.id,
-        employee_name: `${r.first_name} ${r.last_name}`,
-        period: `${r.pay_period_start} to ${r.pay_period_end}`,
-        net_pay: r.net_pay,
-        status: r.status
-      })));
-    } else {
-      console.log('❌ No payroll records found for company:', user.company_id);
-      
-      // Let's debug what employees exist for this company
-      console.log('=== DEBUGGING: Checking employees for company ===');
-      const employees = await dbAll(`
-        SELECT e.*, u.role
-        FROM employees e
-        LEFT JOIN users u ON e.user_id = u.id
-        WHERE e.company_id = ?
-        ORDER BY e.created_at DESC
-      `, [user.company_id]);
-      
-      console.log('Employees found for company:', employees?.length || 0);
-      if (employees && employees.length > 0) {
-        console.log('Employee IDs:', employees.map(e => e.id));
-        
-        // Check if there are any payroll records for these employees
-        console.log('=== CHECKING PAYROLL RECORDS DIRECTLY ===');
-        const employeeIds = employees.map(e => e.id);
-        console.log('Looking for payroll records for employee IDs:', employeeIds);
-        
-        // Direct Supabase query to check all payroll records
-        const { data: allPayroll, error: allPayrollError } = await supabase
-          .from('payroll')
-          .select('*');
-          
-        console.log('All payroll records in database:', allPayroll?.length || 0);
-        if (allPayroll && allPayroll.length > 0) {
-          console.log('First few payroll records:', allPayroll.slice(0, 3));
-          
-          // Check which employee IDs have payroll records
-          const payrollEmployeeIds = allPayroll.map(p => p.employee_id);
-          console.log('Employee IDs in payroll records:', payrollEmployeeIds);
-          
-          // Check for matches
-          const matchingIds = employeeIds.filter(id => payrollEmployeeIds.includes(id));
-          console.log('Matching employee IDs:', matchingIds);
-          
-          if (matchingIds.length > 0) {
-            // There should be records but we're not getting them
-            console.log('❌ CRITICAL ERROR: There are matching payroll records but query is not returning them');
-          }
-        }
-        if (allPayrollError) {
-          console.error('All payroll query error:', allPayrollError);
-        }
-      }
-    }
-
-    return NextResponse.json(payrollRecords || []);
+    return NextResponse.json(payrollRecords);
   } catch (error: any) {
     console.error('Get payroll error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
