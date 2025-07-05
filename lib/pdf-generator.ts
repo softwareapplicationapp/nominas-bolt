@@ -39,6 +39,7 @@ export class PayrollPDFGenerator {
   private pageHeight: number;
   private margin: number;
   private currentY: number;
+  private footerSpace: number;
 
   constructor() {
     console.log('PDF Generator: Initializing PDF generator');
@@ -47,6 +48,14 @@ export class PayrollPDFGenerator {
     this.pageHeight = this.doc.internal.pageSize.getHeight();
     this.margin = 20;
     this.currentY = this.margin;
+    this.footerSpace = 40; // space reserved at bottom for footer
+  }
+
+  private ensureSpace(required: number): void {
+    if (this.currentY + required > this.pageHeight - this.footerSpace) {
+      this.doc.addPage();
+      this.currentY = this.margin;
+    }
   }
 
   generatePayrollPDF(data: PayrollData): Uint8Array {
@@ -61,7 +70,11 @@ export class PayrollPDFGenerator {
       this.addEmployeeInfo(data);
       this.addPayrollDetails(data);
       this.addPayrollBreakdown(data);
-      this.addFooter(data);
+
+      const totalPages = this.doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        this.addFooter(i, totalPages, data.id);
+      }
 
       console.log('PDF Generator: PDF generation completed successfully');
       return this.doc.output('arraybuffer') as Uint8Array;
@@ -117,6 +130,7 @@ export class PayrollPDFGenerator {
 
   private addEmployeeInfo(data: PayrollData): void {
     console.log('PDF Generator: Adding employee information section');
+    this.ensureSpace(80);
     let yPos = this.currentY;
 
     // Employee Information Section
@@ -194,6 +208,7 @@ export class PayrollPDFGenerator {
 
   private addPayrollDetails(data: PayrollData): void {
     console.log('PDF Generator: Adding payroll details section');
+    this.ensureSpace(120);
     let yPos = this.currentY;
 
     // Payroll Details Section
@@ -273,6 +288,7 @@ export class PayrollPDFGenerator {
 
   private addPayrollBreakdown(data: PayrollData): void {
     console.log('PDF Generator: Adding payroll breakdown section');
+    this.ensureSpace(90);
     let yPos = this.currentY;
 
     // Additional Information
@@ -323,8 +339,9 @@ export class PayrollPDFGenerator {
     this.currentY = yPos + 30;
   }
 
-  private addFooter(data: PayrollData): void {
-    console.log('PDF Generator: Adding footer section');
+  private addFooter(page: number, total: number, docId: number): void {
+    console.log('PDF Generator: Adding footer for page', page);
+    this.doc.setPage(page);
     const footerY = this.pageHeight - 30;
 
     // Footer line
@@ -340,11 +357,11 @@ export class PayrollPDFGenerator {
     this.doc.text(`Generado el: ${new Date().toLocaleString('es-ES')}`, this.margin, footerY + 5);
     
     // Page number
-    this.doc.text('Página 1 de 1', this.pageWidth - this.margin, footerY, { align: 'right' });
+    this.doc.text(`Página ${page} de ${total}`, this.pageWidth - this.margin, footerY, { align: 'right' });
     
     // Document ID - Use data.id instead of data.payroll.id
-    console.log('PDF Generator: Using document ID:', data.id);
-    this.doc.text(`ID Documento: PAY-${data.id}-${new Date().getFullYear()}`, this.pageWidth - this.margin, footerY + 5, { align: 'right' });
+    console.log('PDF Generator: Using document ID:', docId);
+    this.doc.text(`ID Documento: PAY-${docId}-${new Date().getFullYear()}`, this.pageWidth - this.margin, footerY + 5, { align: 'right' });
   }
 }
 
